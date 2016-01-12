@@ -1,10 +1,10 @@
 #pragma once
 
+#include <unistd.h>
+
 #pragma message("transparent arch header access")
 #include <arch/x86/task.h>
 #include <arch/x86/types.h>
-
-typedef uint32_t pid_t;
 
 typedef struct {
 	pid_t pid;

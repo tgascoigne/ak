@@ -21,8 +21,9 @@ void multiboot_mmap(multiboot_info_t* mb_info) {
 		PANIC("MULTIBOOT_INFO_MEM_MAP missing");
 	}
 
-	HardwareInfo.mem_max = mb_info->mem_upper;
-	frame_alloc_init(mb_info->mem_upper);
+	/* mem_upper is in KB */
+	HardwareInfo.mem_max = mb_info->mem_upper * 1024;
+	frame_alloc_init(HardwareInfo.mem_max);
 
 	multiboot_memory_map_t* r = (multiboot_memory_map_t*)mb_info->mmap_addr;
 	while ((multiboot_uint32_t)r < mb_info->mmap_addr + mb_info->mmap_length) {

@@ -11,5 +11,6 @@ extern void* _kern_end;
 
 void arch_init(multiboot_info_t* mb_info) {
 	KernelTask.brk = (vaddr_t)&_kern_end;
+
 	multiboot_mmap(mb_info);
 }
