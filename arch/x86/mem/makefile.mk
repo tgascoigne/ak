@@ -1,2 +1,3 @@
 SOURCES += $(addprefix $(ARCH_PATH)/mem/, \
-				mmu.c)
+				mmu.c                     \
+                framealloc.c)

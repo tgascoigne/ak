@@ -12,7 +12,7 @@
               .equ  _start, (_start_vaddr - KZERO)
               .global _start
 
-_start_vaddr: movl  $boot_pgdir, %ecx
+_start_vaddr: movl  $BootPageDir, %ecx
               sub   $KZERO, %ecx
               mov   %ecx, %cr3
 
@@ -28,16 +28,17 @@ _start_vaddr: movl  $boot_pgdir, %ecx
               ret
 
 _start_pgenable:
+              add   $KZERO, %ebx    # need to adjust the pointer for the new zero addr
               push  %ebx            # multiboot_info_t*
               push  %eax            # multiboot magic
 
               call  multiboot_validate
-              add   $8, %esp
+              add   $4, %esp
 
               cmp   $0, %eax
               je   error
 
-
+              call  arch_init
 
 loop:		  hlt
 			  jmp	loop
@@ -47,10 +48,3 @@ error:		  pushl $error_str
 			  jmp loop
 
 error_str:	  .asciz "boot failed\n"
-
-#              .section .data
-#              .align 0x1000
-#boot_pgd:     .word (PAGE_PRESENT | PAGE_RW | PAGE_EXTENDED)
-#              .fill (ADDR_PDE(KZERO) - 1), 4, 0
-#boot_pgd_2:   .word (PAGE_PRESENT | PAGE_RW | PAGE_EXTENDED)
-#              .fill (ADDR_PDE(MEMMAX) - ADDR_PDE(KZERO) - 1), 4, 0

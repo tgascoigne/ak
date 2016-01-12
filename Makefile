@@ -13,7 +13,7 @@ WARNFLAGS   := -Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow -Wno-unuse
 CFLAGS		:= -iwithprefix include $(WARNFLAGS) -g
 LDFLAGS     := -static
 LIB_INC     := -L/usr/lib/gcc/x86_64-redhat-linux/5.3.1/32 -LuClibc/lib/
-HEADER_INC  := -I. -I/usr/i386-linux-uclibc/usr/include/
+HEADER_INC  := -I. -isystem /usr/i386-linux-uclibc/usr/include/
 LIBS		:= -lc -lgcc
 LD_SCRIPT   := arch/$(ARCH)/kernel.ld
 OUT			:= kernel.elf
@@ -32,7 +32,7 @@ CLEANOBJS :=
 
 all: $(OUT) $(DISASM) $(BINFILE)
 
-include arch/$(ARCH)/makefile.mk
+include arch/makefile.mk
 
 OBJECTS   += $(addsuffix .o, $(basename $(SOURCES)))
 ASFLAGS   += $(CFLAGS)
