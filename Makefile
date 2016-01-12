@@ -8,9 +8,9 @@ OBJDUMP := $(CROSS_COMPILE)objdump
 OBJCOPY := $(CROSS_COMPILE)objcopy
 PREPROC := $(CC) -E -x c -P
 
-WARNFLAGS   := -Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow -Wno-unused-parameter
+WARNFLAGS   := -Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow -Wno-unused-parameter -Wno-microsoft
 
-CFLAGS		:= -iwithprefix include $(WARNFLAGS) -g
+CFLAGS		:= -iwithprefix include $(WARNFLAGS) -fms-extensions -g
 LDFLAGS     := -static
 LIB_INC     := -L/usr/lib/gcc/x86_64-redhat-linux/5.3.1/32 -LuClibc/lib/
 HEADER_INC  := -I. -isystem /usr/i386-linux-uclibc/usr/include/
@@ -33,6 +33,7 @@ CLEANOBJS :=
 all: $(OUT) $(DISASM) $(BINFILE)
 
 include arch/makefile.mk
+include kernel/makefile.mk
 
 OBJECTS   += $(addsuffix .o, $(basename $(SOURCES)))
 ASFLAGS   += $(CFLAGS)
