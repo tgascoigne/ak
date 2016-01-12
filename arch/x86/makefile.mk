@@ -8,6 +8,7 @@ CLEANOBJS += $(OUT_IMG)
 
 include arch/$(ARCH)/boot/makefile.mk
 include arch/$(ARCH)/mem/makefile.mk
+include arch/$(ARCH)/intr/makefile.mk
 
 boot-nogrub: $(OUT)
 	qemu-system-i386 -kernel $(OUT)
