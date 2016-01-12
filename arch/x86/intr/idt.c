@@ -1,7 +1,8 @@
 #include "idt.h"
 
 #include <string.h>
-#include <stdio.h>
+
+#include <kernel/panic.h>
 
 #define NUM_INTERRUPTS 256
 
@@ -63,7 +64,7 @@ void idt_handler(isrargs_t* regs) {
 	if (IdtCallbacks[regs->int_no] != NULL) {
 		IdtCallbacks[regs->int_no](regs);
 	} else {
-		printf("Unhandled interrupt: %s, err: %d\n", InterruptDescriptions[regs->int_no], regs->err_code);
+		PANIC("Unhandled interrupt: %s, err: %d\n", InterruptDescriptions[regs->int_no], regs->err_code);
 	}
 }
 
