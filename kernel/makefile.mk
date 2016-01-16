@@ -1,2 +1,5 @@
 SOURCES += $(addprefix kernel/, \
-				task.c)
+				task.c          \
+				list.c)
+
+include kernel/fs/makefile.mk

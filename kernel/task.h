@@ -12,5 +12,5 @@ typedef struct {
 	arch_task_t;
 } task_t;
 
-extern task_t* CurrentTask;
+extern task_t *CurrentTask;
 extern task_t KernelTask;

@@ -11,25 +11,25 @@
 #define BIT_OFFSET(x) (x % BITS_PER_ENTRY)
 #define ADDR_PAGE(x) (x / PAGE_SIZE)
 
-static uint32_t* FrameBitmap;
+static uint32_t *FrameBitmap;
 static uint32_t FrameCount;
 
 void frame_alloc_init(paddr_t mem_max) {
-	FrameCount = ADDR_PAGE(mem_max);
+	FrameCount  = ADDR_PAGE(mem_max);
 	FrameBitmap = malloc(BIT_IDX(FrameCount));
 	memset(FrameBitmap, 0, BIT_IDX(FrameCount));
 }
 
 void frame_clear(paddr_t ptr) {
 	uint32_t entry = ADDR_PAGE(ptr);
-	uint32_t idx = BIT_IDX(entry);
+	uint32_t idx   = BIT_IDX(entry);
 	uint32_t off = BIT_OFFSET(entry);
 	FrameBitmap[idx] &= ~(1 << off);
 }
 
 void frame_set(paddr_t ptr) {
 	uint32_t entry = ADDR_PAGE(ptr);
-	uint32_t idx = BIT_IDX(entry);
+	uint32_t idx   = BIT_IDX(entry);
 	uint32_t off = BIT_OFFSET(entry);
 	FrameBitmap[idx] |= (1 << off);
 }
@@ -48,7 +48,7 @@ void frame_set_range(paddr_t begin, paddr_t end) {
 
 bool frame_test(paddr_t ptr) {
 	uint32_t entry = (uint32_t)ADDR_PAGE(ptr);
-	uint32_t idx = (uint32_t)BIT_IDX(entry);
+	uint32_t idx   = (uint32_t)BIT_IDX(entry);
 	uint32_t off = (uint32_t)BIT_OFFSET(entry);
 	return (FrameBitmap[idx] & (1 << off)) != 0;
 }

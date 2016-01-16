@@ -7,4 +7,9 @@ AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false
 IndentCaseLabels: false
 DerivePointerAlignment: false
-PointerAlignment: Left
+PointerAlignment: Right
+AlignAfterOpenBracket: true
+AlignConsecutiveAssignments: true
+AlignTrailingComments: true
+AlignEscapedNewlinesLeft: true
+Language: Cpp

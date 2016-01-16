@@ -1,6 +1,6 @@
 #include "brk.h"
 
-vaddr_t task_brk(task_t* task, vaddr_t brk) {
+vaddr_t task_brk(task_t *task, vaddr_t brk) {
 	vaddr_t cur = task->brk;
 
 #pragma message("map pages accordingly")

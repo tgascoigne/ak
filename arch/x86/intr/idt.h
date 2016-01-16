@@ -40,11 +40,11 @@ typedef struct {
 	uint32_t base;
 } __attribute__((packed)) idtptr_t;
 
-typedef void (*isrfunc_t)(isrargs_t*);
+typedef void (*isrfunc_t)(isrargs_t *);
 
 void idt_init(void);
 void idt_set_handler(uint8_t interrupt, isrfunc_t func);
-void idt_load(idtptr_t* idt);
-void idt_encode_addrs(idtdescr_t* descr, void* offset, uint16_t selector);
-void idt_encode_interrupt(idtdescr_t* descr);
-void idt_encode_trap(idtdescr_t* descr);
+void idt_load(idtptr_t *idt);
+void idt_encode_addrs(idtdescr_t *descr, void *offset, uint16_t selector);
+void idt_encode_interrupt(idtdescr_t *descr);
+void idt_encode_trap(idtdescr_t *descr);

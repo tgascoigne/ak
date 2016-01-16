@@ -6,7 +6,7 @@
 
 #define NUM_INTERRUPTS 256
 
-static char* InterruptDescriptions[] = {
+static char *InterruptDescriptions[] = {
     "Divide error", "Debug exceptions",    "Nonmaskable interrupt",     "Breakpoint",	 "Overflow",
     "Bounds check", "Invalid opcode",      "Coprocessor not available", "Double fault",       "(reserved)",
     "Invalid TSS",  "Segment not present", "Stack exception",		"General protection", "Page fault",
@@ -20,7 +20,7 @@ static idtptr_t IdtPtr;
 static isrfunc_t IdtCallbacks[NUM_INTERRUPTS];
 
 /* root (asm) entry points for interrupts */
-extern void* IsrRoots[NUM_INTERRUPTS];
+extern void *IsrRoots[NUM_INTERRUPTS];
 
 void idt_init(void) {
 	/* find the kernel's cs */
@@ -44,23 +44,23 @@ void idt_set_handler(uint8_t interrupt, isrfunc_t func) {
 	IdtCallbacks[interrupt] = func;
 }
 
-void idt_encode_addrs(idtdescr_t* descr, void* offset, uint16_t selector) {
-	descr->offset_low = (uint32_t)(offset)&0xFFFF;
+void idt_encode_addrs(idtdescr_t *descr, void *offset, uint16_t selector) {
+	descr->offset_low  = (uint32_t)(offset)&0xFFFF;
 	descr->offset_high = ((uint32_t)(offset) >> 16) & 0xFFFF;
-	descr->selector = selector & 0xFFFF;
-	descr->present = 1;
-	descr->zero0 = 0;
+	descr->selector    = selector & 0xFFFF;
+	descr->present     = 1;
+	descr->zero0       = 0;
 }
 
-void idt_encode_interrupt(idtdescr_t* descr) {
+void idt_encode_interrupt(idtdescr_t *descr) {
 	descr->type = 0xE;
 }
 
-void idt_encode_trap(idtdescr_t* descr) {
+void idt_encode_trap(idtdescr_t *descr) {
 	descr->type = 0xF;
 }
 
-void idt_handler(isrargs_t* regs) {
+void idt_handler(isrargs_t *regs) {
 	if (IdtCallbacks[regs->int_no] != NULL) {
 		IdtCallbacks[regs->int_no](regs);
 	} else {
@@ -68,6 +68,6 @@ void idt_handler(isrargs_t* regs) {
 	}
 }
 
-void idt_load(idtptr_t* idt) {
+void idt_load(idtptr_t *idt) {
 	__asm__ volatile("lidt %0" ::"m"(idt));
 }
