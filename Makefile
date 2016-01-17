@@ -43,8 +43,13 @@ ASFLAGS   += $(CFLAGS)
 
 LD_SCRIPT_PROC = $(addsuffix .processed.ld, $(basename $(LD_SCRIPT)))
 
-clean:
+clean: clean-ak clean-libc
+
+clean-ak:
 	-rm -f $(CLEANOBJS)
+
+clean-libc:
+	(cd uClibc; make clean)
 
 format:
 	find . -iname "*.[ch]" -not -path "./uClibc/*" -exec clang-format -i {} \;
@@ -70,7 +75,7 @@ $(INITRD_OUT): $(shell find $(INITRD_DIR) -type f)
 libc: uClibc/lib/libc.a
 
 uClibc/lib/libc.a:
-	make -e -C uClibc/
+	(cd uClibc; make)
 
 depend: .depend
 
@@ -80,4 +85,4 @@ depend: .depend
 
 include .depend
 
-.PHONY: all libc clean format
+.PHONY: all libc clean clean-ak clean-libc format
