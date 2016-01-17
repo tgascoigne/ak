@@ -20,7 +20,7 @@ typedef struct fsnode_ops {
 typedef struct fsnode {
 	char name[FS_NAME_MAX];
 	VfsType type;
-    fsnode_ops_t;
+	fsnode_ops_t;
 
 	struct fsnode *parent;
 	struct fsnode *first_child;

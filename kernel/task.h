@@ -2,9 +2,8 @@
 
 #include <unistd.h>
 
-#pragma message("transparent arch header access")
-#include <arch/x86/task.h>
-#include <arch/x86/types.h>
+#include <proc/task.h>
+#include <mem/types.h>
 
 typedef struct {
 	pid_t pid;

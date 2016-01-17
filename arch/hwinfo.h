@@ -1,6 +1,6 @@
 #pragma once
 
-#include <arch/x86/types.h>
+#include <mem/types.h>
 
 typedef struct { paddr_t mem_max; } hwinfo_t;
 

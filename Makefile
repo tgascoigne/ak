@@ -20,8 +20,6 @@ OUT			:= kernel.elf
 OUT_SYMS    := $(addsuffix .sym, $(basename $(OUT)))
 INITRD_OUT  := initrd.img
 INITRD_DIR  := initrd/
-CFLAGS		+= $(HEADER_INC)
-LDFLAGS		+= $(LIB_INC)
 
 SOURCES   :=
 OBJECTS   :=
@@ -36,10 +34,12 @@ include arch/makefile.mk
 include kernel/makefile.mk
 
 OBJECTS   += $(addsuffix .o, $(basename $(SOURCES)))
-ASFLAGS   += $(CFLAGS)
 DISASM    += $(addsuffix .dis, $(basename $(OUT)))
 BINFILE   += $(addsuffix .bin, $(basename $(OUT)))
 CLEANOBJS += $(OUT) $(INITRD_OUT) $(OBJECTS) $(BINFILE) $(DISASM) .depend
+CFLAGS    += $(HEADER_INC)
+LDFLAGS   += $(LIB_INC)
+ASFLAGS   += $(CFLAGS)
 
 LD_SCRIPT_PROC = $(addsuffix .processed.ld, $(basename $(LD_SCRIPT)))
 

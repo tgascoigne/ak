@@ -1,6 +1,6 @@
 #pragma once
 
-#include <arch/x86/types.h>
+#include <mem/types.h>
 
 #include <stdbool.h>
 #include <stdint.h>

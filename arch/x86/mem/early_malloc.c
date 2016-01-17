@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-#include <arch/x86/types.h>
+#include <mem/types.h>
 #include <arch/x86/mem/brk.h>
 
 static bool EarlyMallocEnabled = true;
