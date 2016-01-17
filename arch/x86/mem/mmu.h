@@ -22,6 +22,7 @@
 
 #ifndef ASM_FILE
 typedef uint32_t pgentry_t;
+typedef paddr_t pgaddr_t;
 #endif
 
 /* Control register flags */
@@ -37,9 +38,22 @@ typedef uint32_t pgentry_t;
 /* sugar to help define pgentry_t's */
 #define PAGE_ENTRY(addr, flags) (pgentry_t)(addr | (flags))
 
+#define PGADDR(addr) (pgaddr_t)(addr - (addr % PAGE_SIZE))
+
+/* A PDE maps a 4m block (2^22 = 4m) */
+#define ADDR_PDE(addr) (addr >> 22)
+/* A PTE maps a 4k block (2^12 = 4k) */
+#define ADDR_PTE(addr) ((addr >> 12) % 1024)
+/* Extracts the address from a PDE */
+#define PDE_ADDR(pde) (pde & 0xFFC00000);
+/* Extracts the address from a PTE */
+#define PTE_ADDR(pte) (pte & 0xFFFFF000);
+
 #ifndef ASM_FILE
 void pg_init(void);
+void pg_map(pgaddr_t paddr, vaddr_t vaddr);
 pgentry_t *pg_tmp_map(paddr_t addr);
+void pg_tmp_unmap(pgentry_t *mapping);
 void pg_flush_tlb(void);
 void pg_invlpg(vaddr_t addr);
 #endif

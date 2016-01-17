@@ -1,10 +1,14 @@
 #include "mmu.h"
 
+#include <arch/x86/mem/framealloc.h>
 #include <arch/x86/mem/map.h>
 #include <kernel/panic.h>
 #include <kernel/proc/task.h>
 
-#define KERNEL_FLAGS PAGE_PRESENT | PAGE_RW | PAGE_LINK
+#include <string.h>
+
+#define USER_FLAGS PAGE_PRESENT | PAGE_RW
+#define KERNEL_FLAGS USER_FLAGS | PAGE_LINK
 #define KERNEL_LOW_4M PAGE_ENTRY(0, KERNEL_FLAGS | PAGE_EXTENDED)
 
 static pgentry_t NilPgEnt = (pgentry_t)0;
@@ -28,6 +32,33 @@ void pg_init(void) {
 	pg_flush_tlb();
 }
 
+void pg_map(pgaddr_t paddr, vaddr_t vaddr) {
+	uint32_t flags = USER_FLAGS;
+	if (CurrentTask->pid == KERNEL_PID) {
+		flags = KERNEL_FLAGS;
+	}
+
+	pgentry_t *dirent = &CurrentTask->pgd[ADDR_PDE(paddr)];
+	if (*dirent == NilPgEnt) {
+		/* table isn't mapped - allocate a new one */
+		paddr_t tblframe = frame_alloc();
+		frame_set(tblframe);
+		pgentry_t *table = pg_tmp_map((pgaddr_t)tblframe);
+		memset(table, 0, (size_t)sizeof(pgentry_t) * 1024);
+		pg_tmp_unmap(table);
+		*dirent = PAGE_ENTRY(tblframe, flags);
+	}
+
+	paddr_t tblframe = PDE_ADDR(*dirent);
+	pgentry_t *table = pg_tmp_map((pgaddr_t)tblframe);
+
+	pgentry_t *entry = &table[ADDR_PTE(vaddr)];
+	*entry	   = PAGE_ENTRY(paddr, flags);
+
+	pg_tmp_unmap(table);
+	pg_invlpg(vaddr);
+}
+
 static int pg_free_tmp_map() {
 	for (int i = 0; i < 1024; i++) {
 		if (TmpPageTbl[i] == 0) {
@@ -37,7 +68,7 @@ static int pg_free_tmp_map() {
 	return -1;
 }
 
-pgentry_t *pg_tmp_map(paddr_t addr) {
+pgentry_t *pg_tmp_map(pgaddr_t addr) {
 	int entry = pg_free_tmp_map();
 	if (entry == -1) {
 		PANIC("Out of free temporary mapping pages");

@@ -1,7 +1,7 @@
 #include "task.h"
 
 task_t KernelTask = {
-    .pid	  = 0,
+    .pid	  = KERNEL_PID,
 };
 
 task_t *CurrentTask = &KernelTask;

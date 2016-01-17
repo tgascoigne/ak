@@ -5,6 +5,8 @@
 #include <proc/task.h>
 #include <mem/types.h>
 
+#define KERNEL_PID 0
+
 typedef struct {
 	pid_t pid;
 	vaddr_t brk;
