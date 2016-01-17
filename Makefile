@@ -43,7 +43,7 @@ ASFLAGS   += $(CFLAGS)
 
 LD_SCRIPT_PROC = $(addsuffix .processed.ld, $(basename $(LD_SCRIPT)))
 
-clean: clean-ak clean-libc
+clean: clean-ak
 
 clean-ak:
 	-rm -f $(CLEANOBJS)
@@ -81,7 +81,7 @@ depend: .depend
 
 .depend: $(SOURCES)
 	-rm -f .depend
-	$(CC) $(CFLAGS) -MM $^ -MF $@
+	$(CC) $(CFLAGS) -MM $^ >> $@
 
 include .depend
 
