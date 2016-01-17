@@ -2,6 +2,7 @@
 
 #include <arch/x86/mem/map.h>
 #include <kernel/panic.h>
+#include <kernel/proc/task.h>
 
 #define KERNEL_FLAGS PAGE_PRESENT | PAGE_RW | PAGE_LINK
 #define KERNEL_LOW_4M PAGE_ENTRY(0, KERNEL_FLAGS | PAGE_EXTENDED)
@@ -21,6 +22,8 @@ void pg_init(void) {
 
 	// point the last 4m at the temp page table
 	KernelPageDir[ADDR_PDE(KTMPMEM)] = PAGE_ENTRY(KBSSTOPHYS(&TmpPageTbl), KERNEL_FLAGS);
+
+	KernelTask.pgd = KernelPageDir;
 
 	pg_flush_tlb();
 }

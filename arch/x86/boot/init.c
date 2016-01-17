@@ -6,7 +6,7 @@
 #include <arch/x86/boot/multibootimpl.h>
 #include <arch/x86/intr/idt.h>
 #include <kernel/panic.h>
-#include <kernel/task.h>
+#include <kernel/proc/task.h>
 
 extern void *_kern_end;
 
