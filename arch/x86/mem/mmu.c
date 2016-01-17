@@ -32,8 +32,8 @@ void pg_init(void) {
 	pg_flush_tlb();
 }
 
-void pg_map(pgaddr_t paddr, vaddr_t vaddr) {
-	uint32_t flags = USER_FLAGS;
+void pg_map(pgaddr_t paddr, vaddr_t vaddr, uint32_t extra_flags) {
+	uint32_t flags = USER_FLAGS | extra_flags;
 	if (CurrentTask->pid == KERNEL_PID) {
 		flags = KERNEL_FLAGS;
 	}

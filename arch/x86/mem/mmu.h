@@ -51,7 +51,7 @@ typedef paddr_t pgaddr_t;
 
 #ifndef ASM_FILE
 void pg_init(void);
-void pg_map(pgaddr_t paddr, vaddr_t vaddr);
+void pg_map(pgaddr_t paddr, vaddr_t vaddr, uint32_t extra_flags);
 pgentry_t *pg_tmp_map(paddr_t addr);
 void pg_tmp_unmap(pgentry_t *mapping);
 void pg_flush_tlb(void);
