@@ -24,6 +24,10 @@ _start_vaddr: movl  $BootPageDir, %ecx
               orl   $CR0_PGENABLE, %ecx
               mov   %ecx, %cr0
 
+              # Shift the stack pointers up to the virtual mapping
+              add   $KZERO, %esp
+              add   $KZERO, %ebp
+
               push $_start_pgenable
               ret
 
