@@ -1,3 +1,5 @@
 #pragma once
 
-typedef struct { int x; /* avoid empty struct warning */ } arch_task_t;
+#include <arch/x86/mem/mmu.h>
+
+typedef struct { pgentry_t *pgd; } arch_task_t;

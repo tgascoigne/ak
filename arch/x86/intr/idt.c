@@ -13,35 +13,35 @@ static char *InterruptDescriptions[] = {
     "(reserved)",   "Coprocessor error",
 };
 
-static idtdescr_t Idt[NUM_INTERRUPTS];
-static idtptr_t IdtPtr;
+static idtdescr_t IDT[NUM_INTERRUPTS];
+static idtptr_t IDTPtr;
 
 /* handler callbacks for each interrupt - routed by idt_handler */
-static isrfunc_t IdtCallbacks[NUM_INTERRUPTS];
+static isrfunc_t IDTCallbacks[NUM_INTERRUPTS];
 
 /* root (asm) entry points for interrupts */
-extern void *IsrRoots[NUM_INTERRUPTS];
+extern void *ISRRoots[NUM_INTERRUPTS];
 
 void idt_init(void) {
 	/* find the kernel's cs */
 	uint16_t cs;
 	__asm__ volatile("movw %%cs, %0\n\t" : "=r"(cs)::);
 
-	memset(&Idt, 0, sizeof(Idt));
-	memset(&IdtCallbacks, 0, sizeof(IdtCallbacks));
+	memset(&IDT, 0, sizeof(IDT));
+	memset(&IDTCallbacks, 0, sizeof(IDTCallbacks));
 	for (int i = 0; i < NUM_INTERRUPTS; i++) {
-		idt_encode_addrs(&Idt[i], IsrRoots[i], cs);
-		idt_encode_interrupt(&Idt[i]);
+		idt_encode_addrs(&IDT[i], ISRRoots[i], cs);
+		idt_encode_interrupt(&IDT[i]);
 	}
 
 	/* load the idt */
-	IdtPtr.limit = sizeof(Idt) - 1;
-	IdtPtr.base = (uint32_t)(&Idt);
-	idt_load(&IdtPtr);
+	IDTPtr.limit = sizeof(IDT) - 1;
+	IDTPtr.base = (uint32_t)(&IDT);
+	idt_load(&IDTPtr);
 }
 
 void idt_set_handler(uint8_t interrupt, isrfunc_t func) {
-	IdtCallbacks[interrupt] = func;
+	IDTCallbacks[interrupt] = func;
 }
 
 void idt_encode_addrs(idtdescr_t *descr, void *offset, uint16_t selector) {
@@ -61,8 +61,8 @@ void idt_encode_trap(idtdescr_t *descr) {
 }
 
 void idt_handler(isrargs_t *regs) {
-	if (IdtCallbacks[regs->int_no] != NULL) {
-		IdtCallbacks[regs->int_no](regs);
+	if (IDTCallbacks[regs->int_no] != NULL) {
+		IDTCallbacks[regs->int_no](regs);
 	} else {
 		PANIC("Unhandled interrupt: %s, err: %d\n", InterruptDescriptions[regs->int_no], regs->err_code);
 	}

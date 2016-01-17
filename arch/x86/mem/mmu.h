@@ -2,6 +2,7 @@
 
 #ifndef ASM_FILE
 #include <stdint.h>
+#include <arch/x86/mem/types.h>
 #endif
 
 /* Page entry fields */
@@ -35,3 +36,10 @@ typedef uint32_t pgentry_t;
 
 /* sugar to help define pgentry_t's */
 #define PAGE_ENTRY(addr, flags) (pgentry_t)(addr | (flags))
+
+#ifndef ASM_FILE
+void pg_init(void);
+pgentry_t *pg_tmp_map(paddr_t addr);
+void pg_flush_tlb(void);
+void pg_invlpg(vaddr_t addr);
+#endif

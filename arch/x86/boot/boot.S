@@ -12,7 +12,7 @@
               .equ  _start, (_start_vaddr - KZERO)
               .global _start
 
-_start_vaddr: movl  $BootPageDir, %ecx
+_start_vaddr: movl  $KernelPageDir, %ecx
               sub   $KZERO, %ecx
               mov   %ecx, %cr3
 

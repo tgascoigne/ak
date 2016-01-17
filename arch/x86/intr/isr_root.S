@@ -300,8 +300,8 @@ idt_cb_common: pushal               # push all general registers
 
               .section .rodata
 
-              .global IsrRoots
-IsrRoots:     #     A jump table indexing the idt callbacks
+              .global ISRRoots
+ISRRoots:     #     A jump table indexing the idt callbacks
               .long idt_cb_0
               .long idt_cb_1
               .long idt_cb_2
