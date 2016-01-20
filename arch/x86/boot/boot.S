@@ -27,6 +27,8 @@ _start_vaddr: movl  $KernelPageDir, %ecx
               # Shift the stack pointers up to the virtual mapping
               add   $KZERO, %esp
               add   $KZERO, %ebp
+              add   $KZERO, %edi
+              add   $KZERO, %esi
 
               push $_start_pgenable
               ret

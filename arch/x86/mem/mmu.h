@@ -1,8 +1,10 @@
 #pragma once
 
 #ifndef ASM_FILE
-#include <stdint.h>
 #include <arch/x86/mem/types.h>
+
+#include <stdint.h>
+#include <stdbool.h>
 #endif
 
 /* Page entry fields */
@@ -45,15 +47,19 @@ typedef paddr_t pgaddr_t;
 /* A PTE maps a 4k block (2^12 = 4k) */
 #define ADDR_PTE(addr) ((addr >> 12) % 1024)
 /* Extracts the address from a PDE */
-#define PDE_ADDR(pde) (pde & 0xFFC00000);
+#define PDE_ADDR(pde) (pde & 0xFFC00000)
 /* Extracts the address from a PTE */
-#define PTE_ADDR(pte) (pte & 0xFFFFF000);
+#define PTE_ADDR(pte) (pte & 0xFFFFF000)
 
 #ifndef ASM_FILE
 void pg_init(void);
-void pg_map(pgaddr_t paddr, vaddr_t vaddr, uint32_t extra_flags);
+void pg_map(pgaddr_t paddr, vaddr_t vaddr);
+void pg_reserve(vaddr_t vaddr);
+void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags);
 pgentry_t *pg_tmp_map(paddr_t addr);
 void pg_tmp_unmap(pgentry_t *mapping);
 void pg_flush_tlb(void);
 void pg_invlpg(vaddr_t addr);
+bool pg_is_allocated(vaddr_t addr);
+bool pg_is_reserved(vaddr_t addr);
 #endif

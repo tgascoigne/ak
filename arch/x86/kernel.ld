@@ -1,3 +1,4 @@
+#define LD_SCRIPT 1
 #include <arch/x86/mem/map.h>
 
 ENTRY(_start)
@@ -29,5 +30,5 @@ SECTIONS
 		*(.bss)
 	}
 
-	_kern_end = .;
+ 	_kern_end = .;
 }

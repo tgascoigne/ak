@@ -2,6 +2,7 @@
 
 #include <arch/x86/mem/framealloc.h>
 #include <arch/x86/mem/map.h>
+#include <arch/x86/intr/idt.h>
 #include <kernel/panic.h>
 #include <kernel/proc/task.h>
 
@@ -20,9 +21,14 @@ pgentry_t KernelPageDir[1024] PAGE_ALIGN = {
 
 pgentry_t TmpPageTbl[1024] PAGE_ALIGN = {0};
 
+void pg_fault_handler(isrargs_t *regs);
+
 void pg_init(void) {
-	// unmap the kernel from 0x0
-	KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
+	idt_set_handler(INT_PAGE_FAULT, pg_fault_handler);
+
+// unmap the kernel from 0x0
+// KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
+#pragma message("temporarily disabled - breaks interrupts?")
 
 	// point the last 4m at the temp page table
 	KernelPageDir[ADDR_PDE(KTMPMEM)] = PAGE_ENTRY(KBSSTOPHYS(&TmpPageTbl), KERNEL_FLAGS);
@@ -32,21 +38,39 @@ void pg_init(void) {
 	pg_flush_tlb();
 }
 
-void pg_map(pgaddr_t paddr, vaddr_t vaddr, uint32_t extra_flags) {
-	uint32_t flags = USER_FLAGS | extra_flags;
+void pg_map(pgaddr_t paddr, vaddr_t vaddr) {
+	uint32_t flags = USER_FLAGS;
 	if (CurrentTask->pid == KERNEL_PID) {
 		flags = KERNEL_FLAGS;
 	}
+	pg_map_ext(paddr, vaddr, flags);
+}
 
-	pgentry_t *dirent = &CurrentTask->pgd[ADDR_PDE(paddr)];
+void pg_reserve(vaddr_t vaddr) {
+	uint32_t flags = USER_FLAGS;
+	if (CurrentTask->pid == KERNEL_PID) {
+		flags = KERNEL_FLAGS;
+	}
+	flags |= PAGE_RESERVED;
+	flags &= (uint32_t)~PAGE_PRESENT; /* reserved pages are not present (allocated on page fault) */
+	pg_map_ext(0, vaddr, flags);
+}
+
+void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
+	pgentry_t *dirent = &CurrentTask->pgd[ADDR_PDE(vaddr)];
 	if (*dirent == NilPgEnt) {
+		uint32_t ptflags = USER_FLAGS;
+		if (CurrentTask->pid == KERNEL_PID) {
+			ptflags = KERNEL_FLAGS;
+		}
+
 		/* table isn't mapped - allocate a new one */
 		paddr_t tblframe = frame_alloc();
 		frame_set(tblframe);
 		pgentry_t *table = pg_tmp_map((pgaddr_t)tblframe);
 		memset(table, 0, (size_t)sizeof(pgentry_t) * 1024);
 		pg_tmp_unmap(table);
-		*dirent = PAGE_ENTRY(tblframe, flags);
+		*dirent = PAGE_ENTRY(tblframe, ptflags);
 	}
 
 	paddr_t tblframe = PDE_ADDR(*dirent);
@@ -99,4 +123,79 @@ void pg_flush_tlb(void) {
 
 void pg_invlpg(vaddr_t addr) {
 	__asm__ volatile("invlpg (%0)" : : "b"(addr) : "memory");
+}
+
+bool pg_is_allocated(vaddr_t addr) {
+	pgentry_t pgd = CurrentTask->pgd[ADDR_PDE(addr)];
+	if (pgd == NilPgEnt) {
+		return false;
+	}
+
+	if ((pgd & PAGE_PRESENT) == 0) {
+		return false;
+	}
+
+	if ((pgd & PAGE_EXTENDED) != 0) {
+		// page is extended and present. we have no pte to examine.
+		return true;
+	}
+
+	pgentry_t *pt = pg_tmp_map(PDE_ADDR(pgd));
+	pgentry_t pte = pt[ADDR_PTE(addr)];
+	pg_tmp_unmap(pt);
+
+	if (pte == NilPgEnt) {
+		return false;
+	}
+
+	if ((pte & PAGE_PRESENT) == 0) {
+		return false;
+	}
+
+	return true;
+}
+
+bool pg_is_reserved(vaddr_t addr) {
+	pgentry_t pgd = CurrentTask->pgd[ADDR_PDE(addr)];
+	if (pgd == NilPgEnt) {
+		return false;
+	}
+
+	if ((pgd & PAGE_RESERVED) != 0 && (pgd & PAGE_EXTENDED) != 0) {
+		/* 4m is reserved */
+		return true;
+	}
+
+	if ((pgd & PAGE_EXTENDED) != 0) {
+		// page is extended and not reserved. we have no pte to examine.
+		return false;
+	}
+
+	pgentry_t *pt = pg_tmp_map(PDE_ADDR(pgd));
+	pgentry_t pte = pt[ADDR_PTE(addr)];
+	pg_tmp_unmap(pt);
+
+	if (pte == NilPgEnt) {
+		return false;
+	}
+
+	if ((pte & PAGE_RESERVED) != 0) {
+		return true;
+	}
+
+	return false;
+}
+
+void pg_fault_handler(isrargs_t *regs) {
+	vaddr_t fault_addr;
+	__asm__ volatile("mov %%cr2, %0" : "=r"(fault_addr));
+
+	if (pg_is_reserved(fault_addr)) {
+		paddr_t frame = frame_alloc();
+		frame_set(frame);
+		pg_map(frame, fault_addr);
+		return;
+	}
+
+	printf("Page fault on unreserved page %02x\n", fault_addr);
 }

@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include <arch/x86/mem/map.h>
+
 #define INT_DIV_ERROR 0
 #define INT_DEBUG_EXCEPTION 1
 #define INT_NONMASKABLE_INTERRUPT 2
@@ -26,25 +28,25 @@ typedef struct idt_handler_args {
 } isrargs_t;
 
 typedef struct __attribute__((packed)) {
-	int offset_low : 16;
+	vaddr_t offset_low : 16;
 	int selector : 16;
 	int zero0 : 8;
 	int type : 5;
 	int dpl : 2;
 	int present : 1;
-	int offset_high : 16;
+	vaddr_t offset_high : 16;
 } idtdescr_t;
 
 typedef struct {
 	uint16_t limit;
-	uint32_t base;
+	vaddr_t base;
 } __attribute__((packed)) idtptr_t;
 
 typedef void (*isrfunc_t)(isrargs_t *);
 
 void idt_init(void);
 void idt_set_handler(uint8_t interrupt, isrfunc_t func);
-void idt_load(idtptr_t *idt);
-void idt_encode_addrs(idtdescr_t *descr, void *offset, uint16_t selector);
+void idt_load(idtptr_t idt);
+void idt_encode_addrs(idtdescr_t *descr, vaddr_t offset, uint16_t selector);
 void idt_encode_interrupt(idtdescr_t *descr);
 void idt_encode_trap(idtdescr_t *descr);

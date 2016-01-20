@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef ASM_FILE
+#if !defined(ASM_FILE) && !defined(LD_SCRIPT)
 #include <arch/x86/mem/types.h>
 #endif
 
