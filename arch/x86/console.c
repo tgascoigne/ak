@@ -1,9 +1,16 @@
 #include "console.h"
 
+#include <stdbool.h>
+
 #include <arch/x86/vga_console.h>
 
+static bool initialized = false;
+
 static int console_open(iodev_t *dev, int flags) {
-	vga_console_init();
+	if (!initialized) {
+		vga_console_init();
+		initialized = true;
+	}
 	return 0;
 }
 
