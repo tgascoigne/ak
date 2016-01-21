@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <sys/types.h>
 #endif
 
 /* Page entry fields */
@@ -53,6 +54,7 @@ typedef paddr_t pgaddr_t;
 
 #ifndef ASM_FILE
 void pg_init(void);
+void pg_map_sequence(pgaddr_t paddr, vaddr_t vaddr, size_t length);
 void pg_map(pgaddr_t paddr, vaddr_t vaddr);
 void pg_reserve(vaddr_t vaddr);
 void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags);

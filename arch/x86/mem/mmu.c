@@ -38,19 +38,27 @@ void pg_init(void) {
 	pg_flush_tlb();
 }
 
-void pg_map(pgaddr_t paddr, vaddr_t vaddr) {
+static uint32_t base_flags() {
 	uint32_t flags = USER_FLAGS;
 	if (CurrentTask->pid == KERNEL_PID) {
 		flags = KERNEL_FLAGS;
 	}
+	return flags;
+}
+
+void pg_map_sequence(pgaddr_t paddr, vaddr_t vaddr, size_t length) {
+	for (size_t i = 0; i < length; i += PAGE_SIZE) {
+		pg_map(paddr + (pgaddr_t)i, vaddr + (vaddr_t)i);
+	}
+}
+
+void pg_map(pgaddr_t paddr, vaddr_t vaddr) {
+	uint32_t flags = base_flags();
 	pg_map_ext(paddr, vaddr, flags);
 }
 
 void pg_reserve(vaddr_t vaddr) {
-	uint32_t flags = USER_FLAGS;
-	if (CurrentTask->pid == KERNEL_PID) {
-		flags = KERNEL_FLAGS;
-	}
+	uint32_t flags = base_flags();
 	flags |= PAGE_RESERVED;
 	flags &= (uint32_t)~PAGE_PRESENT; /* reserved pages are not present (allocated on page fault) */
 	pg_map_ext(0, vaddr, flags);
@@ -59,10 +67,7 @@ void pg_reserve(vaddr_t vaddr) {
 void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
 	pgentry_t *dirent = &CurrentTask->pgd[ADDR_PDE(vaddr)];
 	if (*dirent == NilPgEnt) {
-		uint32_t ptflags = USER_FLAGS;
-		if (CurrentTask->pid == KERNEL_PID) {
-			ptflags = KERNEL_FLAGS;
-		}
+		uint32_t ptflags = base_flags();
 
 		/* table isn't mapped - allocate a new one */
 		paddr_t tblframe = frame_alloc();
