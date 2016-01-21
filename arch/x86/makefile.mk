@@ -8,6 +8,7 @@ CLEANOBJS += $(OUT_IMG)
 
 SOURCES += $(addprefix $(ARCH_PATH), \
                 vga_console.c        \
+                console.c            \
                 io.c)
 
 include arch/$(ARCH)/boot/makefile.mk
