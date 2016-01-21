@@ -61,7 +61,7 @@ void pg_reserve(vaddr_t vaddr) {
 	uint32_t flags = base_flags();
 	flags |= PAGE_RESERVED;
 	flags &= (uint32_t)~PAGE_PRESENT; /* reserved pages are not present (allocated on page fault) */
-	pg_map_ext(0, vaddr, flags);
+	pg_map_ext(MEMMAX, vaddr, flags);
 }
 
 void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
