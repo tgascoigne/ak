@@ -34,7 +34,7 @@ void pg_init(void) {
 
 	KernelTask.pgd = KernelPageDir;
 
-	pg_flush_tlb();
+	tlb_flush();
 }
 
 static uint32_t base_flags() {
@@ -84,7 +84,7 @@ void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
 	*entry	   = PAGE_ENTRY(paddr, flags);
 
 	pg_tmp_unmap(table);
-	pg_invlpg(vaddr);
+	tlb_invlpg(vaddr);
 }
 
 static int pg_free_tmp_map() {
@@ -105,7 +105,7 @@ pgentry_t *pg_tmp_map(pgaddr_t addr) {
 	vaddr_t tmpaddr   = KTMPMEM + ((vaddr_t)entry * PAGE_SIZE);
 	TmpPageTbl[entry] = PAGE_ENTRY(addr, KERNEL_FLAGS);
 
-	pg_invlpg(tmpaddr);
+	tlb_invlpg(tmpaddr);
 
 	return (pgentry_t *)tmpaddr;
 }
@@ -114,19 +114,7 @@ void pg_tmp_unmap(pgentry_t *mapping) {
 	vaddr_t tmpaddr = (vaddr_t)mapping;
 	TmpPageTbl[ADDR_PTE(tmpaddr)] = NilPgEnt;
 
-	pg_invlpg(tmpaddr);
-}
-
-void pg_flush_tlb(void) {
-	__asm__ volatile("movl %%cr3, %%eax\n\t"
-			 "movl %%eax, %%cr3\n\t"
-			 :
-			 :
-			 : "%eax");
-}
-
-void pg_invlpg(vaddr_t addr) {
-	__asm__ volatile("invlpg (%0)" : : "b"(addr) : "memory");
+	tlb_invlpg(tmpaddr);
 }
 
 bool pg_is_allocated(vaddr_t addr) {
@@ -191,8 +179,7 @@ bool pg_is_reserved(vaddr_t addr) {
 }
 
 void pg_fault_handler(isrargs_t *regs) {
-	vaddr_t fault_addr;
-	__asm__ volatile("mov %%cr2, %0" : "=r"(fault_addr));
+	vaddr_t fault_addr = mmu_read_cr2();
 
 	if (pg_is_reserved(fault_addr)) {
 		paddr_t frame = frame_alloc();

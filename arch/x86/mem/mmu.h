@@ -60,8 +60,17 @@ void pg_reserve(vaddr_t vaddr);
 void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags);
 pgentry_t *pg_tmp_map(paddr_t addr);
 void pg_tmp_unmap(pgentry_t *mapping);
-void pg_flush_tlb(void);
-void pg_invlpg(vaddr_t addr);
 bool pg_is_allocated(vaddr_t addr);
 bool pg_is_reserved(vaddr_t addr);
+
+uint32_t mmu_read_cr0();
+void mmu_write_cr0(uint32_t cr0);
+vaddr_t mmu_read_cr2();
+pgentry_t mmu_read_cr3();
+void mmu_write_cr3(pgentry_t cr3);
+uint32_t mmu_read_cr4();
+void mmu_write_cr4(uint32_t cr4);
+
+void tlb_flush(void);
+void tlb_invlpg(vaddr_t addr);
 #endif
