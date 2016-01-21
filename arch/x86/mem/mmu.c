@@ -10,7 +10,7 @@
 
 #define USER_FLAGS PAGE_PRESENT | PAGE_RW
 #define KERNEL_FLAGS USER_FLAGS | PAGE_LINK
-#define KERNEL_LOW_4M PAGE_ENTRY(0, KERNEL_FLAGS | PAGE_EXTENDED)
+#define KERNEL_LOW_4M PAGE_ENTRY(0, KERNEL_FLAGS | PAGE_EXTENDED | PAGE_GLOBAL)
 
 static pgentry_t NilPgEnt = (pgentry_t)0;
 
@@ -26,8 +26,8 @@ void pg_fault_handler(isrargs_t *regs);
 void pg_init(void) {
 	idt_set_handler(INT_PAGE_FAULT, pg_fault_handler);
 
-// unmap the kernel from 0x0
-// KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
+	// unmap the kernel from 0x0
+	KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
 #pragma message("temporarily disabled - breaks interrupts?")
 
 	// point the last 4m at the temp page table
