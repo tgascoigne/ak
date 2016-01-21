@@ -1,16 +1,13 @@
 #include "console.h"
 
 #include <stdbool.h>
+#include <string.h>
 
 #include <arch/x86/vga_console.h>
-
-static bool initialized = false;
+#include <kernel/module.h>
+#include <kernel/io/dev.h>
 
 static int console_open(iodev_t *dev, int flags) {
-	if (!initialized) {
-		vga_console_init();
-		initialized = true;
-	}
 	return 0;
 }
 
@@ -31,6 +28,16 @@ static int console_close(iodev_t *dev) {
 	return 0;
 }
 
-iodev_t ConsoleDev = {
+static iodev_t ConsoleDev = {
     .open = console_open, .read = console_read, .write = console_write, .close = console_close,
 };
+
+static bool console_register() {
+	vga_console_init();
+
+	char *msg = "initialized console\n";
+	ConsoleDev.write(&ConsoleDev, msg, strlen(msg));
+	return true;
+}
+
+module_init(console_register);
