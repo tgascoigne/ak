@@ -28,7 +28,6 @@ void pg_init(void) {
 
 	// unmap the kernel from 0x0
 	KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
-#pragma message("temporarily disabled - breaks interrupts?")
 
 	// point the last 4m at the temp page table
 	KernelPageDir[ADDR_PDE(KTMPMEM)] = PAGE_ENTRY(KBSSTOPHYS(&TmpPageTbl), KERNEL_FLAGS);
