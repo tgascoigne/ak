@@ -6,29 +6,43 @@ OUTPUT_FORMAT("elf32-i386")
 
 SECTIONS
 {
-	. = KTEXT;
+    . = KTEXT;
 
-	.text ALIGN(4K) : AT(ADDR(.text) - KZERO)
-	{
-		*(.multiboot)
-		*(.text)
-	}
+    .text ALIGN(4K) : AT(ADDR(.text) - KZERO)
+    {
+        *(.multiboot)
+        *(.text)
+    }
 
-	.rodata ALIGN(4K) : AT(ADDR(.rodata) - KZERO)
-	{
-		*(.rodata)
-	}
+    .modinit : AT(ADDR(.modinit) - KZERO)
+    {
+        _modinit_start = .;
+        *(.modinit)
+        _modinit_end = .;
+    }
 
-	.data ALIGN(4K) : AT(ADDR(.data) - KZERO)
-	{
-		*(.data)
-	}
+    .modexit : AT(ADDR(.modexit) - KZERO)
+    {
+        _modexit_start = .;
+        *(.modexit)
+        _modexit_end = .;
+    }
 
-	.bss ALIGN(4K) : AT(ADDR(.bss) - KZERO)
-	{
-		*(COMMON)
-		*(.bss)
-	}
+    .rodata ALIGN(4K) : AT(ADDR(.rodata) - KZERO)
+    {
+        *(.rodata)
+    }
 
- 	_kern_end = .;
+    .data ALIGN(4K) : AT(ADDR(.data) - KZERO)
+    {
+        *(.data)
+    }
+
+    .bss ALIGN(4K) : AT(ADDR(.bss) - KZERO)
+    {
+        *(COMMON)
+        *(.bss)
+    }
+
+    _kern_end = .;
 }

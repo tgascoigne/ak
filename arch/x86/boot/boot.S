@@ -47,6 +47,8 @@ _start_pgenable:
 
               call  arch_init
 
+              call  kmain
+
 loop:		  hlt
 			  jmp	loop
 
