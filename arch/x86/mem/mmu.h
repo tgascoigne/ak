@@ -29,7 +29,8 @@ typedef paddr_t pgaddr_t;
 #endif
 
 /* Control register flags */
-#define CR4_PSE 0x10
+#define CR4_PSE (1 << 4)
+#define CR4_PGE (1 << 4)
 #define CR0_PGENABLE 0x80000000
 
 #define PAGE_SIZE 0x1000

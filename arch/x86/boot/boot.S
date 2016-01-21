@@ -18,6 +18,7 @@ _start_vaddr: movl  $KernelPageDir, %ecx
 
               mov   %cr4, %ecx
               orl   $CR4_PSE, %ecx
+              orl   $CR4_PGE, %ecx
               mov   %ecx, %cr4
 
               mov   %cr0, %ecx
