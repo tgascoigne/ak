@@ -11,4 +11,6 @@
 /* The last 4m is used as a temporary mapping area */
 #define KTMPMEM (MEMMAX - (0x400000 - 1))
 
+#define VGA_TEXT_BASE (0xB8000 + KZERO)
+
 #define KBSSTOPHYS(addr) ((paddr_t)addr - KZERO)

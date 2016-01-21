@@ -6,6 +6,10 @@ LDFLAGS += -melf_i386
 OUT_IMG   := $(addsuffix .img, $(basename $(OUT)))
 CLEANOBJS += $(OUT_IMG)
 
+SOURCES += $(addprefix $(ARCH_PATH), \
+                vga_console.c        \
+                io.c)
+
 include arch/$(ARCH)/boot/makefile.mk
 include arch/$(ARCH)/mem/makefile.mk
 include arch/$(ARCH)/intr/makefile.mk

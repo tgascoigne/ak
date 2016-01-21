@@ -9,6 +9,7 @@
 #include <arch/x86/mem/map.h>
 #include <arch/x86/mem/framealloc.h>
 #include <arch/x86/intr/idt.h>
+#include <arch/x86/vga_console.h>
 #include <kernel/panic.h>
 #include <kernel/proc/task.h>
 
@@ -25,4 +26,7 @@ void arch_init(multiboot_info_t *mb_info) {
 
 	task_brk(CurrentTask, KZERO + 0x400000 + (0x1000 * 4));
 	memset((void *)(KZERO + 0x400000), 0, 0x1000 * 4);
+
+	vga_console_init();
+	vga_console_puts("test\n");
 }
