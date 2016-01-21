@@ -17,7 +17,7 @@
 #define PAGE_ACCESSED (1 << 5)
 #define PAGE_DIRTY (1 << 6)
 #define PAGE_EXTENDED (1 << 7)
-#define PAGE_GLOBAL (1 << 7)
+#define PAGE_GLOBAL (1 << 8)
 /* ak specific fields */
 #define PAGE_RESERVED (1 << 8) /* A 'reserved' page is lazy allocated */
 #define PAGE_LINK (1 << 9)     /* A linked page is always linked on pd/pt copy */
