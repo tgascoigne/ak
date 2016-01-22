@@ -5,3 +5,4 @@ SOURCES += $(addprefix kernel/, \
 
 include kernel/fs/makefile.mk
 include kernel/proc/makefile.mk
+include kernel/syscall/makefile.mk
