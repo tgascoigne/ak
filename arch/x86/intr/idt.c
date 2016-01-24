@@ -6,7 +6,7 @@
 
 #define NUM_INTERRUPTS 256
 
-static char *InterruptDescriptions[] = {
+static char *InterruptDescriptions[] __attribute__((used)) = {
     "Divide error", "Debug exceptions",    "Nonmaskable interrupt",     "Breakpoint",	 "Overflow",
     "Bounds check", "Invalid opcode",      "Coprocessor not available", "Double fault",       "(reserved)",
     "Invalid TSS",  "Segment not present", "Stack exception",		"General protection", "Page fault",
@@ -72,4 +72,7 @@ void idt_handler(isrargs_t *regs) {
 
 void idt_load(idtptr_t idt) {
 	__asm__ volatile("lidt %0" ::"m"(idt));
+}
+
+void idt_nop_handler(isrargs_t *x) {
 }

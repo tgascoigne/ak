@@ -1,2 +1,3 @@
 SOURCES += $(addprefix kernel/syscall/, \
-                syscall.c)
+                syscall.c               \
+                fdio.c)

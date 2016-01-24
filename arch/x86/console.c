@@ -6,6 +6,7 @@
 #include <arch/x86/vga_console.h>
 #include <kernel/module.h>
 #include <kernel/io/dev.h>
+#include <kernel/io/tty.h>
 
 static int console_open(iodev_t *dev, int flags) {
 	return 0;
@@ -34,6 +35,8 @@ static iodev_t ConsoleDev = {
 
 static bool console_register() {
 	vga_console_init();
+
+	KConsole = &ConsoleDev;
 
 	char *msg = "initialized console\n";
 	ConsoleDev.write(&ConsoleDev, msg, strlen(msg));

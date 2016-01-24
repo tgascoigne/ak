@@ -9,5 +9,4 @@ void kmain(void) {
 		fprintf(stderr, "modules_init failed\n");
 		return;
 	}
-	printf("xxx\n");
 }

@@ -13,17 +13,18 @@
 #include <kernel/kmain.h>
 #include <kernel/proc/task.h>
 
-extern void *_kern_end;
-
 void arch_init(multiboot_info_t *mb_info) {
-	KernelTask.brk = (vaddr_t)&_kern_end;
-
 	idt_init();
 	multiboot_mmap(mb_info);
 	/* the first 4m is used for various devices and the kernel */
 	frame_set_range(0, 0x400000);
 	pg_init();
 
-	task_brk(CurrentTask, KZERO + 0x400000 + (0x1000 * 4));
-	memset((void *)(KZERO + 0x400000), 0, 0x1000 * 4);
+	/* ignore interrupt 0x8 for now (pit) */
+	idt_set_handler(0x8, idt_nop_handler);
+	__asm__ volatile("sti");
+
+	task_brk(CurrentTask, KZERO + 0x400000 + (0x4000 * 4));
+	char *x = (char *)KZERO + 0x400000;
+	memset(x, 0, 0x4000 * 4);
 }

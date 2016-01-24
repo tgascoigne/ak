@@ -54,6 +54,8 @@ typedef paddr_t pgaddr_t;
 #define PTE_ADDR(pte) (pte & 0xFFFFF000)
 
 #ifndef ASM_FILE
+extern pgentry_t KernelPageDir[1024];
+
 void pg_init(void);
 void pg_map_sequence(pgaddr_t paddr, vaddr_t vaddr, size_t length);
 void pg_map(pgaddr_t paddr, vaddr_t vaddr);

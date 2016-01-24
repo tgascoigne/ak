@@ -36,7 +36,7 @@ include kernel/makefile.mk
 OBJECTS   += $(addsuffix .o, $(basename $(SOURCES)))
 DISASM    += $(addsuffix .dis, $(basename $(OUT)))
 BINFILE   += $(addsuffix .bin, $(basename $(OUT)))
-CLEANOBJS += $(OUT) $(INITRD_OUT) $(OBJECTS) $(BINFILE) $(DISASM) .depend
+CLEANOBJS += $(OUT) $(OUT_SYMS) $(INITRD_OUT) $(OBJECTS) $(BINFILE) $(DISASM) .depend
 CFLAGS    += $(HEADER_INC)
 LDFLAGS   += $(LIB_INC)
 ASFLAGS   += $(CFLAGS)

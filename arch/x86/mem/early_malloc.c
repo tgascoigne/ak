@@ -34,7 +34,7 @@ void early_malloc_disable() {
 
 void *early_malloc(size_t size) {
 	vaddr_t brk = task_brk(CurrentTask, 0);
-	brk	 = task_brk(CurrentTask, brk);
+	brk	 = task_brk(CurrentTask, brk + size);
 
 	AllocStack[++AllocSP] = (vaddr_t)brk;
 	return (void *)brk;

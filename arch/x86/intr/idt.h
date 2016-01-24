@@ -50,3 +50,4 @@ void idt_load(idtptr_t idt);
 void idt_encode_addrs(idtdescr_t *descr, vaddr_t offset, uint16_t selector);
 void idt_encode_interrupt(idtdescr_t *descr);
 void idt_encode_trap(idtdescr_t *descr);
+void idt_nop_handler(isrargs_t *);
