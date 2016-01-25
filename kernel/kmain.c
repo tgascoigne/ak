@@ -1,6 +1,7 @@
 #include "kmain.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <arch/x86/mem/map.h>
@@ -16,9 +17,7 @@ void kmain(void) {
 
 	intr_enable();
 
-	task_brk(CurrentTask, KZERO + 0x400000 + (0x4000 * 4));
-	char *x = (char *)KZERO + 0x400000;
+	char *x = malloc(0x4000 * 4);
 	memset(x, 0, 0x4000 * 4);
-
-	task_brk(CurrentTask, KZERO + 0x400000);
+	free(x);
 }
