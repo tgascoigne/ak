@@ -69,7 +69,8 @@ void idt_handler(isrargs_t *regs) {
 	if (IDTCallbacks[regs->int_no] != NULL) {
 		IDTCallbacks[regs->int_no](regs);
 	} else {
-		PANIC("Unhandled interrupt: %s, err: %d\n", InterruptDescriptions[regs->int_no], regs->err_code);
+		PANIC("Unhandled interrupt: %s <%x>, err: %d\n", InterruptDescriptions[regs->int_no], regs->int_no,
+		      regs->err_code);
 	}
 }
 

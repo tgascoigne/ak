@@ -18,7 +18,10 @@ vaddr_t task_brk(task_t *task, vaddr_t brk) {
 
 	} else if (brk < cur) {
 		task->brk = brk;
-#pragma message("free up newly available memory")
+
+		for (pgaddr_t i = PGADDR(brk) + 1; i < PGADDR(cur); i += PAGE_SIZE) {
+			pg_unmap(i);
+		}
 	}
 
 	return task->brk;

@@ -6,6 +6,10 @@
 #include <kernel/io/tty.h>
 
 ssize_t sys_write(int fildes, const void *buf, size_t nbyte) {
+	if (KConsole == NULL) {
+		return 0;
+	}
+
 	return KConsole->write(KConsole, buf, nbyte);
 }
 

@@ -56,6 +56,29 @@ void pg_map(pgaddr_t paddr, vaddr_t vaddr) {
 	pg_map_ext(paddr, vaddr, flags);
 }
 
+void pg_unmap(vaddr_t vaddr) {
+	pgentry_t *dirent = &CurrentTask->pgd[ADDR_PDE(vaddr)];
+	if (*dirent == NilPgEnt) {
+		// nothing to do
+		return;
+	}
+
+	if ((*dirent & PAGE_EXTENDED) != 0) {
+		// We can't unmap a single page within a 4m range
+		// To unmap the entire range, call pg_unmap_ext instead
+		return;
+	}
+
+	paddr_t tblframe = PDE_ADDR(*dirent);
+	pgentry_t *table = pg_tmp_map((pgaddr_t)tblframe);
+
+	pgentry_t *entry = &table[ADDR_PTE(vaddr)];
+	*entry	   = NilPgEnt;
+
+	pg_tmp_unmap(table);
+	tlb_invlpg(vaddr);
+}
+
 void pg_reserve(vaddr_t vaddr) {
 	uint32_t flags = base_flags();
 	flags |= PAGE_RESERVED;
@@ -85,6 +108,18 @@ void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
 
 	pg_tmp_unmap(table);
 	tlb_invlpg(vaddr);
+}
+
+void pg_unmap_ext(vaddr_t vaddr) {
+	pgentry_t *dirent = &CurrentTask->pgd[ADDR_PDE(vaddr)];
+	if (*dirent == NilPgEnt) {
+		// nothing to do
+		return;
+	}
+
+	*dirent = NilPgEnt;
+
+	tlb_flush();
 }
 
 static int pg_free_tmp_map(void) {
