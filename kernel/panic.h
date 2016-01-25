@@ -5,6 +5,6 @@
 #define PANIC(...)                   \
 	{                            \
 		printf(__VA_ARGS__); \
-		while (1) {          \
+		while (/*1*/ 0) {    \
 		}                    \
 	}

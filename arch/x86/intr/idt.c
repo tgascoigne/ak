@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include <arch/x86/intr/pic.h>
 #include <kernel/panic.h>
 
 #define NUM_INTERRUPTS 256
@@ -40,6 +41,8 @@ void idt_init(void) {
 	IDTPtr.limit = sizeof(IDT) - 1;
 	IDTPtr.base = (vaddr_t)&IDT;
 	idt_load(IDTPtr);
+
+	pic_init();
 }
 
 void idt_set_handler(uint8_t interrupt, isrfunc_t func) {
