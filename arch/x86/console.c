@@ -33,7 +33,7 @@ static iodev_t ConsoleDev = {
     .open = console_open, .read = console_read, .write = console_write, .close = console_close,
 };
 
-static bool console_register() {
+static bool console_register(void) {
 	vga_console_init();
 
 	KConsole = &ConsoleDev;

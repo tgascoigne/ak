@@ -37,7 +37,7 @@ void pg_init(void) {
 	tlb_flush();
 }
 
-static uint32_t base_flags() {
+static uint32_t base_flags(void) {
 	uint32_t flags = USER_FLAGS;
 	if (CurrentTask->pid == KERNEL_PID) {
 		flags = KERNEL_FLAGS;
@@ -87,7 +87,7 @@ void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
 	tlb_invlpg(vaddr);
 }
 
-static int pg_free_tmp_map() {
+static int pg_free_tmp_map(void) {
 	for (int i = 0; i < 1024; i++) {
 		if (TmpPageTbl[i] == 0) {
 			return i;

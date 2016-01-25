@@ -66,12 +66,12 @@ void pg_tmp_unmap(pgentry_t *mapping);
 bool pg_is_allocated(vaddr_t addr);
 bool pg_is_reserved(vaddr_t addr);
 
-uint32_t mmu_read_cr0();
+uint32_t mmu_read_cr0(void);
 void mmu_write_cr0(uint32_t cr0);
-vaddr_t mmu_read_cr2();
-pgentry_t mmu_read_cr3();
+vaddr_t mmu_read_cr2(void);
+pgentry_t mmu_read_cr3(void);
 void mmu_write_cr3(pgentry_t cr3);
-uint32_t mmu_read_cr4();
+uint32_t mmu_read_cr4(void);
 void mmu_write_cr4(uint32_t cr4);
 
 void tlb_flush(void);

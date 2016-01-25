@@ -15,10 +15,10 @@ static struct {
 	uint8_t attrib;
 } state;
 
-static void vga_console_scroll();
+static void vga_console_scroll(void);
 static void vga_console_set_cursor(int x, int y);
 
-void vga_console_init() {
+void vga_console_init(void) {
 	state.buffer = (uint16_t *)VGA_TEXT_BASE;
 
 	/* set default buffer size */
@@ -75,12 +75,12 @@ void vga_console_putc(char c) {
 	}
 }
 
-void vga_console_clear() {
+void vga_console_clear(void) {
 	memset(state.buffer, 0, (size_t)(state.rows * state.cols) * 2);
 }
 
 /* This only scrolls the buffer, not the cursor */
-static void vga_console_scroll() {
+static void vga_console_scroll(void) {
 	memmove(state.buffer, state.buffer + state.cols, (size_t)((state.rows * state.cols) * 2));
 	state.y--;
 }

@@ -28,7 +28,7 @@ void __wrap_free(void *addr) {
 
 /* disables early_malloc as the malloc implementation, and switches
    to libc malloc */
-void early_malloc_disable() {
+void early_malloc_disable(void) {
 	EarlyMallocEnabled = false;
 }
 

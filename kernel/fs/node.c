@@ -5,7 +5,7 @@
 
 fsnode_t *FSRootNode;
 
-void fs_create_rootfs() {
+void fs_create_rootfs(void) {
 }
 
 fsnode_t *fs_locate(fsnode_t *origin, const char *path) {
