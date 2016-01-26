@@ -15,6 +15,8 @@ void kmain(void) {
 		return;
 	}
 
+	printf("module init complete\n");
+
 	intr_enable();
 
 	char *x = malloc(0x4000 * 4);

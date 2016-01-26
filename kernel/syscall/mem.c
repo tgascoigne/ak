@@ -10,12 +10,12 @@ void *sys_brk(vaddr_t brk) {
 	return (void *)task_brk(CurrentTask, brk);
 }
 
-void *sys_mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset) {
-	if ((flags & MAP_ANONYMOUS) != 0) {
+void *sys_mmap(void *addr, size_t length, int *prot, int *flags, int *fd, off_t *offset) {
+	if ((*flags & MAP_ANONYMOUS) != 0) {
 		return sys_brk((vaddr_t)sys_brk(0) + (vaddr_t)length);
 	}
-	PANIC("not implemented");
-	return (void *)0;
+	PANIC("sys_mmap: not implemented\n");
+	return (void *)-1;
 }
 
 static bool mem_syscall_init(void) {
@@ -25,4 +25,4 @@ static bool mem_syscall_init(void) {
 	return true;
 }
 
-module_init(mem_syscall_init);
+module_init_prio(mem_syscall_init, MODINIT_MEM);

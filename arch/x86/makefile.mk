@@ -10,6 +10,7 @@ SOURCES += $(addprefix $(ARCH_PATH), \
                 vga_console.c        \
                 console.c            \
                 syscall.c            \
+                pit.c                \
                 io.c)
 
 include arch/$(ARCH)/boot/makefile.mk

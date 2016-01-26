@@ -17,14 +17,14 @@ SECTIONS
     .modinit : AT(ADDR(.modinit) - KZERO)
     {
         _modinit_start = .;
-        *(.modinit)
+        *(SORT(.modinit*))
         _modinit_end = .;
     }
 
     .modexit : AT(ADDR(.modexit) - KZERO)
     {
         _modexit_start = .;
-        *(.modexit)
+        *(SORT(.modexit*))
         _modexit_end = .;
     }
 

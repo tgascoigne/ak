@@ -43,6 +43,8 @@ ASFLAGS   += $(CFLAGS)
 
 LD_SCRIPT_PROC = $(addsuffix .processed.ld, $(basename $(LD_SCRIPT)))
 
+CLEANOBJS += $(LD_SCRIPT_PROC)
+
 clean: clean-ak
 
 clean-ak:

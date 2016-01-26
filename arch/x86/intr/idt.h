@@ -19,6 +19,8 @@
 #define INT_GENERAL_PROTECTION 13
 #define INT_PAGE_FAULT 14
 #define INT_COPROCESSOR_ERROR 16
+#define INT_PIT 32
+#define INT_SYSCALL 128
 
 typedef struct idt_handler_args {
 	uint32_t ds;

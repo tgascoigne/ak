@@ -26,7 +26,7 @@ fd_t sys_open(const char *pathname, int flags, mode_t mode) {
 
 	iodev_t *dev = fsn->open(fsn);
 	if (dev == NULL) {
-		PANIC("Couldn't open fs node");
+		PANIC("Couldn't open fs node\n");
 		errno = ENOENT;
 		return -1;
 	}
@@ -79,7 +79,8 @@ static bool fdio_init(void) {
 	syscall_register(SYS_CLOSE, (syscall_fn_t)sys_close, 1);
 	syscall_register(SYS_READ, (syscall_fn_t)sys_read, 3);
 	syscall_register(SYS_WRITE, (syscall_fn_t)sys_write, 3);
+	fdio_tbl_init();
 	return true;
 }
 
-module_init(fdio_init);
+module_init_prio(fdio_init, MODINIT_FDIO);

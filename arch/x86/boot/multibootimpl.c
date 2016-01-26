@@ -14,11 +14,11 @@ bool multiboot_validate(uint32_t magic, multiboot_info_t *mb_info) {
 
 void multiboot_mmap(multiboot_info_t *mb_info) {
 	if ((mb_info->flags & MULTIBOOT_INFO_MEMORY) == 0) {
-		PANIC("MULTIBOOT_INFO_MEMORY missing");
+		PANIC("MULTIBOOT_INFO_MEMORY missing\n");
 	}
 
 	if ((mb_info->flags & MULTIBOOT_INFO_MEM_MAP) == 0) {
-		PANIC("MULTIBOOT_INFO_MEM_MAP missing");
+		PANIC("MULTIBOOT_INFO_MEM_MAP missing\n");
 	}
 
 	/* mem_upper is in KB */

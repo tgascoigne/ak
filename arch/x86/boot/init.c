@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#include <arch/x86/pit.h>
 #include <arch/x86/boot/multiboot.h>
 #include <arch/x86/boot/multibootimpl.h>
 #include <arch/x86/mem/framealloc.h>
@@ -14,4 +15,5 @@ void arch_init(multiboot_info_t *mb_info) {
 	/* the first 4m is used for various devices and the kernel */
 	frame_set_range(0, 0x400000);
 	pg_init();
+	pit_init();
 }

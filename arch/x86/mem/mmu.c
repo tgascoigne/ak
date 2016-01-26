@@ -134,7 +134,7 @@ static int pg_free_tmp_map(void) {
 pgentry_t *pg_tmp_map(pgaddr_t addr) {
 	int entry = pg_free_tmp_map();
 	if (entry == -1) {
-		PANIC("Out of free temporary mapping pages");
+		PANIC("Out of free temporary mapping pages\n");
 	}
 
 	vaddr_t tmpaddr   = KTMPMEM + ((vaddr_t)entry * PAGE_SIZE);

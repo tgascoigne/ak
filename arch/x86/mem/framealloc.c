@@ -71,6 +71,6 @@ paddr_t frame_alloc_after(paddr_t addr) {
 			}
 		}
 	}
-	PANIC("Out of memory")
+	PANIC("Out of memory\n")
 	return 0;
 }

@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <kernel/module.h>
-
 static fd_t next_fd = 0;
 static fdescr_t **fd_table;
 
@@ -39,10 +37,8 @@ int fd_close(fd_t fd) {
 	return 0;
 }
 
-static bool fdio_init(void) {
+bool fdio_tbl_init(void) {
 	fd_table = (fdescr_t **)malloc(FD_MAX * sizeof(fdescr_t *));
 	memset(fd_table, 0, FD_MAX * sizeof(fdescr_t *));
 	return true;
 }
-
-module_init(fdio_init);

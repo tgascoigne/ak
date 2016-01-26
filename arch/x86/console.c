@@ -7,6 +7,7 @@
 #include <kernel/module.h>
 #include <kernel/io/dev.h>
 #include <kernel/io/tty.h>
+#include <kernel/io/fdio.h>
 
 static int console_open(iodev_t *dev, int flags) {
 	return 0;
@@ -38,9 +39,12 @@ static bool console_register(void) {
 
 	KConsole = &ConsoleDev;
 
-	char *msg = "initialized console\n";
-	ConsoleDev.write(&ConsoleDev, msg, strlen(msg));
+	/* create stdin, stdout, stderr */
+	fd_open(KConsole);
+	fd_open(KConsole);
+	fd_open(KConsole);
+
 	return true;
 }
 
-module_init(console_register);
+module_init_prio(console_register, MODINIT_TTY);

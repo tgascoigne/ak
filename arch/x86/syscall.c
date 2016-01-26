@@ -8,8 +8,6 @@
 #include <kernel/syscall/syscall.h>
 #include <kernel/module.h>
 
-#define SYSCALL_INTERRUPT 0x80
-
 static void syscall_interrupt(isrargs_t *regs) {
 	int syscall     = (int)regs->eax;
 	syscall_fn_t fn = syscall_funcs[syscall];
@@ -55,8 +53,8 @@ static void syscall_interrupt(isrargs_t *regs) {
 }
 
 static bool syscall_arch_init(void) {
-	idt_set_handler(SYSCALL_INTERRUPT, &syscall_interrupt);
+	idt_set_handler(INT_SYSCALL, &syscall_interrupt);
 	return true;
 }
 
-module_init(syscall_arch_init);
+module_init_prio(syscall_arch_init, MODINIT_ARCH);
