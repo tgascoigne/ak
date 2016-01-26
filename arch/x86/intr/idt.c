@@ -72,6 +72,9 @@ void idt_handler(isrargs_t *regs) {
 		PANIC("Unhandled interrupt: %s <%x>, err: %d\n", InterruptDescriptions[regs->int_no], regs->int_no,
 		      regs->err_code);
 	}
+	if (regs->int_no >= INT_PIC1_BASE && regs->int_no < INT_PIC_END) {
+		pic_eoi(regs);
+	}
 }
 
 void idt_load(idtptr_t idt) {

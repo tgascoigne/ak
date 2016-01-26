@@ -2,9 +2,5 @@
 
 #include <stdio.h>
 
-#define PANIC(...)                   \
-	{                            \
-		printf(__VA_ARGS__); \
-		while (/*1*/ 0) {    \
-		}                    \
-	}
+#define PANIC(...) \
+	{ printf(__VA_ARGS__); }

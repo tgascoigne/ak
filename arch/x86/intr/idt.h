@@ -19,7 +19,11 @@
 #define INT_GENERAL_PROTECTION 13
 #define INT_PAGE_FAULT 14
 #define INT_COPROCESSOR_ERROR 16
-#define INT_PIT 32
+
+#define INT_PIC1_BASE 32
+#define INT_PIT (INT_PIC1_BASE + 0)
+#define INT_PIC2_BASE (INT_PIC1_BASE + 8)
+#define INT_PIC_END (INT_PIC2_BASE + 8)
 #define INT_SYSCALL 128
 
 typedef struct idt_handler_args {

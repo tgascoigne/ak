@@ -64,7 +64,7 @@ paddr_t frame_alloc_after(paddr_t addr) {
 			// -1 = all bits set, nothing free here
 			continue;
 		}
-
+#pragma message("associate mapped pages with the task structure")
 		for (paddr_t j = 0; j < BITS_PER_ENTRY; j++) {
 			if ((FrameBitmap[i] & (1 << j)) == 0) {
 				return (i * BITS_PER_ENTRY + j) * PAGE_SIZE;

@@ -2,11 +2,11 @@
 
 #include <stdio.h>
 
-#include <arch/x86/pit.h>
 #include <arch/x86/boot/multiboot.h>
 #include <arch/x86/boot/multibootimpl.h>
 #include <arch/x86/mem/framealloc.h>
 #include <arch/x86/intr/idt.h>
+#include <arch/x86/intr/pit.h>
 #include <kernel/proc/task.h>
 
 void arch_init(multiboot_info_t *mb_info) {
