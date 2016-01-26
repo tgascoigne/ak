@@ -1,2 +1,3 @@
 SOURCES += $(addprefix kernel/io/, \
-				tty.c)
+				tty.c              \
+                fdio.c)
