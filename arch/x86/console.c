@@ -1,13 +1,14 @@
 #include "console.h"
 
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <arch/x86/vga_console.h>
 #include <kernel/module.h>
 #include <kernel/io/dev.h>
-#include <kernel/io/tty.h>
 #include <kernel/io/fdio.h>
+#include <kernel/proc/task.h>
 
 static int console_open(iodev_t *dev, int flags) {
 	return 0;
@@ -37,12 +38,9 @@ static iodev_t ConsoleDev = {
 static bool console_register(void) {
 	vga_console_init();
 
-	KConsole = &ConsoleDev;
-
-	/* create stdin, stdout, stderr */
-	fd_open(KConsole);
-	fd_open(KConsole);
-	fd_open(KConsole);
+	fdescr_t *consfd     = (fdescr_t *)malloc(sizeof(fdescr_t));
+	consfd->dev	  = &ConsoleDev;
+	CurrentTask->console = consfd;
 
 	return true;
 }
