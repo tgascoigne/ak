@@ -19,9 +19,9 @@
 #define PAGE_EXTENDED (1 << 7)
 #define PAGE_GLOBAL (1 << 8)
 /* ak specific fields */
-#define PAGE_RESERVED (1 << 8) /* A 'reserved' page is lazy allocated */
-#define PAGE_LINK (1 << 9)     /* A linked page is always linked on pd/pt copy */
-/* (1 << 10) is unused */
+#define PAGE_RESERVED (1 << 8)   /* A 'reserved' page is lazy allocated */
+#define PAGE_LINK (1 << 9)       /* A linked page is always linked on pd/pt copy */
+#define PAGE_STACK_END (1 << 10) /* Stack boundary. Used to indicate a stack overflow and allocate more stack space */
 
 #ifndef ASM_FILE
 typedef uint32_t pgentry_t;
@@ -40,18 +40,18 @@ typedef paddr_t pgaddr_t;
 #endif
 
 /* sugar to help define pgentry_t's */
-#define PAGE_ENTRY(addr, flags) (pgentry_t)(addr | (flags))
+#define PAGE_ENTRY(addr, flags) (pgentry_t)((unsigned)addr | (flags))
 
 #define PGADDR(addr) (pgaddr_t)(addr - (addr % PAGE_SIZE))
 
 /* A PDE maps a 4m block (2^22 = 4m) */
-#define ADDR_PDE(addr) (addr >> 22)
+#define ADDR_PDE(addr) ((addr) >> 22)
 /* A PTE maps a 4k block (2^12 = 4k) */
-#define ADDR_PTE(addr) ((addr >> 12) % 1024)
+#define ADDR_PTE(addr) (((addr) >> 12) % 1024)
 /* Extracts the address from a PDE */
-#define PDE_ADDR(pde) (pde & 0xFFC00000)
+#define PDE_ADDR(pde) ((pde)&0xFFC00000)
 /* Extracts the address from a PTE */
-#define PTE_ADDR(pte) (pte & 0xFFFFF000)
+#define PTE_ADDR(pte) ((pte)&0xFFFFF000)
 
 #ifndef ASM_FILE
 extern pgentry_t KernelPageDir[1024];

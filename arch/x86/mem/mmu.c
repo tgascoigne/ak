@@ -21,13 +21,23 @@ pgentry_t KernelPageDir[1024] PAGE_ALIGN = {
 
 pgentry_t TmpPageTbl[1024] PAGE_ALIGN = {0};
 
+pgentry_t KernelStackTbl[1024] PAGE_ALIGN = {0};
+
 void pg_fault_handler(isrargs_t *regs);
 
 void pg_init(void) {
 	idt_set_handler(INT_PAGE_FAULT, pg_fault_handler);
 
+	extern void *_stack_bottom;
+	extern void *_stack_top;
+
+#pragma message("extend stack on PAGE_STACK_END fault")
+	KernelStackTbl[1022] = PAGE_ENTRY(0, PAGE_STACK_END);
+	KernelStackTbl[1023] = PAGE_ENTRY(KBSSTOPHYS(&_stack_top), KERNEL_FLAGS);
+	KernelPageDir[ADDR_PDE(KSTACK - 1)] = PAGE_ENTRY(KBSSTOPHYS(&KernelStackTbl), KERNEL_FLAGS);
+
 	// unmap the kernel from 0x0
-	//	KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
+	// KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
 
 	// point the last 4m at the temp page table
 	KernelPageDir[ADDR_PDE(KTMPMEM)] = PAGE_ENTRY(KBSSTOPHYS(&TmpPageTbl), KERNEL_FLAGS);
@@ -35,6 +45,16 @@ void pg_init(void) {
 	KernelTask.pgd = KernelPageDir;
 
 	tlb_flush();
+
+#define rebase_sp(x) (KSTACK + (x - KBSSTOPHYS(&_stack_bottom)))
+
+	uint32_t sp, bp;
+	__asm__ volatile("mov %%esp, %0" : "=r"(sp));
+	__asm__ volatile("mov %%ebp, %0" : "=r"(bp));
+	sp = rebase_sp(sp);
+	bp = rebase_sp(bp);
+	__asm__ volatile("mov %0, %%esp" : : "b"(sp));
+	__asm__ volatile("mov %0, %%ebp" : : "b"(bp));
 }
 
 static uint32_t base_flags(void) {

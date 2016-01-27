@@ -35,6 +35,10 @@ _start_vaddr: movl  $KernelPageDir, %ecx
               ret
 
 _start_pgenable:
+              movl  $_stack_bottom, %ecx
+              sub   $KZERO, %ecx
+              movl  %ecx, %esp
+
               add   $KZERO, %ebx    # need to adjust the pointer for the new zero addr
               push  %ebx            # multiboot_info_t*
               push  %eax            # multiboot magic

@@ -44,5 +44,11 @@ SECTIONS
         *(.bss)
     }
 
+    /* reserve some space for the first stack page */
+    . = ALIGN(0x1000);
+    _stack_top = .;
+    . += 0x1000;
+    _stack_bottom = .;
+
     _kern_end = .;
 }
