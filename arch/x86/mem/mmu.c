@@ -37,14 +37,12 @@ void pg_init(void) {
 	KernelPageDir[ADDR_PDE(KSTACK - 1)] = PAGE_ENTRY(KBSSTOPHYS(&KernelStackTbl), KERNEL_FLAGS);
 
 	// unmap the kernel from 0x0
-	// KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
+	KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
 
 	// point the last 4m at the temp page table
 	KernelPageDir[ADDR_PDE(KTMPMEM)] = PAGE_ENTRY(KBSSTOPHYS(&TmpPageTbl), KERNEL_FLAGS);
 
 	KernelTask.pgd = KernelPageDir;
-
-	tlb_flush();
 
 #define rebase_sp(x) (KSTACK + (x - KBSSTOPHYS(&_stack_bottom)))
 
@@ -55,6 +53,8 @@ void pg_init(void) {
 	bp = rebase_sp(bp);
 	__asm__ volatile("mov %0, %%esp" : : "b"(sp));
 	__asm__ volatile("mov %0, %%ebp" : : "b"(bp));
+
+	tlb_flush();
 }
 
 static uint32_t base_flags(void) {

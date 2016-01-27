@@ -1,5 +1,7 @@
 SOURCES += $(addprefix $(ARCH_PATH)/mem/, \
                 brk.c                     \
+                gdt.c                     \
+                gdt_load.S                \
                 mmu.c                     \
                 mmu_regs.c                \
                 mmu_tlb.c                 \

@@ -9,10 +9,10 @@
 struct mmap_args {
 	void *addr;
 	size_t length;
-	int *prot;
-	int *flags;
-	int *fd;
-	off_t *offset;
+	int prot;
+	int flags;
+	int fd;
+	off_t offset;
 };
 
 void *sys_brk(vaddr_t brk) {
@@ -20,7 +20,7 @@ void *sys_brk(vaddr_t brk) {
 }
 
 void *sys_mmap(struct mmap_args *args) {
-	if ((*args->flags & MAP_ANONYMOUS) != 0) {
+	if ((args->flags & MAP_ANONYMOUS) != 0) {
 		return sys_brk((vaddr_t)sys_brk(0) + (vaddr_t)args->length);
 	}
 	PANIC("sys_mmap: not implemented\n");
