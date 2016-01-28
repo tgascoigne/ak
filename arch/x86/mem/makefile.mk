@@ -5,6 +5,7 @@ SOURCES += $(addprefix $(ARCH_PATH)/mem/, \
                 mmu.c                     \
                 mmu_regs.c                \
                 mmu_tlb.c                 \
+                mmu_clone_dir.c           \
                 framealloc.c              \
                 early_malloc.c)
 

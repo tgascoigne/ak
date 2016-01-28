@@ -19,9 +19,10 @@
 #define PAGE_EXTENDED (1 << 7)
 #define PAGE_GLOBAL (1 << 8)
 /* ak specific fields */
-#define PAGE_RESERVED (1 << 8)   /* A 'reserved' page is lazy allocated */
-#define PAGE_LINK (1 << 9)       /* A linked page is always linked on pd/pt copy */
-#define PAGE_STACK_END (1 << 10) /* Stack boundary. Used to indicate a stack overflow and allocate more stack space */
+#define PAGE_LINK (1 << 9) /* A linked page is always linked on pd/pt copy */
+/* Fields when PRESENT = 0 */
+#define PAGE_RESERVED (1 << 10) /* A 'reserved' page is lazy allocated */
+#define PAGE_STACK_END (1 << 1) /* Stack boundary. Used to indicate a stack overflow and allocate more stack space */
 
 #ifndef ASM_FILE
 typedef uint32_t pgentry_t;
@@ -49,11 +50,20 @@ typedef paddr_t pgaddr_t;
 /* A PTE maps a 4k block (2^12 = 4k) */
 #define ADDR_PTE(addr) (((addr) >> 12) % 1024)
 /* Extracts the address from a PDE */
-#define PDE_ADDR(pde) ((pde)&0xFFC00000)
+#define PDE_ADDR(pde) ((pde)&PDE_ADDR_MASK)
 /* Extracts the address from a PTE */
-#define PTE_ADDR(pte) ((pte)&0xFFFFF000)
+#define PTE_ADDR(pte) ((pte)&PTE_ADDR_MASK)
+/* Extracts the flags from a PDE */
+#define PDE_FLAGS(pde) ((pde) & ~PDE_ADDR_MASK)
+/* Extracts the flags from a PTE */
+#define PTE_FLAGS(pte) ((pte) & ~PTE_ADDR_MASK)
+
+#define PDE_ADDR_MASK 0xFFC00000
+#define PTE_ADDR_MASK 0xFFFFF000
 
 #ifndef ASM_FILE
+static pgentry_t NilPgEnt = (pgentry_t)0;
+
 extern pgentry_t KernelPageDir[1024];
 
 void pg_init(void);
@@ -63,10 +73,12 @@ void pg_unmap(vaddr_t vaddr);
 void pg_reserve(vaddr_t vaddr);
 void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags);
 void pg_unmap_ext(vaddr_t vaddr);
-pgentry_t *pg_tmp_map(paddr_t addr);
-void pg_tmp_unmap(pgentry_t *mapping);
+void *pg_tmp_map(paddr_t addr);
+void pg_tmp_unmap(const void *mapping);
 bool pg_is_allocated(vaddr_t addr);
 bool pg_is_reserved(vaddr_t addr);
+paddr_t pg_clone_dir(pgentry_t dirframe);
+paddr_t pg_dir_new(void);
 
 uint32_t mmu_read_cr0(void);
 void mmu_write_cr0(uint32_t cr0);

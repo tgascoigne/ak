@@ -8,11 +8,10 @@
 
 #include <string.h>
 
-#define USER_FLAGS PAGE_PRESENT | PAGE_RW
-#define KERNEL_FLAGS USER_FLAGS | PAGE_LINK
+#define BASE_FLAGS PAGE_PRESENT | PAGE_RW
+#define USER_FLAGS BASE_FLAGS | PAGE_USER
+#define KERNEL_FLAGS BASE_FLAGS | PAGE_LINK
 #define KERNEL_LOW_4M PAGE_ENTRY(0, KERNEL_FLAGS | PAGE_EXTENDED)
-
-static pgentry_t NilPgEnt = (pgentry_t)0;
 
 // boot_pgd is the initial page directory used during startup
 pgentry_t KernelPageDir[1024] PAGE_ALIGN = {
@@ -28,23 +27,23 @@ void pg_fault_handler(isrargs_t *regs);
 void pg_init(void) {
 	idt_set_handler(INT_PAGE_FAULT, pg_fault_handler);
 
+	// unmap the kernel from 0x0
+	KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
+
+	// point the last 4m at the temp page table
+	KernelPageDir[ADDR_PDE(KTMPMEM)] = PAGE_ENTRY(KBSSTOPHYS(&TmpPageTbl), KERNEL_FLAGS | PAGE_LINK);
+
+	KernelTask.pgd = KernelPageDir;
+
+#define rebase_sp(x) (KSTACK + (x - KBSSTOPHYS(&_stack_bottom)))
+
 	extern void *_stack_bottom;
 	extern void *_stack_top;
 
 #pragma message("extend stack on PAGE_STACK_END fault")
 	KernelStackTbl[1022] = PAGE_ENTRY(0, PAGE_STACK_END);
-	KernelStackTbl[1023] = PAGE_ENTRY(KBSSTOPHYS(&_stack_top), KERNEL_FLAGS);
-	KernelPageDir[ADDR_PDE(KSTACK - 1)] = PAGE_ENTRY(KBSSTOPHYS(&KernelStackTbl), KERNEL_FLAGS);
-
-	// unmap the kernel from 0x0
-	KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
-
-	// point the last 4m at the temp page table
-	KernelPageDir[ADDR_PDE(KTMPMEM)] = PAGE_ENTRY(KBSSTOPHYS(&TmpPageTbl), KERNEL_FLAGS);
-
-	KernelTask.pgd = KernelPageDir;
-
-#define rebase_sp(x) (KSTACK + (x - KBSSTOPHYS(&_stack_bottom)))
+	KernelStackTbl[1023] = PAGE_ENTRY(KBSSTOPHYS(&_stack_top), BASE_FLAGS);
+	KernelPageDir[ADDR_PDE(KSTACK - 1)] = PAGE_ENTRY(KBSSTOPHYS(&KernelStackTbl), BASE_FLAGS);
 
 	uint32_t sp, bp;
 	__asm__ volatile("mov %%esp, %0" : "=r"(sp));
@@ -54,6 +53,11 @@ void pg_init(void) {
 	__asm__ volatile("mov %0, %%esp" : : "b"(sp));
 	__asm__ volatile("mov %0, %%ebp" : : "b"(bp));
 
+	tlb_flush();
+
+#pragma message("remove page clone testing")
+	paddr_t newdir = pg_clone_dir(mmu_read_cr3());
+	mmu_write_cr3((pgentry_t)newdir);
 	tlb_flush();
 }
 
@@ -106,18 +110,23 @@ void pg_reserve(vaddr_t vaddr) {
 	pg_map_ext(MEMMAX, vaddr, flags);
 }
 
+paddr_t pg_dir_new(void) {
+	paddr_t dirframe = frame_alloc();
+	frame_set(dirframe);
+	pgentry_t *dir = pg_tmp_map((pgaddr_t)dirframe);
+	memset(dir, 0, (size_t)sizeof(pgentry_t) * 1024);
+	pg_tmp_unmap(dir);
+	return dirframe;
+}
+
 void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
 	pgentry_t *dirent = &CurrentTask->pgd[ADDR_PDE(vaddr)];
 	if (*dirent == NilPgEnt) {
 		uint32_t ptflags = base_flags();
 
 		/* table isn't mapped - allocate a new one */
-		paddr_t tblframe = frame_alloc();
-		frame_set(tblframe);
-		pgentry_t *table = pg_tmp_map((pgaddr_t)tblframe);
-		memset(table, 0, (size_t)sizeof(pgentry_t) * 1024);
-		pg_tmp_unmap(table);
-		*dirent = PAGE_ENTRY(tblframe, ptflags);
+		paddr_t tblframe = pg_dir_new();
+		*dirent	  = PAGE_ENTRY(tblframe, ptflags);
 	}
 
 	paddr_t tblframe = PDE_ADDR(*dirent);
@@ -151,7 +160,7 @@ static int pg_free_tmp_map(void) {
 	return -1;
 }
 
-pgentry_t *pg_tmp_map(pgaddr_t addr) {
+void *pg_tmp_map(pgaddr_t addr) {
 	int entry = pg_free_tmp_map();
 	if (entry == -1) {
 		PANIC("Out of free temporary mapping pages\n");
@@ -165,7 +174,7 @@ pgentry_t *pg_tmp_map(pgaddr_t addr) {
 	return (pgentry_t *)tmpaddr;
 }
 
-void pg_tmp_unmap(pgentry_t *mapping) {
+void pg_tmp_unmap(const void *mapping) {
 	vaddr_t tmpaddr = (vaddr_t)mapping;
 	TmpPageTbl[ADDR_PTE(tmpaddr)] = NilPgEnt;
 
@@ -205,6 +214,10 @@ bool pg_is_allocated(vaddr_t addr) {
 bool pg_is_reserved(vaddr_t addr) {
 	pgentry_t pgd = CurrentTask->pgd[ADDR_PDE(addr)];
 	if (pgd == NilPgEnt) {
+		return false;
+	}
+
+	if ((pgd & PAGE_PRESENT) != 0) {
 		return false;
 	}
 

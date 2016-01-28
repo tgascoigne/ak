@@ -58,6 +58,20 @@ paddr_t frame_alloc(void) {
 	return frame_alloc_after((paddr_t)0);
 }
 
+paddr_t frame_alloc_4m(void) {
+	size_t bytecount = BIT_IDX(FrameCount);
+	int f0	   = 0;
+	/* find a sequence of 8 bytes (4m) = 0 */
+	/* 32 frames per byte * 32 = 1024 frames = 4m */
+	for (int i = 0; i < 32 && f0 < (int)bytecount; i++) {
+		if (FrameBitmap[f0 + i] != 0) {
+			i  = 0;
+			f0 = f0 + i + 1;
+		}
+	}
+	return (paddr_t)(f0 * BITS_PER_ENTRY * PAGE_SIZE);
+}
+
 paddr_t frame_alloc_after(paddr_t addr) {
 	for (paddr_t i = ADDR_PAGE(addr); i < FrameCount; i++) {
 		if (FrameBitmap[i] == (uint32_t)-1) {
