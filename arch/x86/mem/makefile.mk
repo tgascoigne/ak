@@ -3,8 +3,6 @@ SOURCES += $(addprefix $(ARCH_PATH)/mem/, \
                 gdt.c                     \
                 gdt_load.S                \
                 mmu.c                     \
-                mmu_regs.c                \
-                mmu_tlb.c                 \
                 mmu_clone_dir.c           \
                 framealloc.c              \
                 early_malloc.c)

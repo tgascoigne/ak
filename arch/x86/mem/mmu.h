@@ -1,11 +1,12 @@
 #pragma once
 
 #ifndef ASM_FILE
-#include <arch/x86/mem/types.h>
-
 #include <stdint.h>
 #include <stdbool.h>
 #include <sys/types.h>
+
+#include <arch/x86/mem/types.h>
+#include <arch/x86/mem/mmu_inline.h>
 #endif
 
 /* Page entry fields */
@@ -23,11 +24,6 @@
 /* Fields when PRESENT = 0 */
 #define PAGE_RESERVED (1 << 10) /* A 'reserved' page is lazy allocated */
 #define PAGE_STACK_END (1 << 1) /* Stack boundary. Used to indicate a stack overflow and allocate more stack space */
-
-#ifndef ASM_FILE
-typedef uint32_t pgentry_t;
-typedef paddr_t pgaddr_t;
-#endif
 
 /* Control register flags */
 #define CR4_PSE (1 << 4)
@@ -63,7 +59,6 @@ typedef paddr_t pgaddr_t;
 
 #ifndef ASM_FILE
 static pgentry_t NilPgEnt = (pgentry_t)0;
-
 extern pgentry_t KernelPageDir[1024];
 
 void pg_init(void);
@@ -77,17 +72,8 @@ void *pg_tmp_map(paddr_t addr);
 void pg_tmp_unmap(const void *mapping);
 bool pg_is_allocated(vaddr_t addr);
 bool pg_is_reserved(vaddr_t addr);
-paddr_t pg_clone_dir(pgentry_t dirframe);
-paddr_t pg_dir_new(void);
+pgaddr_t pg_clone_dir(pgaddr_t dirframe);
+pgaddr_t pg_dir_new(void);
 
-uint32_t mmu_read_cr0(void);
-void mmu_write_cr0(uint32_t cr0);
-vaddr_t mmu_read_cr2(void);
-pgentry_t mmu_read_cr3(void);
-void mmu_write_cr3(pgentry_t cr3);
-uint32_t mmu_read_cr4(void);
-void mmu_write_cr4(uint32_t cr4);
-
-void tlb_flush(void);
-void tlb_invlpg(vaddr_t addr);
+bool mmu_is_ready(void);
 #endif

@@ -1,5 +1,12 @@
 #pragma once
 
+#include <setjmp.h>
+
 #include <arch/x86/mem/mmu.h>
 
-typedef struct { pgentry_t *pgd; } arch_task_t;
+struct task;
+
+typedef struct {
+	pgaddr_t pgd;
+	jmp_buf ctx;
+} arch_task_t;

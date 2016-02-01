@@ -34,4 +34,4 @@ static bool mem_syscall_init(void) {
 	return true;
 }
 
-module_init_prio(mem_syscall_init, MODINIT_MEM);
+module_init_prio(mem_syscall_init, MODINIT_EARLY);

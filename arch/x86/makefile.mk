@@ -15,6 +15,7 @@ SOURCES += $(addprefix $(ARCH_PATH), \
 include arch/$(ARCH)/boot/makefile.mk
 include arch/$(ARCH)/mem/makefile.mk
 include arch/$(ARCH)/intr/makefile.mk
+include arch/$(ARCH)/proc/makefile.mk
 
 boot-nogrub: $(OUT)
 	qemu-system-i386 -kernel $(OUT)

@@ -11,7 +11,7 @@ vaddr_t task_brk(task_t *task, vaddr_t brk) {
 		task->brk = brk;
 
 		for (; cur < brk; cur += PAGE_SIZE) {
-			if (!pg_is_allocated(cur)) {
+			if (mmu_is_ready() && !pg_is_allocated(cur)) {
 				pg_reserve(cur);
 			}
 		}
@@ -20,7 +20,9 @@ vaddr_t task_brk(task_t *task, vaddr_t brk) {
 		task->brk = brk;
 
 		for (pgaddr_t i = PGADDR(brk) + 1; i < PGADDR(cur); i += PAGE_SIZE) {
-			pg_unmap(i);
+			if (mmu_is_ready()) {
+				pg_unmap(i);
+			}
 		}
 	}
 

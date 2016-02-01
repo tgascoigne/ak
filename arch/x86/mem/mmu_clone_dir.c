@@ -9,11 +9,11 @@ static pgentry_t pg_clone_page(pgentry_t page);
 static pgentry_t pg_clone_page_4m(pgentry_t page);
 static void frame_copy(paddr_t src, paddr_t dest);
 
-paddr_t pg_clone_dir(pgentry_t dirframe) {
-	paddr_t newdirframe = pg_dir_new();
+pgaddr_t pg_clone_dir(pgaddr_t dirframe) {
+	pgaddr_t newdirframe = pg_dir_new();
 
-	pgentry_t *dir    = pg_tmp_map((pgaddr_t)dirframe);
-	pgentry_t *newdir = pg_tmp_map((pgaddr_t)newdirframe);
+	pgentry_t *dir    = pg_tmp_map(dirframe);
+	pgentry_t *newdir = pg_tmp_map(newdirframe);
 
 	for (int i = 0; i < 1024; i++) {
 		if (dir[i] != NilPgEnt) {

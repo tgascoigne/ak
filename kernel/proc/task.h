@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unistd.h>
+#include <setjmp.h>
 
 #include <proc/task.h>
 #include <mem/types.h>
@@ -17,3 +18,7 @@ typedef struct {
 
 extern task_t *CurrentTask;
 extern task_t KernelTask;
+
+pid_t task_next_pid(void);
+void task_enter(task_t *task);
+task_t *task_fork(void);

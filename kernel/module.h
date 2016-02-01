@@ -8,7 +8,7 @@ extern modfunc_t _modinit_start, _modinit_end;
 extern modfunc_t _modexit_start, _modexit_end;
 
 #define MODINIT_ARCH "0"
-#define MODINIT_MEM "0"
+#define MODINIT_EARLY "0"
 #define MODINIT_FDIO "1"
 #define MODINIT_TTY "2"
 #define MODINIT_LATE "9"

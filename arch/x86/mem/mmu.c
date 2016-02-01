@@ -17,10 +17,9 @@
 pgentry_t KernelPageDir[1024] PAGE_ALIGN = {
 	[ADDR_PDE(0)] = KERNEL_LOW_4M, [ADDR_PDE(KZERO)] = KERNEL_LOW_4M,
 };
-
-pgentry_t TmpPageTbl[1024] PAGE_ALIGN = {0};
-
+pgentry_t TmpPageTbl[1024] PAGE_ALIGN     = {0};
 pgentry_t KernelStackTbl[1024] PAGE_ALIGN = {0};
+static bool MMUReady		       = false;
 
 void pg_fault_handler(isrargs_t *regs);
 
@@ -33,7 +32,7 @@ void pg_init(void) {
 	// point the last 4m at the temp page table
 	KernelPageDir[ADDR_PDE(KTMPMEM)] = PAGE_ENTRY(KBSSTOPHYS(&TmpPageTbl), KERNEL_FLAGS | PAGE_LINK);
 
-	KernelTask.pgd = KernelPageDir;
+	KernelTask.pgd = (pgaddr_t)KBSSTOPHYS(&KernelPageDir);
 
 #define rebase_sp(x) (KSTACK + (x - KBSSTOPHYS(&_stack_bottom)))
 
@@ -54,11 +53,11 @@ void pg_init(void) {
 	__asm__ volatile("mov %0, %%ebp" : : "b"(bp));
 
 	tlb_flush();
+	MMUReady = true;
+}
 
-#pragma message("remove page clone testing")
-	paddr_t newdir = pg_clone_dir(mmu_read_cr3());
-	mmu_write_cr3((pgentry_t)newdir);
-	tlb_flush();
+bool mmu_is_ready(void) {
+	return MMUReady;
 }
 
 static uint32_t base_flags(void) {
@@ -81,15 +80,18 @@ void pg_map(pgaddr_t paddr, vaddr_t vaddr) {
 }
 
 void pg_unmap(vaddr_t vaddr) {
-	pgentry_t *dirent = &CurrentTask->pgd[ADDR_PDE(vaddr)];
+	pgentry_t *dir    = pg_tmp_map(CurrentTask->pgd);
+	pgentry_t *dirent = &dir[ADDR_PDE(vaddr)];
 	if (*dirent == NilPgEnt) {
 		// nothing to do
+		pg_tmp_unmap(dir);
 		return;
 	}
 
 	if ((*dirent & PAGE_EXTENDED) != 0) {
 		// We can't unmap a single page within a 4m range
 		// To unmap the entire range, call pg_unmap_ext instead
+		pg_tmp_unmap(dir);
 		return;
 	}
 
@@ -100,6 +102,7 @@ void pg_unmap(vaddr_t vaddr) {
 	*entry	   = NilPgEnt;
 
 	pg_tmp_unmap(table);
+	pg_tmp_unmap(dir);
 	tlb_invlpg(vaddr);
 }
 
@@ -110,7 +113,7 @@ void pg_reserve(vaddr_t vaddr) {
 	pg_map_ext(MEMMAX, vaddr, flags);
 }
 
-paddr_t pg_dir_new(void) {
+pgaddr_t pg_dir_new(void) {
 	paddr_t dirframe = frame_alloc();
 	frame_set(dirframe);
 	pgentry_t *dir = pg_tmp_map((pgaddr_t)dirframe);
@@ -120,7 +123,8 @@ paddr_t pg_dir_new(void) {
 }
 
 void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
-	pgentry_t *dirent = &CurrentTask->pgd[ADDR_PDE(vaddr)];
+	pgentry_t *dir    = pg_tmp_map(CurrentTask->pgd);
+	pgentry_t *dirent = &dir[ADDR_PDE(vaddr)];
 	if (*dirent == NilPgEnt) {
 		uint32_t ptflags = base_flags();
 
@@ -136,19 +140,23 @@ void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
 	*entry	   = PAGE_ENTRY(paddr, flags);
 
 	pg_tmp_unmap(table);
+	pg_tmp_unmap(dir);
 	tlb_invlpg(vaddr);
 }
 
 void pg_unmap_ext(vaddr_t vaddr) {
-	pgentry_t *dirent = &CurrentTask->pgd[ADDR_PDE(vaddr)];
+	pgentry_t *dir    = pg_tmp_map(CurrentTask->pgd);
+	pgentry_t *dirent = &dir[ADDR_PDE(vaddr)];
 	if (*dirent == NilPgEnt) {
 		// nothing to do
+		pg_tmp_unmap(dir);
 		return;
 	}
 
 	*dirent = NilPgEnt;
 
 	tlb_flush();
+	pg_tmp_unmap(dir);
 }
 
 static int pg_free_tmp_map(void) {
@@ -182,7 +190,10 @@ void pg_tmp_unmap(const void *mapping) {
 }
 
 bool pg_is_allocated(vaddr_t addr) {
-	pgentry_t pgd = CurrentTask->pgd[ADDR_PDE(addr)];
+	pgentry_t *dir = pg_tmp_map(CurrentTask->pgd);
+	pgentry_t pgd = dir[ADDR_PDE(addr)];
+	pg_tmp_unmap(dir);
+
 	if (pgd == NilPgEnt) {
 		return false;
 	}
@@ -212,7 +223,10 @@ bool pg_is_allocated(vaddr_t addr) {
 }
 
 bool pg_is_reserved(vaddr_t addr) {
-	pgentry_t pgd = CurrentTask->pgd[ADDR_PDE(addr)];
+	pgentry_t *dir = pg_tmp_map(CurrentTask->pgd);
+	pgentry_t pgd = dir[ADDR_PDE(addr)];
+	pg_tmp_unmap(dir);
+
 	if (pgd == NilPgEnt) {
 		return false;
 	}
