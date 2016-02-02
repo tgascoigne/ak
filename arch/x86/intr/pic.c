@@ -45,3 +45,33 @@ void pic_eoi(isrargs_t *args) {
 	}
 	io_put8(PIC1_COMMAND, PIC_EOI);
 }
+
+void pic_mask(uint8_t irq) {
+	uint16_t port;
+	uint8_t val;
+
+	if (irq < 8) {
+		port = PIC1_DATA;
+	} else {
+		port = PIC2_DATA;
+		irq -= 8;
+	}
+
+	val = (uint8_t)io_get8(port) | (uint8_t)(1 << irq);
+	io_put8(port, val);
+}
+
+void pic_unmask(uint8_t irq) {
+	uint16_t port;
+	uint8_t val;
+
+	if (irq < 8) {
+		port = PIC1_DATA;
+	} else {
+		port = PIC2_DATA;
+		irq -= 8;
+	}
+
+	val = io_get8(port) & ~(1 << irq);
+	io_put8(port, val);
+}

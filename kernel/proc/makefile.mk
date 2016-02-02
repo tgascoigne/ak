@@ -1,2 +1,3 @@
 SOURCES += $(addprefix kernel/proc/, \
-				task.c)
+				task.c               \
+                sched.c)

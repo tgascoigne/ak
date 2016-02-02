@@ -1,24 +1,21 @@
 #include <stdbool.h>
 
+#include <arch/x86/intr/intr.h>
 #include <kernel/module.h>
 #include <kernel/syscall/syscall.h>
 #include <kernel/proc/task.h>
-
-static task_t *last_task = (task_t *)NULL;
+#include <kernel/proc/sched.h>
 
 pid_t sys_fork(void) {
 	task_t *clone = task_fork();
 	if (clone) {
-		last_task = clone;
 		return clone->pid;
 	}
 	return 0;
 }
 
 int sys_sched_yield(void) {
-	task_t *next_task = last_task;
-	last_task = CurrentTask;
-	task_enter(next_task);
+	kern_sched_yield();
 	return 0;
 }
 

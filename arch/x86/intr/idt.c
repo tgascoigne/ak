@@ -66,14 +66,14 @@ void idt_encode_trap(idtdescr_t *descr) {
 }
 
 void idt_handler(isrargs_t *regs) {
+	if (regs->int_no >= INT_PIC1_BASE && regs->int_no < INT_PIC_END) {
+		pic_eoi(regs);
+	}
+
 	if (IDTCallbacks[regs->int_no] != NULL) {
 		IDTCallbacks[regs->int_no](regs);
 	} else {
-		PANIC("Unhandled interrupt: %s <%x>, err: %d\n", InterruptDescriptions[regs->int_no], regs->int_no,
-		      regs->err_code);
-	}
-	if (regs->int_no >= INT_PIC1_BASE && regs->int_no < INT_PIC_END) {
-		pic_eoi(regs);
+		printf("Unhandled interrupt <%x>, err: %d\n", regs->int_no, regs->err_code);
 	}
 }
 

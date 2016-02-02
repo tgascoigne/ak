@@ -1,18 +1,23 @@
 #include "task.h"
 
+#include <sched.h>
 #include <stdlib.h>
 
+#include <arch/x86/intr/idt.h>
+#include <arch/x86/intr/intr.h>
+#include <arch/x86/intr/pic.h>
 #include <arch/x86/mem/mmu.h>
+#include <arch/x86/proc/context.h>
 #include <kernel/proc/task.h>
+#include <kernel/proc/sched.h>
 
 void task_enter(task_t *task) {
-	task_t *next_task;
-	next_task = (task_t *)setjmp(CurrentTask->ctx);
-	if (next_task == 0) {
-		longjmp(task->ctx, (int)task);
+	int ret;
+	ret = task_store_context(CurrentTask);
+	if (!ret) {
+		CurrentTask = task;
+		task_load_context(CurrentTask);
 	}
-	CurrentTask = next_task;
-	pg_switch_dir(next_task->pgd);
 }
 
 task_t *task_fork(void) {
@@ -20,14 +25,30 @@ task_t *task_fork(void) {
 	clone->pid     = task_next_pid();
 	clone->brk     = CurrentTask->brk;
 	clone->console = CurrentTask->console;
-	clone->pgd     = pg_clone_dir(CurrentTask->pgd);
+	task_insert(clone);
 
-	if (setjmp(clone->ctx) != 0) {
-		/* Reached when the scheduler longjmps to the new process */
-		/* set clone = 0 to signal this to caller */
-		pg_switch_dir(clone->pgd);
-		CurrentTask = clone;
-		clone       = 0;
+	int ret;
+	ret = task_fork_context(clone);
+
+	if (CurrentTask == clone) {
+		return 0;
 	}
 	return clone;
+}
+
+static void sched_preempt(isrargs_t *args) {
+	kern_sched_yield();
+}
+
+void task_mask_preempt(void) {
+	pic_mask(INT_PIT - INT_PIC1_BASE);
+}
+
+void task_unmask_preempt(void) {
+	pic_unmask(INT_PIT - INT_PIC1_BASE);
+}
+
+void task_enable_preempt(void) {
+	task_mask_preempt();
+	idt_set_handler(INT_PIT, sched_preempt);
 }

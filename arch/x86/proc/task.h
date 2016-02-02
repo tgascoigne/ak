@@ -1,12 +1,9 @@
 #pragma once
 
-#include <setjmp.h>
-
 #include <arch/x86/mem/mmu.h>
 
-struct task;
-
 typedef struct {
+	uint32_t esp;
+	uint32_t ebp;
 	pgaddr_t pgd;
-	jmp_buf ctx;
 } arch_task_t;

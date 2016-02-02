@@ -270,5 +270,5 @@ void pg_fault_handler(isrargs_t *regs) {
 		return;
 	}
 
-	printf("Page fault on unreserved page %02x\n", fault_addr);
+	PANIC("Page fault on unreserved page %02x\n", fault_addr);
 }

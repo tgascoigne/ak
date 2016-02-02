@@ -19,16 +19,16 @@ void kmain(void) {
 
 	printf("module init complete\n");
 
+	task_unmask_preempt();
 	intr_enable();
 
-	char *x = malloc(0x4000 * 4);
-	memset(x, 0, 0x4000 * 4);
-	free(x);
-
-	fork();
-
-	while (1) {
-		printf("my pid is %i\n", CurrentTask->pid);
-		sched_yield();
+	if (fork()) {
+		while (1) {
+			printf("foo\n");
+		}
+	} else {
+		while (1) {
+			printf("bar\n");
+		}
 	}
 }

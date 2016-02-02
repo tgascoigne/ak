@@ -5,7 +5,7 @@
 #include <arch/x86/io.h>
 #include <arch/x86/intr/idt.h>
 
-static uint32_t const pit_freq    = 50;
+static uint32_t const pit_freq    = 200;
 static uint32_t const pit_divisor = 1193180 / pit_freq;
 
 static void pit_cb(isrargs_t *args) {
