@@ -24,11 +24,11 @@ void kmain(void) {
 
 	if (fork()) {
 		while (1) {
-			printf("foo\n");
+			printf("foo %i\n", getpid());
 		}
 	} else {
 		while (1) {
-			printf("bar\n");
+			printf("bar %i\n", getpid());
 		}
 	}
 }

@@ -19,7 +19,12 @@ int sys_sched_yield(void) {
 	return 0;
 }
 
+pid_t sys_getpid(void) {
+	return CurrentTask->pid;
+}
+
 static bool proc_init(void) {
+	syscall_register(SYS_GETPID, (syscall_fn_t)sys_getpid, 0);
 	syscall_register(SYS_FORK, (syscall_fn_t)sys_fork, 0);
 	syscall_register(SYS_SCHED_YIELD, (syscall_fn_t)sys_sched_yield, 0);
 	return true;
