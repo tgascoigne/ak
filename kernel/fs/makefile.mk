@@ -1,2 +1,5 @@
 SOURCES += $(addprefix kernel/fs/, \
-				node.c)
+				node.c             \
+                cpiofs.c           \
+                tmpfs.c            \
+                devfs.c)

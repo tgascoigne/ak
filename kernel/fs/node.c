@@ -2,10 +2,16 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
+#include <kernel/fs/tmpfs.h>
+#include <kernel/fs/devfs.h>
 
 fsnode_t *FSRootNode;
 
 void fs_create_rootfs(void) {
+	FSRootNode = tmpfs_create("root");
+	fs_link_child(FSRootNode, devfs_get());
 }
 
 fsnode_t *fs_locate(fsnode_t *origin, const char *path) {
@@ -18,14 +24,12 @@ fsnode_t *fs_locate(fsnode_t *origin, const char *path) {
 		// locate the fsnode_t* for the current node name
 		fsnode_t *child = NULL;
 
-		do {
-			fs_child_iter(cur, &child);
-
+		while (fs_child_iter(cur, &child)) {
 			if (strcmp(tok, child->name) == 0) {
 				cur = child;
 				break;
 			}
-		} while (child != NULL);
+		}
 
 		if (child == NULL) {
 			// missing child
@@ -41,12 +45,13 @@ fsnode_t *fs_locate(fsnode_t *origin, const char *path) {
 	return cur;
 }
 
-void fs_child_iter(fsnode_t *parent, fsnode_t **next_dest) {
+fsnode_t *fs_child_iter(fsnode_t *parent, fsnode_t **next_dest) {
 	if (*next_dest == NULL) {
 		*next_dest = parent->first_child;
 	} else {
 		*next_dest = (*next_dest)->next_sibling;
 	}
+	return *next_dest;
 }
 
 void fs_link_child(fsnode_t *parent, fsnode_t *child) {
