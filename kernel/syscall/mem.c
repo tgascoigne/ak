@@ -1,8 +1,9 @@
+#include "mem.h"
+
 #include <sys/mman.h>
 
 #include <arch/x86/mem/brk.h>
 #include <arch/x86/mem/early_malloc.h>
-#include <kernel/module.h>
 #include <kernel/panic.h>
 #include <kernel/syscall/syscall.h>
 
@@ -27,11 +28,8 @@ void *sys_mmap(struct mmap_args *args) {
 	return (void *)-1;
 }
 
-static bool mem_syscall_init(void) {
+void mem_syscall_init(void) {
 	syscall_register(SYS_BRK, (syscall_fn_t)sys_brk, 1);
 	syscall_register(SYS_MMAP, (syscall_fn_t)sys_mmap, 1);
 	early_malloc_disable();
-	return true;
 }
-
-module_init_prio(mem_syscall_init, MODINIT_EARLY);

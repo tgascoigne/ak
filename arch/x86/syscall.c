@@ -6,7 +6,6 @@
 
 #include <arch/x86/intr/idt.h>
 #include <kernel/syscall/syscall.h>
-#include <kernel/module.h>
 
 static void syscall_interrupt(isrargs_t *regs) {
 	int syscall     = (int)regs->eax;
@@ -52,9 +51,6 @@ static void syscall_interrupt(isrargs_t *regs) {
 	regs->eax = ret;
 }
 
-static bool syscall_arch_init(void) {
+void syscall_arch_init(void) {
 	idt_set_handler(INT_SYSCALL, &syscall_interrupt);
-	return true;
 }
-
-module_init_prio(syscall_arch_init, MODINIT_ARCH);

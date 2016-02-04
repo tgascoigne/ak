@@ -1,3 +1,5 @@
+#include "fdio.h"
+
 #include <kernel/syscall/syscall.h>
 
 #include <errno.h>
@@ -6,7 +8,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <kernel/module.h>
 #include <kernel/panic.h>
 #include <kernel/io/fdio.h>
 #include <kernel/fs/node.h>
@@ -74,13 +75,10 @@ int sys_close(fd_t fd) {
 	return 0;
 }
 
-static bool fdio_init(void) {
+void fdio_init(void) {
 	syscall_register(SYS_OPEN, (syscall_fn_t)sys_open, 3);
 	syscall_register(SYS_CLOSE, (syscall_fn_t)sys_close, 1);
 	syscall_register(SYS_READ, (syscall_fn_t)sys_read, 3);
 	syscall_register(SYS_WRITE, (syscall_fn_t)sys_write, 3);
 	fdio_tbl_init();
-	return true;
 }
-
-module_init_prio(fdio_init, MODINIT_FDIO);

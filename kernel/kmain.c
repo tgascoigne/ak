@@ -6,16 +6,34 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <arch/x86/mem/map.h>
-#include <arch/x86/mem/brk.h>
-#include <arch/x86/intr/intr.h>
+#include <syscall.h>
+#include <mem/map.h>
+#include <mem/brk.h>
+#include <intr/intr.h>
 #include <kernel/module.h>
+#include <kernel/panic.h>
+#include <kernel/syscall/fdio.h>
+#include <kernel/syscall/mem.h>
+#include <kernel/syscall/proc.h>
+#include <kernel/syscall/syscall.h>
+#include <kernel/fs/node.h>
+#include <kernel/proc/sched.h>
+#include <kernel/tty/console.h>
 
 void kmain(void) {
+	syscall_arch_init();
+	mem_syscall_init();
+	proc_init();
+	fdio_init();
+	sched_init();
+	fs_create_rootfs();
+
 	if (!modules_init()) {
-		fprintf(stderr, "modules_init failed\n");
+		PANIC("modules_init failed\n");
 		return;
 	}
+
+	console_init();
 
 	printf("module init complete\n");
 

@@ -9,6 +9,7 @@
 #include <kernel/io/dev.h>
 #include <kernel/io/fdio.h>
 #include <kernel/proc/task.h>
+#include <kernel/fs/devfs.h>
 
 static int console_open(iodev_t *dev, int flags) {
 	return 0;
@@ -38,9 +39,9 @@ static iodev_t ConsoleDev = {
 static bool console_register(void) {
 	vga_console_init();
 
-	fdescr_t *consfd     = (fdescr_t *)malloc(sizeof(fdescr_t));
-	consfd->dev	  = &ConsoleDev;
-	CurrentTask->console = consfd;
+	fdescr_t *consfd = (fdescr_t *)malloc(sizeof(fdescr_t));
+	consfd->dev = &ConsoleDev;
+	devfs_register_device("tty", &ConsoleDev);
 
 	return true;
 }
