@@ -12,7 +12,7 @@
 #include <kernel/io/fdio.h>
 #include <kernel/fs/node.h>
 
-fd_t sys_open(const char *pathname, int flags, mode_t mode) {
+int sys_open(const char *pathname, int flags, mode_t mode) {
 	fsnode_t *fsn = fs_locate(FSRootNode, pathname);
 	if (fsn == NULL) {
 		if ((flags & O_CREAT) != 0) {
@@ -25,14 +25,14 @@ fd_t sys_open(const char *pathname, int flags, mode_t mode) {
 		}
 	}
 
-	iodev_t *dev = fsn->open(fsn);
+	iodev_t *dev = fsn->open(fsn, 0);
 	if (dev == NULL) {
 		PANIC("Couldn't open fs node\n");
 		errno = ENOENT;
 		return -1;
 	}
 
-	return fd_open(dev);
+	return (int)fd_open(dev);
 }
 
 ssize_t sys_write(fd_t fd, const void *buf, size_t nbyte) {

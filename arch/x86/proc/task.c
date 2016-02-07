@@ -21,10 +21,7 @@ void task_enter(task_t *task) {
 }
 
 task_t *task_fork(void) {
-	task_t *clone  = (task_t *)malloc(sizeof(task_t));
-	clone->pid     = task_next_pid();
-	clone->brk     = CurrentTask->brk;
-	clone->console = CurrentTask->console;
+	task_t *clone = task_clone(CurrentTask);
 	task_insert(clone);
 
 	int ret;

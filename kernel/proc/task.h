@@ -20,6 +20,9 @@ typedef struct {
 	vaddr_t brk;
 	tstate_t state;
 	list_head_t list;
+	fd_t fdnext;
+	fd_t fdcap;
+	fdescr_t **fdtbl;
 	union {
 		arch_task_t;
 		arch_task_t arch;
@@ -36,3 +39,4 @@ void task_insert(task_t *task);
 void task_enable_preempt(void);
 void task_mask_preempt(void);
 void task_unmask_preempt(void);
+task_t *task_clone(task_t *task);
