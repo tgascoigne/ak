@@ -13,10 +13,10 @@
 
 void task_enter(task_t *task) {
 	int ret;
-	ret = task_store_context(CurrentTask);
+	ret = task_store_context(&CurrentTask->arch);
 	if (!ret) {
 		CurrentTask = task;
-		task_load_context(CurrentTask);
+		task_load_context(&CurrentTask->arch);
 	}
 }
 
@@ -28,7 +28,7 @@ task_t *task_fork(void) {
 	task_insert(clone);
 
 	int ret;
-	ret = task_fork_context(clone);
+	ret = task_fork_context(&clone->arch);
 
 	if (CurrentTask == clone) {
 		return 0;

@@ -20,7 +20,10 @@ typedef struct {
 	vaddr_t brk;
 	tstate_t state;
 	list_head_t list;
-	arch_task_t;
+	union {
+		arch_task_t;
+		arch_task_t arch;
+	};
 } task_t;
 
 extern task_t *CurrentTask;

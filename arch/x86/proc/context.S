@@ -8,9 +8,9 @@ task_load_context:
               movl  $0x0,-0x8(%ebp)
               mov   -0x4(%ebp),%eax
 
-              mov   0x18(%eax),%edx
-              mov   0x1c(%eax),%ebx
-              mov   0x20(%eax),%ecx
+              mov   0x00(%eax),%edx
+              mov   0x04(%eax),%ebx
+              mov   0x08(%eax),%ecx
               mov   %edx,%esp
               mov   %ebx,%ebp
               mov   %ecx,%cr3
@@ -35,8 +35,8 @@ task_store_context:
 
               mov   %esp,%edx
               mov   %ebp,%ebx
-              mov   %edx,0x18(%eax)
-              mov   %ebx,0x1c(%eax)
+              mov   %edx,0x00(%eax)
+              mov   %ebx,0x04(%eax)
 
               mov   -0x8(%ebp),%eax
               add   $0x8,%esp
@@ -56,8 +56,8 @@ task_fork_context:
 
               mov   %esp,%edx
               mov   %ebp,%ebx
-              mov   %edx,0x18(%eax)
-              mov   %ebx,0x1c(%eax)
+              mov   %edx,0x00(%eax)
+              mov   %ebx,0x04(%eax)
               mov   %cr3,%ebx
               push  %eax
               push  %ebx
@@ -65,7 +65,7 @@ task_fork_context:
               add   $4,%esp
               mov   %eax,%ecx
               pop   %eax
-              mov   %ecx,0x20(%eax)
+              mov   %ecx,0x08(%eax)
 
               mov   -0x8(%ebp),%eax
               add   $0x8,%esp
