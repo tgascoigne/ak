@@ -1,4 +1,4 @@
-userspace/hello/hello: userspace/hello/main.c
-	$(CC) $(LIB_INC) $(CFLAGS) -static -o $@ $^ /usr/lib/gcc/x86_64-redhat-linux/5.3.1/32/crt1.o /usr/lib/gcc/x86_64-redhat-linux/5.3.1/32/crti.o /usr/lib/gcc/x86_64-redhat-linux/5.3.1/32/crtn.o -lgcc
+initrd/hello: userspace/hello/main.c
+	$(CC) $(CFLAGS) -static -o $@ $<
 
-USER_BINARIES += userspace/hello/hello
+USER_BINARIES += initrd/hello
