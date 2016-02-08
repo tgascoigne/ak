@@ -30,7 +30,6 @@ typedef struct fsnode {
 extern fsnode_t *FSRootNode;
 
 void fs_create_rootfs(void);
-fsnode_t *fs_get_root(void);
 fsnode_t *fs_child_iter(fsnode_t *parent, fsnode_t **next_dest);
 fsnode_t *fs_locate(fsnode_t *origin, const char *path);
 void fs_link_child(fsnode_t *parent, fsnode_t *child);

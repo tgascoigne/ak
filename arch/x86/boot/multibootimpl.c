@@ -2,7 +2,9 @@
 
 #include <arch/hwinfo.h>
 #include <arch/x86/mem/framealloc.h>
+#include <arch/x86/mem/map.h>
 #include <kernel/panic.h>
+#include <kernel/initrd.h>
 
 bool multiboot_validate(uint32_t magic, multiboot_info_t *mb_info) {
 	if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
@@ -33,4 +35,10 @@ void multiboot_mmap(multiboot_info_t *mb_info) {
 		}
 		r = (multiboot_memory_map_t *)((paddr_t)r + r->size + sizeof(multiboot_uint32_t));
 	}
+
+	if (mb_info->mods_count < 1) {
+		PANIC("missing initrd");
+	}
+
+	Initrd = (cpiohdr_t *)PHYSTOKBSS(*(paddr_t *)(mb_info->mods_addr));
 }

@@ -1,7 +1,8 @@
 SOURCES += $(addprefix kernel/, \
                 kmain.c         \
 				list.c          \
-                module.c)
+                module.c        \
+                initrd.c)
 
 include kernel/fs/makefile.mk
 include kernel/io/makefile.mk

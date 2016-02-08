@@ -11,6 +11,7 @@
 #include <mem/brk.h>
 #include <intr/intr.h>
 #include <kernel/module.h>
+#include <kernel/initrd.h>
 #include <kernel/panic.h>
 #include <kernel/syscall/fdio.h>
 #include <kernel/syscall/mem.h>
@@ -27,6 +28,7 @@ void kmain(void) {
 	fdio_init();
 	sched_init();
 	fs_create_rootfs();
+	initrd_mount(FSRootNode);
 
 	if (!modules_init()) {
 		PANIC("modules_init failed\n");
@@ -40,13 +42,9 @@ void kmain(void) {
 	task_unmask_preempt();
 	intr_enable();
 
-	if (fork()) {
-		while (1) {
-			printf("foo %i\n", getpid());
-		}
-	} else {
-		while (1) {
-			printf("bar %i\n", getpid());
-		}
-	}
+	FILE *fd = fopen("/initrd/hello_world.txt", "r");
+	char buf[256];
+	size_t len = fread(buf, 1, 256, fd);
+	fclose(fd);
+	fwrite(buf, 1, len, stdout);
 }

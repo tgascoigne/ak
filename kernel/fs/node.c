@@ -62,7 +62,7 @@ void fs_link_child(fsnode_t *parent, fsnode_t *child) {
 		// parent has children, insert it amongst siblings
 		fsnode_t *i = NULL;
 
-		for (i = parent->first_child; strcmp(i->name, child->name) < 0 && i != NULL; i = i->next_sibling) {
+		for (i = parent->first_child; i != NULL && strcmp(i->name, child->name) < 0; i = i->next_sibling) {
 		}
 
 		if (i == NULL) {
