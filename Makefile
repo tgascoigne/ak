@@ -32,6 +32,7 @@ all: $(OUT) $(DISASM) $(BINFILE)
 
 include arch/makefile.mk
 include kernel/makefile.mk
+include userspace/makefile.mk
 
 OBJECTS   += $(addsuffix .o, $(basename $(SOURCES)))
 DISASM    += $(addsuffix .dis, $(basename $(OUT)))
@@ -68,7 +69,7 @@ $(BINFILE): $(OUT)
 $(DISASM): $(OUT)
 	$(OBJDUMP) -D $(OUT) > $(DISASM)
 
-$(INITRD_OUT): $(shell find $(INITRD_DIR) -type f)
+$(INITRD_OUT): $(shell find $(INITRD_DIR) -type f) userspace
 	(cd $(INITRD_DIR) && ls | cpio -ov) > $(INITRD_OUT)
 
 %.processed.ld: %.ld
@@ -87,4 +88,4 @@ depend: .depend
 
 include .depend
 
-.PHONY: all libc clean clean-ak clean-libc format
+.PHONY: all libc clean clean-ak clean-libc format userspace
