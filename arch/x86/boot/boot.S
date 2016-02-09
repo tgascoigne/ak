@@ -7,9 +7,12 @@
 
               .extern multiboot_validate
 
+              .global _start_vaddr
+
+              .equ  _start, (_start_vaddr - KZERO)
               .global _start
 
-_start:       movl  $KernelPageDir, %ecx
+_start_vaddr: movl  $KernelPageDir, %ecx
               sub   $KZERO, %ecx
               mov   %ecx, %cr3
 

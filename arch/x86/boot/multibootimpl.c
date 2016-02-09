@@ -6,39 +6,54 @@
 #include <kernel/panic.h>
 #include <kernel/initrd.h>
 
-bool multiboot_validate(uint32_t magic, multiboot_info_t *mb_info) {
-	if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
+bool multiboot_validate(uint32_t magic, vaddr_t mb_info) {
+	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
 		PANIC("bad multiboot magic %i\n", magic);
 	}
 
 	return true;
 }
 
-void multiboot_mmap(multiboot_info_t *mb_info) {
-	if ((mb_info->flags & MULTIBOOT_INFO_MEMORY) == 0) {
-		PANIC("MULTIBOOT_INFO_MEMORY missing\n");
-	}
+void multiboot_mmap(vaddr_t mb_info) {
+	// the first 8 bytes are size + reserved
+	struct multiboot_tag *tag = (struct multiboot_tag *)(mb_info + 8);
 
-	if ((mb_info->flags & MULTIBOOT_INFO_MEM_MAP) == 0) {
-		PANIC("MULTIBOOT_INFO_MEM_MAP missing\n");
-	}
-
-	/* mem_upper is in KB */
-	HardwareInfo.mem_max = mb_info->mem_upper * 1024;
-	frame_alloc_init(HardwareInfo.mem_max);
-
-	multiboot_memory_map_t *r = (multiboot_memory_map_t *)mb_info->mmap_addr;
-	while ((multiboot_uint32_t)r < mb_info->mmap_addr + mb_info->mmap_length) {
-		if (r->type != 1) {
-			/* type == 1 means usable ram; everything else is reserved */
-			frame_set_range((paddr_t)r->addr, (paddr_t)r->addr + (paddr_t)r->len);
+	while (tag->type != MULTIBOOT_TAG_TYPE_END) {
+		if (tag->type != MULTIBOOT_TAG_TYPE_BASIC_MEMINFO) {
+			tag = (struct multiboot_tag *)((vaddr_t)tag + ((tag->size + 7) & (uint32_t)~7));
+			continue;
 		}
-		r = (multiboot_memory_map_t *)((paddr_t)r + r->size + sizeof(multiboot_uint32_t));
+
+		/* mem_upper is in KB */
+		struct multiboot_tag_basic_meminfo *meminfo = (struct multiboot_tag_basic_meminfo *)tag;
+		HardwareInfo.mem_max = meminfo->mem_upper * 1024;
+		frame_alloc_init(HardwareInfo.mem_max);
+
+		break;
 	}
 
-	if (mb_info->mods_count < 1) {
-		PANIC("missing initrd");
-	}
+	tag = (struct multiboot_tag *)(mb_info + 8);
 
-	Initrd = (cpiohdr_t *)PHYSTOKBSS(*(paddr_t *)(mb_info->mods_addr));
+	while (tag->type != MULTIBOOT_TAG_TYPE_END) {
+		if (tag->type == MULTIBOOT_TAG_TYPE_MMAP) {
+			struct multiboot_tag_mmap *mmap = (struct multiboot_tag_mmap *)tag;
+
+			struct multiboot_mmap_entry *entry = (struct multiboot_mmap_entry *)&mmap->entries;
+			for (int i = 0; i < (int)tag->size; i += mmap->entry_size) {
+				if (entry->type != MULTIBOOT_MEMORY_RESERVED) {
+					frame_set_range((paddr_t)entry->addr,
+							(paddr_t)entry->addr + (paddr_t)entry->len);
+				}
+
+				entry = (struct multiboot_mmap_entry *)((vaddr_t)entry + (vaddr_t)mmap->entry_size);
+			}
+		}
+
+		if (tag->type == MULTIBOOT_TAG_TYPE_MODULE) {
+			struct multiboot_tag_module *mod = (struct multiboot_tag_module *)tag;
+			Initrd			   = (cpiohdr_t *)*(paddr_t *)(mod->mod_start);
+		}
+
+		tag = (struct multiboot_tag *)((vaddr_t)tag + ((tag->size + 7) & (uint32_t)~7));
+	}
 }
