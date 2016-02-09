@@ -5,7 +5,7 @@ LDFLAGS += -melf_i386
 
 OUT_IMG   := boot.img
 OUT_ISO   := boot.iso
-CLEANOBJS += $(OUT_IMG)
+CLEANOBJS += $(OUT_IMG) $(OUT_ISO)
 
 SOURCES += $(addprefix $(ARCH_PATH), \
                 vga_console.c        \
@@ -40,5 +40,4 @@ $(OUT_IMG): $(ARCH_PATH)/boot.sfdisk $(OUT) $(INITRD_OUT)
 	sudo chown `whoami` $(OUT_IMG)
 
 $(OUT_ISO): $(OUT) $(INITRD_OUT)
-	sudo $(ARCH_PATH)/bin/mkbootiso.sh $@ $(OUT) $(INITRD_OUT)
-	sudo chown `whoami` $(OUT_ISO)
+	$(ARCH_PATH)/bin/mkbootiso.sh $@ $(OUT) $(INITRD_OUT)
