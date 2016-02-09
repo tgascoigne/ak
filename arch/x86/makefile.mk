@@ -3,7 +3,7 @@ ARCH_PATH := arch/$(ARCH)/
 CFLAGS  += -march=i686 -m32
 LDFLAGS += -melf_i386
 
-OUT_IMG   := $(addsuffix .img, $(basename $(OUT)))
+OUT_IMG   := boot.img
 CLEANOBJS += $(OUT_IMG)
 
 SOURCES += $(addprefix $(ARCH_PATH), \
@@ -21,7 +21,7 @@ boot-nogrub: $(OUT)
 	qemu-system-i386 -kernel $(OUT)
 
 boot: $(OUT_IMG)
-	qemu-system-i386 -fda $(OUT_IMG)
+	qemu-system-i386 -hda $(OUT_IMG)
 
 debug: $(OUT_IMG) $(OUT_SYMS)
 	$(eval tmpsh := $(shell mktemp --suffix .gdb))
@@ -30,12 +30,10 @@ debug: $(OUT_IMG) $(OUT_SYMS)
 	$(info )
 	$(info gdb --command=$(tmpsh))
 	$(info )
-	qemu-system-i386 -S -s -fda $(OUT_IMG) &
+	qemu-system-i386 -S -s -hda $(OUT_IMG) &
 	sleep 2
 	gdb --command=$(tmpsh)
 
-$(OUT_IMG): $(OUT) $(INITRD_OUT)
-	cp $(ARCH_PATH)/floppy.img.template $(OUT_IMG)
-	mcopy -i $(OUT_IMG) -/ $(ARCH_PATH)/grub/ ::/
-	mcopy -i $(OUT_IMG) $(INITRD_OUT) ::/
-	mcopy -i $(OUT_IMG) $(OUT) ::/
+$(OUT_IMG): $(ARCH_PATH)/boot.sfdisk $(OUT) $(INITRD_OUT)
+	sudo $(ARCH_PATH)/bin/mkbootimg.sh $@ $(OUT) $(INITRD_OUT)
+	sudo chown `whoami` $(OUT_IMG)

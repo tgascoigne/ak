@@ -1,0 +1,6 @@
+label: dos
+label-id: 0x4bb0d23d
+device: boot.img
+unit: sectors
+
+boot.img1 : start=        2048, size=      129024, type=83, bootable
