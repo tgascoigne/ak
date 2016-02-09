@@ -27,7 +27,7 @@ void pg_init(void) {
 	idt_set_handler(INT_PAGE_FAULT, pg_fault_handler);
 
 	// unmap the kernel from 0x0
-	//	KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
+	KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
 
 	// point the last 4m at the temp page table
 	KernelPageDir[ADDR_PDE(KTMPMEM)] = PAGE_ENTRY(KBSSTOPHYS(&TmpPageTbl), KERNEL_FLAGS | PAGE_LINK);

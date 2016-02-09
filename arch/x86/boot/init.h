@@ -2,7 +2,6 @@
 
 #include <stdbool.h>
 
-#include <arch/x86/boot/multiboot2.h>
-#include <arch/x86/mem/map.h>
+#include <arch/x86/boot/multiboot.h>
 
-void arch_init(vaddr_t mb_info);
+void arch_init(multiboot_info_t *mb_info);

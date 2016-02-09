@@ -1,7 +1,7 @@
 #define LD_SCRIPT 1
 #include <arch/x86/mem/map.h>
 
-ENTRY(_start_vaddr)
+ENTRY(_start)
 OUTPUT_FORMAT("elf32-i386")
 
 SECTIONS
