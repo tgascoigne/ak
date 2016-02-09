@@ -19,6 +19,7 @@
 #include <kernel/syscall/syscall.h>
 #include <kernel/fs/node.h>
 #include <kernel/proc/sched.h>
+#include <kernel/proc/read_elf.h>
 #include <kernel/tty/console.h>
 
 void kmain(void) {
@@ -47,4 +48,11 @@ void kmain(void) {
 	size_t len = fread(buf, 1, 256, fd);
 	fclose(fd);
 	fwrite(buf, 1, len, stdout);
+
+	elf_t init;
+	if (!elf_read("/initrd/hello", &init)) {
+		PANIC("couldn't parse init\n");
+	}
+
+	elf_print_sections(&init);
 }

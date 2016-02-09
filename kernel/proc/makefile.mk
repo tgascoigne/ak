@@ -1,3 +1,4 @@
 SOURCES += $(addprefix kernel/proc/, \
 				task.c               \
-                sched.c)
+                sched.c              \
+                read_elf.c)
