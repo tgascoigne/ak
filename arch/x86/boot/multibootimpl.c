@@ -24,9 +24,11 @@ void multiboot_mmap(vaddr_t mb_info) {
 			continue;
 		}
 
-		/* mem_upper is in KB */
 		struct multiboot_tag_basic_meminfo *meminfo = (struct multiboot_tag_basic_meminfo *)tag;
-		HardwareInfo.mem_max = meminfo->mem_upper * 1024;
+
+		/* mem_upper is the amount of upper memory in kb */
+		/* upper memory begins at 1M (hence + 1024) */
+		HardwareInfo.mem_max = (meminfo->mem_upper + 1024) * 1024;
 		frame_alloc_init(HardwareInfo.mem_max);
 
 		break;
@@ -36,8 +38,7 @@ void multiboot_mmap(vaddr_t mb_info) {
 
 	while (tag->type != MULTIBOOT_TAG_TYPE_END) {
 		if (tag->type == MULTIBOOT_TAG_TYPE_MMAP) {
-			struct multiboot_tag_mmap *mmap = (struct multiboot_tag_mmap *)tag;
-
+			struct multiboot_tag_mmap *mmap    = (struct multiboot_tag_mmap *)tag;
 			struct multiboot_mmap_entry *entry = (struct multiboot_mmap_entry *)&mmap->entries;
 			for (int i = 0; i < (int)tag->size; i += mmap->entry_size) {
 				if (entry->type != MULTIBOOT_MEMORY_RESERVED) {

@@ -17,8 +17,8 @@ static uint32_t FrameCount;
 void frame_alloc_init(paddr_t mem_max) {
 	FrameCount   = ADDR_PAGE(mem_max);
 	size_t count = BIT_IDX(FrameCount);
-	FrameBitmap = malloc(count);
-	memset(FrameBitmap, 0, BIT_IDX(FrameCount));
+	FrameBitmap = malloc(count * sizeof(uint32_t));
+	memset(FrameBitmap, 0, count * sizeof(uint32_t));
 }
 
 void frame_clear(paddr_t ptr) {
