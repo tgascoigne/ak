@@ -1,5 +1,8 @@
 #include "multibootimpl.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 #include <arch/hwinfo.h>
 #include <arch/x86/mem/framealloc.h>
 #include <arch/x86/mem/map.h>

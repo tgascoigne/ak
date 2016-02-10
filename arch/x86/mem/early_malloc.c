@@ -37,7 +37,7 @@ void *early_malloc(size_t size) {
 	brk	 = task_brk(CurrentTask, brk + size);
 
 	AllocStack[++AllocSP] = (vaddr_t)brk;
-	return (void *)brk;
+	return (void *)(brk - size);
 }
 
 void early_free(void *addr) {
