@@ -5,11 +5,11 @@
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <sys/types.h>
 
 #include <kernel/panic.h>
 #include <kernel/io/fdio.h>
+#include <kernel/io/stat.h>
 #include <kernel/fs/node.h>
 
 int sys_open(const char *pathname, int flags, mode_t mode) {
@@ -75,10 +75,22 @@ int sys_close(fd_t fd) {
 	return 0;
 }
 
+int sys_newstat(const char *path, struct kernel_stat *stat) {
+	fsnode_t *fsn = fs_locate(FSRootNode, path);
+	if (fsn == NULL) {
+		errno = ENOENT;
+		return -1;
+	}
+	memset(stat, 0, sizeof(struct kernel_stat));
+
+	return fsn->stat(fsn, stat);
+}
+
 void fdio_init(void) {
 	syscall_register(SYS_OPEN, (syscall_fn_t)sys_open, 3);
 	syscall_register(SYS_CLOSE, (syscall_fn_t)sys_close, 1);
 	syscall_register(SYS_READ, (syscall_fn_t)sys_read, 3);
 	syscall_register(SYS_WRITE, (syscall_fn_t)sys_write, 3);
+	syscall_register(SYS_NEWSTAT, (syscall_fn_t)sys_newstat, 2);
 	fdio_tbl_init();
 }

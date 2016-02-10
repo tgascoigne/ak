@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <kernel/io/stat.h>
 #include <mem/types.h>
 
 static cpiohdr_t *cpiofs_unpack_file(fsnode_t *parent, cpiohdr_t *hdr);
@@ -11,13 +12,19 @@ static iodev_t *cpiofs_open_file(cpionode_t *node);
 static ssize_t cpiofs_read_file(cpiofiledev_t *file, void *buf, size_t nbyte);
 static off_t cpiofs_seek_file(cpiofiledev_t *file, off_t offset, int whence);
 static void cpiofs_close_file(cpiofiledev_t *file);
+static int cpiofs_stat_file(cpionode_t *node, struct kernel_stat *stat);
 
 static fsnode_t cpiofs_dir_tmpl = {
     .parent = NULL, .first_child = NULL, .next_sibling = NULL, .open = NULL, .create = NULL,
 };
 
 static fsnode_t cpiofs_file_tmpl = {
-    .parent = NULL, .first_child = NULL, .next_sibling = NULL, .open = (fsopenfunc_t)cpiofs_open_file, .create = NULL,
+    .parent		      = NULL,
+    .first_child		 = NULL,
+    .next_sibling		= NULL,
+    .open			= (fsopenfunc_t)cpiofs_open_file,
+    .create		      = NULL,
+    .stat			= (fsstatfunc_t)cpiofs_stat_file,
 };
 
 static cpiohdr_t CpioEOF;
@@ -100,6 +107,16 @@ ssize_t cpiofs_read_file(cpiofiledev_t *file, void *buf, size_t nbyte) {
 	memcpy(buf, file->data + file->pos, nbyte);
 	file->pos += nbyte;
 	return (ssize_t)nbyte;
+}
+
+int cpiofs_stat_file(cpionode_t *node, struct kernel_stat *stat) {
+	cpiofiledev_t *dev = (cpiofiledev_t *)cpiofs_open_file(node);
+	if (dev == NULL) {
+		return -1;
+	}
+
+	stat->st_size = (unsigned long)dev->length;
+	return 0;
 }
 
 off_t cpiofs_seek_file(cpiofiledev_t *file, off_t offset, int whence) {

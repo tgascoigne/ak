@@ -1,5 +1,6 @@
 #pragma once
 
+#include <kernel/io/stat.h>
 #include <kernel/io/dev.h>
 
 #define FS_PATH_DELIM "/"
@@ -9,12 +10,14 @@ typedef struct fsnode fsnode_t;
 
 typedef struct fsnode *(*fscreatefunc_t)(struct fsnode *, const char *name);
 typedef iodev_t *(*fsopenfunc_t)(struct fsnode *, int flags);
+typedef int (*fsstatfunc_t)(struct fsnode *, struct kernel_stat *stat);
 
 typedef enum { VfsTypeDir, VfsTypeFile, VfsTypeDev } VfsType;
 
 typedef struct fsnode_ops {
 	fscreatefunc_t create;
 	fsopenfunc_t open;
+	fsstatfunc_t stat;
 } fsnode_ops_t;
 
 typedef struct fsnode {
