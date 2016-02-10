@@ -4,6 +4,8 @@
 
 #include <kernel/fs/node.h>
 
+#define CPIO_MAGIC 070707
+
 typedef struct {
 	uint16_t magic;
 	uint16_t dev;

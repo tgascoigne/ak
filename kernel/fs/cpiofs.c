@@ -1,6 +1,7 @@
 #include "cpiofs.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <mem/types.h>
@@ -19,6 +20,8 @@ static fsnode_t cpiofs_file_tmpl = {
     .parent = NULL, .first_child = NULL, .next_sibling = NULL, .open = (fsopenfunc_t)cpiofs_open_file, .create = NULL,
 };
 
+static cpiohdr_t CpioEOF;
+
 static iodev_t cpiofiledev_tmpl = {
     .open			      = NULL,
     .close			     = (ioclosefunc_t)cpiofs_close_file,
@@ -32,18 +35,26 @@ fsnode_t *cpiofs_mount(const char *name, cpiohdr_t *cpio_hdr) {
 	memcpy(cpiofs, &cpiofs_dir_tmpl, sizeof(fsnode_t));
 	strcpy(cpiofs->node.name, name);
 
-	while (cpio_hdr != NULL) {
+	while (cpio_hdr != &CpioEOF) {
 		cpio_hdr = cpiofs_unpack_file((fsnode_t *)cpiofs, cpio_hdr);
+		if (cpio_hdr == NULL) {
+			return NULL;
+		}
 	}
 
 	return (fsnode_t *)cpiofs;
 }
 
 cpiohdr_t *cpiofs_unpack_file(fsnode_t *parent, cpiohdr_t *hdr) {
+	if (hdr->magic != CPIO_MAGIC) {
+		printf("error parsing cpiofs: invalid magic %o\n", hdr->magic);
+		return NULL;
+	}
+
 	const char *name = (const char *)((vaddr_t)hdr + sizeof(cpiohdr_t));
 	if (strcmp(name, "TRAILER!!!") == 0) {
 		/* last entry in the archive is named TRAILER!!! */
-		return NULL;
+		return &CpioEOF;
 	}
 
 	const char *data = name + hdr->namesize;
