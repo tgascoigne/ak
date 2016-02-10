@@ -39,6 +39,9 @@ void multiboot_mmap(vaddr_t mb_info) {
 
 	tag = (struct multiboot_tag *)(mb_info + 8);
 
+	paddr_t initrd_start;
+	paddr_t initrd_len;
+
 	while (tag->type != MULTIBOOT_TAG_TYPE_END) {
 		if (tag->type == MULTIBOOT_TAG_TYPE_MMAP) {
 			struct multiboot_tag_mmap *mmap    = (struct multiboot_tag_mmap *)tag;
@@ -56,10 +59,13 @@ void multiboot_mmap(vaddr_t mb_info) {
 		if (tag->type == MULTIBOOT_TAG_TYPE_MODULE) {
 			struct multiboot_tag_module *mod = (struct multiboot_tag_module *)tag;
 
-			Initrd = (cpiohdr_t *)malloc(mod->size);
-			memcpy(Initrd, (void *)mod->mod_start, mod->mod_end - mod->mod_start);
+			initrd_start = mod->mod_start;
+			initrd_len   = mod->mod_end - mod->mod_start;
 		}
 
 		tag = (struct multiboot_tag *)((vaddr_t)tag + ((tag->size + 7) & (uint32_t)~7));
 	}
+
+	Initrd = (cpiohdr_t *)malloc(initrd_len);
+	memcpy(Initrd, (void *)initrd_start, initrd_len);
 }
