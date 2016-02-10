@@ -54,5 +54,5 @@ void kmain(void) {
 		PANIC("couldn't parse init\n");
 	}
 
-	elf_print_sections(&init);
+	elf_print_segments(&init);
 }
