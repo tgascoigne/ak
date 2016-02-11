@@ -47,7 +47,7 @@ void multiboot_mmap(vaddr_t mb_info) {
 			struct multiboot_tag_mmap *mmap    = (struct multiboot_tag_mmap *)tag;
 			struct multiboot_mmap_entry *entry = (struct multiboot_mmap_entry *)&mmap->entries;
 			for (int i = 0; i < (int)tag->size; i += mmap->entry_size) {
-				if (entry->type != MULTIBOOT_MEMORY_RESERVED) {
+				if (entry->type == MULTIBOOT_MEMORY_RESERVED) {
 					frame_set_range((paddr_t)entry->addr,
 							(paddr_t)entry->addr + (paddr_t)entry->len);
 				}
