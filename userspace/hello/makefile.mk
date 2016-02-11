@@ -1,4 +1,6 @@
-initrd/hello: userspace/hello/main.c
-	$(CC) $(CFLAGS) -static -o $@ $<
+THISDIR=$(dir $(lastword $(MAKEFILE_LIST)))
 
-USER_BINARIES += initrd/hello
+$(INITRD_DIR)/hello: $(THISDIR)/main.o
+	$(LD) -o $@ $(LDFLAGS) $< $(USERSPACE_LIBS)
+
+USER_BINARIES += $(INITRD_DIR)/hello
