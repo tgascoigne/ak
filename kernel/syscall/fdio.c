@@ -74,6 +74,11 @@ int sys_close(fd_t fd) {
 	return 0;
 }
 
+int sys_ioctl(fd_t fd, unsigned int cmd, unsigned long arg) {
+	//	printf("ioctl fd:%i cmd:0x%x arg:0x%lx (not implemented)\n", fd, cmd, arg);
+	return 0;
+}
+
 int sys_newstat(const char *path, struct kernel_stat *stat) {
 	fsnode_t *fsn = fs_locate(FSRootNode, path);
 	if (fsn == NULL) {
@@ -88,6 +93,7 @@ int sys_newstat(const char *path, struct kernel_stat *stat) {
 void fdio_init(void) {
 	syscall_register(SYS_OPEN, (syscall_fn_t)sys_open, 3);
 	syscall_register(SYS_CLOSE, (syscall_fn_t)sys_close, 1);
+	syscall_register(SYS_IOCTL, (syscall_fn_t)sys_ioctl, 3);
 	syscall_register(SYS_READ, (syscall_fn_t)sys_read, 3);
 	syscall_register(SYS_WRITE, (syscall_fn_t)sys_write, 3);
 	syscall_register(SYS_NEWSTAT, (syscall_fn_t)sys_newstat, 2);

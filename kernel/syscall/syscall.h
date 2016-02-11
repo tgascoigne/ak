@@ -18,6 +18,7 @@ extern syscall_fn_t syscall_funcs[NUM_SYSCALLS];
 #define SYS_CLOSE 0x06
 #define SYS_GETPID 0x14
 #define SYS_BRK 0x2d
+#define SYS_IOCTL 0x36
 #define SYS_MMAP 0x5a
 #define SYS_NEWSTAT 0x6a
 #define SYS_UNAME 0x7a
