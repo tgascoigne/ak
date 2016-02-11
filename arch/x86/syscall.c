@@ -10,7 +10,7 @@
 static void syscall_interrupt(isrargs_t *regs) {
 	int syscall     = (int)regs->eax;
 	syscall_fn_t fn = syscall_funcs[syscall];
-	int argc	= syscall_argc[syscall];
+	int argc        = syscall_argc[syscall];
 
 	if (fn == NULL) {
 		printf("unhandled syscall: %02x\n", syscall);

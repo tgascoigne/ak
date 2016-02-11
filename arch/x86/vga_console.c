@@ -60,7 +60,7 @@ void vga_console_putc(char c) {
 
 	if (!special) {
 		/* print the character */
-		int buffer_pos	   = (state.y * state.cols) + state.x;
+		int buffer_pos           = (state.y * state.cols) + state.x;
 		state.buffer[buffer_pos] = (uint16_t)((state.attrib << 8) | c);
 		state.x++;
 	}

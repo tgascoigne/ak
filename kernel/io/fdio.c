@@ -23,10 +23,10 @@ static fd_t fd_alloc(void) {
 }
 
 fd_t fd_open(iodev_t *dev) {
-	fd_t fd		      = fd_alloc();
-	fdescr_t *descr	= (fdescr_t *)malloc(sizeof(fdescr_t));
-	descr->dev		   = dev;
-	descr->refs		  = 1;
+	fd_t fd                = fd_alloc();
+	fdescr_t *descr        = (fdescr_t *)malloc(sizeof(fdescr_t));
+	descr->dev             = dev;
+	descr->refs            = 1;
 	CurrentTask->fdtbl[fd] = descr;
 	return fd;
 }

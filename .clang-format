@@ -1,6 +1,7 @@
 BasedOnStyle: LLVM
-IndentWidth: 8
-UseTab: Always
+IndentWidth: 4
+UseTab: ForIndentation
+TabWidth: 4
 ColumnLimit: 120
 BreakBeforeBraces: Attach
 AllowShortFunctionsOnASingleLine: false

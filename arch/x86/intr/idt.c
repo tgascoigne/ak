@@ -8,9 +8,9 @@
 #define NUM_INTERRUPTS 256
 
 static char *InterruptDescriptions[] __attribute__((used)) = {
-    "Divide error", "Debug exceptions",    "Nonmaskable interrupt",     "Breakpoint",	 "Overflow",
+    "Divide error", "Debug exceptions",    "Nonmaskable interrupt",     "Breakpoint",         "Overflow",
     "Bounds check", "Invalid opcode",      "Coprocessor not available", "Double fault",       "(reserved)",
-    "Invalid TSS",  "Segment not present", "Stack exception",		"General protection", "Page fault",
+    "Invalid TSS",  "Segment not present", "Stack exception",           "General protection", "Page fault",
     "(reserved)",   "Coprocessor error",
 };
 

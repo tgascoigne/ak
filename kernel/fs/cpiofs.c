@@ -19,22 +19,22 @@ static fsnode_t cpiofs_dir_tmpl = {
 };
 
 static fsnode_t cpiofs_file_tmpl = {
-    .parent		      = NULL,
-    .first_child		 = NULL,
-    .next_sibling		= NULL,
-    .open			= (fsopenfunc_t)cpiofs_open_file,
-    .create		      = NULL,
-    .stat			= (fsstatfunc_t)cpiofs_stat_file,
+    .parent                      = NULL,
+    .first_child                 = NULL,
+    .next_sibling                = NULL,
+    .open                        = (fsopenfunc_t)cpiofs_open_file,
+    .create                      = NULL,
+    .stat                        = (fsstatfunc_t)cpiofs_stat_file,
 };
 
 static cpiohdr_t CpioEOF;
 
 static iodev_t cpiofiledev_tmpl = {
-    .open			      = NULL,
-    .close			     = (ioclosefunc_t)cpiofs_close_file,
-    .write			     = NULL, /* read only */
-    .read			      = (ioreadfunc_t)cpiofs_read_file,
-    .seek			      = (ioseekfunc_t)cpiofs_seek_file,
+    .open                       = NULL,
+    .close                      = (ioclosefunc_t)cpiofs_close_file,
+    .write                      = NULL, /* read only */
+    .read                       = (ioreadfunc_t)cpiofs_read_file,
+    .seek                       = (ioseekfunc_t)cpiofs_seek_file,
 };
 
 fsnode_t *cpiofs_mount(const char *name, cpiohdr_t *cpio_hdr) {

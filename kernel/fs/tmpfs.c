@@ -18,11 +18,11 @@ static fsnode_t tmpfs_file_tmpl = {
 };
 
 static iodev_t tmpfiledev_tmpl = {
-    .open			    = NULL,
-    .close			   = (ioclosefunc_t)tmpfs_close_file,
-    .write			   = (iowritefunc_t)tmpfs_write_file,
-    .read			    = (ioreadfunc_t)tmpfs_read_file,
-    .seek			    = (ioseekfunc_t)tmpfs_seek_file,
+    .open                      = NULL,
+    .close                     = (ioclosefunc_t)tmpfs_close_file,
+    .write                     = (iowritefunc_t)tmpfs_write_file,
+    .read                      = (ioreadfunc_t)tmpfs_read_file,
+    .seek                      = (ioseekfunc_t)tmpfs_seek_file,
 };
 
 fsnode_t *tmpfs_create(const char *name) {

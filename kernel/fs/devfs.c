@@ -19,9 +19,9 @@ void devfs_register_device(const char *devname, iodev_t *device) {
 	node->node.parent       = NULL;
 	node->node.first_child  = NULL;
 	node->node.next_sibling = NULL;
-	node->node.open		= (fsopenfunc_t)devfs_open_dev;
+	node->node.open         = (fsopenfunc_t)devfs_open_dev;
 	node->node.create       = NULL;
-	node->device		   = device;
+	node->device            = device;
 
 	fs_link_child(&devfs, &node->node);
 }

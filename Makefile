@@ -19,7 +19,7 @@ LD_SCRIPT   := arch/$(ARCH)/kernel.ld
 OUT			:= kernel.elf
 OUT_SYMS    := $(addsuffix .sym, $(basename $(OUT)))
 INITRD_OUT  := initrd.img
-INITRD_DIR  := initrd/
+INITRD_DIR  := initrd
 
 SOURCES   :=
 OBJECTS   :=
