@@ -106,11 +106,41 @@ void pg_unmap(vaddr_t vaddr) {
 	tlb_invlpg(vaddr);
 }
 
+void pg_alloc(vaddr_t vaddr) {
+	paddr_t frame = frame_alloc();
+	frame_set(frame);
+	pg_map(frame, vaddr);
+}
+
+void pg_alloc_range(vaddr_t start, vaddr_t end, bool rw) {
+	uint32_t flags = base_flags();
+	if (rw) {
+		flags |= PAGE_RW;
+	}
+
+	for (; start < end; start += PAGE_SIZE) {
+		pg_alloc(start);
+	}
+}
+
 void pg_reserve(vaddr_t vaddr) {
 	uint32_t flags = base_flags();
 	flags |= PAGE_RESERVED;
 	flags &= (uint32_t)~PAGE_PRESENT; /* reserved pages are not present (allocated on page fault) */
 	pg_map_ext(MEMMAX, vaddr, flags);
+}
+
+void pg_reserve_range(vaddr_t start, vaddr_t end, bool rw) {
+	uint32_t flags = base_flags();
+	flags |= PAGE_RESERVED;
+	flags &= (uint32_t)~PAGE_PRESENT; /* reserved pages are not present (allocated on page fault) */
+	if (rw) {
+		flags |= PAGE_RW;
+	}
+
+	for (; start < end; start += PAGE_SIZE) {
+		pg_map_ext(MEMMAX, start, flags);
+	}
 }
 
 pgaddr_t pg_dir_new(void) {
@@ -133,7 +163,7 @@ void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
 		*dirent	  = PAGE_ENTRY(tblframe, ptflags);
 	}
 
-	paddr_t tblframe = PDE_ADDR(*dirent);
+	paddr_t tblframe = PTE_ADDR(*dirent);
 	pgentry_t *table = pg_tmp_map((pgaddr_t)tblframe);
 
 	pgentry_t *entry = &table[ADDR_PTE(vaddr)];
@@ -228,10 +258,6 @@ bool pg_is_reserved(vaddr_t addr) {
 	pg_tmp_unmap(dir);
 
 	if (pgd == NilPgEnt) {
-		return false;
-	}
-
-	if ((pgd & PAGE_PRESENT) != 0) {
 		return false;
 	}
 
