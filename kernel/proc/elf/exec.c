@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <proc/exec.h>
 #include <mem/mmu.h>
 
 void elf_load(elf_t *elf) {
@@ -29,21 +30,8 @@ void elf_load(elf_t *elf) {
 	}
 }
 
-typedef int (*startfunc_t)(int argc, char **argv, char **envp);
-
-void elf_start(elf_t *elf) {
+void elf_start(elf_t *elf, char *const argv[], char *const envp[]) {
 	startfunc_t fn = (startfunc_t)elf->header->e_entry;
-	char *prog     = "init";
-
-#pragma message "need a TLS segment set up.. for now just map 0x0"
-	pg_alloc(0);
-
-#pragma message "belongs in arch/x86"
-	__asm__ volatile("pushl $0\n\t"
-			 "pushl $0\n\t"
-			 "pushl %0\n\t"
-			 "pushl $1\n\t"
-			 "jmpl  *%1\n\t"
-			 :
-			 : "b"(&prog), "b"(fn));
+#pragma message "use exit code"
+	arch_exec(fn, argv, envp);
 }

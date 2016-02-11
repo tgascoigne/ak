@@ -1,6 +1,7 @@
 USER_BINARIES :=
 
-USERSPACE_LIBS := -lc -lgcc
+CRTDIR := ./uClibc/lib
+USERSPACE_LIBS := $(CRTDIR)/crt1.o -lc -lgcc
 
 include userspace/hello/makefile.mk
 

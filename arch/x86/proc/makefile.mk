@@ -1,3 +1,4 @@
 SOURCES += $(addprefix $(ARCH_PATH)/proc/, \
                 task.c                     \
-                context.S)
+                context.S                  \
+                exec.c)

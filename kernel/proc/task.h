@@ -13,6 +13,7 @@
 typedef enum {
 	TaskInit,
 	TaskReady,
+	TaskQuit,
 } tstate_t;
 
 typedef struct {
@@ -23,6 +24,7 @@ typedef struct {
 	fd_t fdnext;
 	fd_t fdcap;
 	fdescr_t **fdtbl;
+	int exitcode;
 	union {
 		arch_task_t;
 		arch_task_t arch;
@@ -36,6 +38,7 @@ pid_t task_next_pid(void);
 void task_enter(task_t *task);
 task_t *task_fork(void);
 void task_insert(task_t *task);
+void task_exit(task_t *task, int status);
 void task_enable_preempt(void);
 void task_mask_preempt(void);
 void task_unmask_preempt(void);

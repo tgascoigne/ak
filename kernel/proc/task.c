@@ -1,6 +1,7 @@
 #include "task.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <mem/mmu.h>
@@ -8,13 +9,13 @@
 extern void *_kern_end;
 
 task_t KernelTask = {
-    .pid	  = KERNEL_PID,
-    .brk	  = (vaddr_t)&_kern_end,
+    .pid          = KERNEL_PID,
+    .brk          = (vaddr_t)&_kern_end,
     .state = TaskReady,
     .list =
-	{
-	    .next = NULL, .prev = NULL,
-	},
+        {
+            .next = NULL, .prev = NULL,
+        },
 };
 
 task_t *CurrentTask = &KernelTask;
@@ -27,6 +28,13 @@ pid_t task_next_pid(void) {
 
 void task_insert(task_t *task) {
 	list_insert_after(&CurrentTask->list, &task->list);
+}
+
+void task_exit(task_t *task, int status) {
+	list_remove(&task->list);
+	task->state    = TaskQuit;
+	task->exitcode = status;
+	printf("task %i exited with code %i\n", task->pid, status);
 }
 
 task_t *task_clone(task_t *task) {

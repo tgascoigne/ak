@@ -8,3 +8,4 @@ void *list_prev(list_head_t *elem);
 void *list_next(list_head_t *elem);
 void list_insert_after(list_head_t *after, list_head_t *elem);
 void list_insert_before(list_head_t *before, list_head_t *elem);
+void list_remove(list_head_t *elem);

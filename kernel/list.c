@@ -27,3 +27,11 @@ void list_insert_after(list_head_t *after, list_head_t *elem) {
 void list_insert_before(list_head_t *before, list_head_t *elem) {
 	list_insert_after(before->prev, elem);
 }
+
+void list_remove(list_head_t *elem) {
+	list_head_t *next = elem->next;
+	list_head_t *prev = elem->prev;
+	elem->next = elem->prev = NULL;
+	prev->next = next;
+	next->prev = prev;
+}

@@ -72,7 +72,7 @@ void elf_print_symbols(elf_t *elf) {
 	char sym_name[32];
 	char sym_type[32];
 	for (int i = 1; i < elf->num_symbols; i++) {
-		ret		= elf_get_symbol_name(elf, i, sym_name);
+		ret               = elf_get_symbol_name(elf, i, sym_name);
 		Elf32_Sym *symbol = &elf->symtab[i];
 
 		/* fill in a blank name */
@@ -121,7 +121,7 @@ int elf_map_vaddr(elf_t *elf, Elf32_Addr vaddr, uint64_t *faddr) {
 		if (vaddr > base_addr && vaddr < lim_addr) {
 			/* Success! */
 			Elf32_Addr offset_addr = vaddr - base_addr;
-			*faddr		       = segment->p_offset + offset_addr;
+			*faddr                 = segment->p_offset + offset_addr;
 			return 0;
 		}
 	}
@@ -155,18 +155,18 @@ static int elf_read_header(elf_t *elf) {
 }
 
 static int elf_read_shdr(elf_t *elf) {
-	elf->shdr	 = (Elf32_Shdr *)(elf->elf_data + elf->header->e_shoff);
+	elf->shdr         = (Elf32_Shdr *)(elf->elf_data + elf->header->e_shoff);
 	elf->num_sections = elf->header->e_shnum;
 	/* locate the common section indices */
 	elf->sec_shstrtab = elf->header->e_shstrndx;
-	int ret	   = 0;
+	int ret           = 0;
 	ret = elf_get_section_by_name(elf, ".strtab", &elf->sec_strtab);
 	kassert(ret == 0, ret);
 	return 0;
 }
 
 static int elf_read_phdr(elf_t *elf) {
-	elf->phdr	 = (Elf32_Phdr *)(elf->elf_data + elf->header->e_phoff);
+	elf->phdr         = (Elf32_Phdr *)(elf->elf_data + elf->header->e_phoff);
 	elf->num_segments = elf->header->e_phnum;
 	return 0;
 }
@@ -212,7 +212,7 @@ int elf_get_symbol_faddr(elf_t *elf, int symidx, uint64_t *out) {
 
 int elf_get_symbol_vaddr(elf_t *elf, int symidx, uint32_t *out) {
 	Elf32_Sym *symbol = &elf->symtab[symidx];
-	*out	      = symbol->st_value;
+	*out              = symbol->st_value;
 	return 0;
 }
 
@@ -256,7 +256,7 @@ int elf_get_strtab_entry(elf_t *elf, int strtab, int ofs, char *out) {
 int elf_get_section_data(elf_t *elf, int section, char **out) {
 	kassert(section < elf->num_sections, ELF_INVALID_SECTION);
 	uint64_t file_ofs = elf->shdr[section].sh_offset;
-	*out	      = elf->elf_data + file_ofs;
+	*out              = elf->elf_data + file_ofs;
 	return 0;
 }
 

@@ -46,17 +46,15 @@ void kmain(void) {
 	task_unmask_preempt();
 	intr_enable();
 
-	FILE *fd = fopen("/initrd/hello_world.txt", "r");
-	char buf[256];
-	size_t len = fread(buf, 1, 256, fd);
-	fclose(fd);
-	fwrite(buf, 1, len, stdout);
-
-	elf_t init;
-	if (!elf_read("/initrd/hello", &init)) {
-		PANIC("couldn't parse init\n");
+	if (fork()) {
+		FILE *fd = fopen("/initrd/hello_world.txt", "r");
+		char buf[256];
+		size_t len = fread(buf, 1, 256, fd);
+		fclose(fd);
+		fwrite(buf, 1, len, stdout);
+	} else {
+		char *argv[] = {"initrd/hello", NULL};
+		char *envp[] = {"foo=bar", NULL};
+		execve("/initrd/hello", argv, envp);
 	}
-
-	elf_load(&init);
-	elf_start(&init);
 }
