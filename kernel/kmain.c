@@ -17,9 +17,11 @@
 #include <kernel/syscall/mem.h>
 #include <kernel/syscall/proc.h>
 #include <kernel/syscall/syscall.h>
+#include <kernel/syscall/uname.h>
 #include <kernel/fs/node.h>
 #include <kernel/proc/sched.h>
-#include <kernel/proc/read_elf.h>
+#include <kernel/proc/elf/read_elf.h>
+#include <kernel/proc/elf/exec.h>
 #include <kernel/tty/console.h>
 
 void kmain(void) {
@@ -30,6 +32,7 @@ void kmain(void) {
 	sched_init();
 	fs_create_rootfs();
 	initrd_mount(FSRootNode);
+	uname_syscall_init();
 
 	if (!modules_init()) {
 		PANIC("modules_init failed\n");
@@ -54,5 +57,6 @@ void kmain(void) {
 		PANIC("couldn't parse init\n");
 	}
 
-	elf_print_segments(&init);
+	elf_load(&init);
+	elf_start(&init);
 }

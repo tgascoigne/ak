@@ -1,12 +1,11 @@
 #include "fdio.h"
 
-#include <kernel/syscall/syscall.h>
-
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
 
+#include <kernel/syscall/syscall.h>
 #include <kernel/panic.h>
 #include <kernel/io/fdio.h>
 #include <kernel/io/stat.h>

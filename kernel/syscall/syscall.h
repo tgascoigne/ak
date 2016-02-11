@@ -20,6 +20,8 @@ extern syscall_fn_t syscall_funcs[NUM_SYSCALLS];
 #define SYS_BRK 0x2d
 #define SYS_MMAP 0x5a
 #define SYS_NEWSTAT 0x6a
+#define SYS_UNAME 0x7a
 #define SYS_SCHED_YIELD 0x9e
+#define SYS_MMAP_PGOFF 0xc0
 
 void syscall_register(int syscall, syscall_fn_t fn, int argc);
