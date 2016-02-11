@@ -15,11 +15,11 @@
 
 // boot_pgd is the initial page directory used during startup
 pgentry_t KernelPageDir[1024] PAGE_ALIGN = {
-	[ADDR_PDE(0)] = KERNEL_LOW_4M, [ADDR_PDE(KZERO)] = KERNEL_LOW_4M,
+        [ADDR_PDE(0)] = KERNEL_LOW_4M, [ADDR_PDE(KZERO)] = KERNEL_LOW_4M,
 };
 pgentry_t TmpPageTbl[1024] PAGE_ALIGN     = {0};
 pgentry_t KernelStackTbl[1024] PAGE_ALIGN = {0};
-static bool MMUReady		       = false;
+static bool MMUReady                      = false;
 
 void pg_fault_handler(isrargs_t *regs);
 
@@ -99,7 +99,7 @@ void pg_unmap(vaddr_t vaddr) {
 	pgentry_t *table = pg_tmp_map((pgaddr_t)tblframe);
 
 	pgentry_t *entry = &table[ADDR_PTE(vaddr)];
-	*entry	   = NilPgEnt;
+	*entry           = NilPgEnt;
 
 	pg_tmp_unmap(table);
 	pg_tmp_unmap(dir);
@@ -118,7 +118,7 @@ void pg_alloc_range(vaddr_t start, vaddr_t end, bool rw) {
 		flags |= PAGE_RW;
 	}
 
-	for (; start < end; start += PAGE_SIZE) {
+	for (; start < (end + PAGE_SIZE); start += PAGE_SIZE) {
 		pg_alloc(start);
 	}
 }
@@ -138,7 +138,7 @@ void pg_reserve_range(vaddr_t start, vaddr_t end, bool rw) {
 		flags |= PAGE_RW;
 	}
 
-	for (; start < end; start += PAGE_SIZE) {
+	for (; start < (end + PAGE_SIZE); start += PAGE_SIZE) {
 		pg_map_ext(MEMMAX, start, flags);
 	}
 }
@@ -160,14 +160,14 @@ void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
 
 		/* table isn't mapped - allocate a new one */
 		paddr_t tblframe = pg_dir_new();
-		*dirent	  = PAGE_ENTRY(tblframe, ptflags);
+		*dirent          = PAGE_ENTRY(tblframe, ptflags);
 	}
 
 	paddr_t tblframe = PTE_ADDR(*dirent);
 	pgentry_t *table = pg_tmp_map((pgaddr_t)tblframe);
 
 	pgentry_t *entry = &table[ADDR_PTE(vaddr)];
-	*entry	   = PAGE_ENTRY(paddr, flags);
+	*entry           = PAGE_ENTRY(paddr, flags);
 
 	pg_tmp_unmap(table);
 	pg_tmp_unmap(dir);

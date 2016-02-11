@@ -60,7 +60,7 @@ paddr_t frame_alloc(void) {
 
 paddr_t frame_alloc_4m(void) {
 	size_t bytecount = BIT_IDX(FrameCount);
-	int f0	   = 0;
+	int f0           = 0;
 	/* find a sequence of 8 bytes (4m) = 0 */
 	/* 32 frames per byte * 32 = 1024 frames = 4m */
 	for (int i = 0; i < 32 && f0 < (int)bytecount; i++) {
