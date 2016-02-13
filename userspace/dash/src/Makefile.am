@@ -69,4 +69,4 @@ signames.c: mksignames
 mksyntax: token.h
 
 $(HELPERS): %: %.c
-	$(COMPILE_FOR_BUILD) -o $@ $<
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LIBS)
