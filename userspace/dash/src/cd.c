@@ -45,7 +45,7 @@
 
 #include "shell.h"
 #include "var.h"
-#include "nodes.h"	/* for jobs.h */
+#include "nodes.h" /* for jobs.h */
 #include "jobs.h"
 #include "options.h"
 #include "output.h"
@@ -66,12 +66,10 @@ STATIC const char *updatepwd(const char *);
 STATIC char *getpwd(void);
 STATIC int cdopt(void);
 
-STATIC char *curdir = nullstr;		/* current working directory */
-STATIC char *physdir = nullstr;		/* physical working directory */
+STATIC char *curdir  = nullstr; /* current working directory */
+STATIC char *physdir = nullstr; /* physical working directory */
 
-STATIC int
-cdopt()
-{
+STATIC int cdopt() {
 	int flags = 0;
 	int i, j;
 
@@ -86,9 +84,7 @@ cdopt()
 	return flags;
 }
 
-int
-cdcmd(int argc, char **argv)
-{
+int cdcmd(int argc, char **argv) {
 	const char *dest;
 	const char *path;
 	const char *p;
@@ -110,7 +106,7 @@ cdcmd(int argc, char **argv)
 		goto step6;
 	if (*dest == '.') {
 		c = dest[1];
-dotdot:
+	dotdot:
 		switch (c) {
 		case '\0':
 		case '/':
@@ -130,7 +126,7 @@ dotdot:
 		if (stat(p, &statb) >= 0 && S_ISDIR(statb.st_mode)) {
 			if (c && c != ':')
 				flags |= CD_PRINT;
-docd:
+		docd:
 			if (!docd(p, flags))
 				goto out;
 			goto err;
@@ -143,22 +139,19 @@ step6:
 
 err:
 	sh_error("can't cd to %s", dest);
-	/* NOTREACHED */
+/* NOTREACHED */
 out:
 	if (flags & CD_PRINT)
 		out1fmt(snlfmt, curdir);
 	return 0;
 }
 
-
 /*
  * Actually do the chdir.  We also call hashcd to let the routines in exec.c
  * know that the current directory has changed.
  */
 
-STATIC int
-docd(const char *dest, int flags)
-{
+STATIC int docd(const char *dest, int flags) {
 	const char *dir = 0;
 	int err;
 
@@ -180,15 +173,12 @@ out:
 	return err;
 }
 
-
 /*
  * Update curdir (the name of the current directory) in response to a
  * cd command.
  */
 
-STATIC const char *
-updatepwd(const char *dir)
-{
+STATIC const char *updatepwd(const char *dir) {
 	char *new;
 	char *p;
 	char *cdcomppath;
@@ -206,7 +196,7 @@ updatepwd(const char *dir)
 	if (*dir != '/') {
 		if (new[-1] != '/')
 			USTPUTC('/', new);
-		if (new > lim && *lim == '/')
+		if (new > lim &&*lim == '/')
 			lim++;
 	} else {
 		USTPUTC('/', new);
@@ -219,7 +209,7 @@ updatepwd(const char *dir)
 	}
 	p = strtok(cdcomppath, "/");
 	while (p) {
-		switch(*p) {
+		switch (*p) {
 		case '.':
 			if (p[1] == '.' && p[2] == '\0') {
 				while (new > lim) {
@@ -230,7 +220,7 @@ updatepwd(const char *dir)
 				break;
 			} else if (p[1] == '\0')
 				break;
-			/* fall through */
+		/* fall through */
 		default:
 			new = stputs(p, new);
 			USTPUTC('/', new);
@@ -243,15 +233,11 @@ updatepwd(const char *dir)
 	return stackblock();
 }
 
-
 /*
  * Find out what the current directory is. If we already know the current
  * directory, this routine returns immediately.
  */
-inline
-STATIC char *
-getpwd()
-{
+inline STATIC char *getpwd() {
 #ifdef __GLIBC__
 	char *dir = getcwd(0, 0);
 
@@ -268,9 +254,7 @@ getpwd()
 	return nullstr;
 }
 
-int
-pwdcmd(int argc, char **argv)
-{
+int pwdcmd(int argc, char **argv) {
 	int flags;
 	const char *dir = curdir;
 
@@ -284,9 +268,7 @@ pwdcmd(int argc, char **argv)
 	return 0;
 }
 
-void
-setpwd(const char *val, int setold)
-{
+void setpwd(const char *val, int setold) {
 	char *oldcur, *dir;
 
 	oldcur = dir = curdir;

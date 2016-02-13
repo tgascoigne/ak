@@ -18,6 +18,7 @@
 #include <kernel/syscall/proc.h>
 #include <kernel/syscall/syscall.h>
 #include <kernel/syscall/uname.h>
+#include <kernel/syscall/user.h>
 #include <kernel/fs/node.h>
 #include <kernel/proc/sched.h>
 #include <kernel/proc/elf/read_elf.h>
@@ -33,6 +34,7 @@ void kmain(void) {
 	fs_create_rootfs();
 	initrd_mount(FSRootNode);
 	uname_syscall_init();
+	user_syscall_init();
 
 	if (!modules_init()) {
 		PANIC("modules_init failed\n");
@@ -46,15 +48,13 @@ void kmain(void) {
 	task_unmask_preempt();
 	intr_enable();
 
-	if (fork()) {
-		FILE *fd = fopen("/initrd/hello_world.txt", "r");
-		char buf[256];
-		size_t len = fread(buf, 1, 256, fd);
-		fclose(fd);
-		fwrite(buf, 1, len, stdout);
-	} else {
-		char *argv[] = {"initrd/hello", NULL};
-		char *envp[] = {"foo=bar", NULL};
-		execve("/initrd/hello", argv, envp);
-	}
+	FILE *fd = fopen("/initrd/hello_world.txt", "r");
+	char buf[256];
+	size_t len = fread(buf, 1, 256, fd);
+	fclose(fd);
+	fwrite(buf, 1, len, stdout);
+
+	char *argv[] = {"initrd/dash", NULL};
+	char *envp[] = {"foo=bar", NULL};
+	execve("/initrd/dash", argv, envp);
 }

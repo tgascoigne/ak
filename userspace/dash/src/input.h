@@ -47,8 +47,8 @@ enum {
  * package must set its value.
  */
 extern int plinno;
-extern int parsenleft;		/* number of characters left in input buffer */
-extern char *parsenextc;	/* next character in input buffer */
+extern int parsenleft;   /* number of characters left in input buffer */
+extern char *parsenextc; /* next character in input buffer */
 
 int pgetc(void);
 int pgetc2(void);
@@ -62,5 +62,4 @@ void popfile(void);
 void popallfiles(void);
 void closescript(void);
 
-#define pgetc_macro() \
-	(--parsenleft >= 0 ? (signed char)*parsenextc++ : preadbuffer())
+#define pgetc_macro() (--parsenleft >= 0 ? (signed char)*parsenextc++ : preadbuffer())

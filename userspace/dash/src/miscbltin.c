@@ -36,8 +36,8 @@
  * Miscelaneous builtins.
  */
 
-#include <sys/types.h>		/* quad_t */
-#include <sys/param.h>		/* BSD4_4 */
+#include <sys/types.h> /* quad_t */
+#include <sys/param.h> /* BSD4_4 */
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -61,7 +61,6 @@
 
 #undef rflag
 
-
 /** handle one line of the read command.
  *  more fields than variables -> remainder shall be part of last variable.
  *  less fields than variables -> remaining variables unset.
@@ -70,9 +69,7 @@
  *  @param ap argument (variable) list
  *  @param len length of line including trailing '\0'
  */
-static void
-readcmd_handle_line(char *s, char **ap)
-{
+static void readcmd_handle_line(char *s, char **ap) {
 	struct arglist arglist;
 	struct strlist *sl;
 	char *backup;
@@ -80,14 +77,14 @@ readcmd_handle_line(char *s, char **ap)
 
 	/* ifsbreakup will fiddle with stack region... */
 	line = stackblock();
-	s = grabstackstr(s);
+	s    = grabstackstr(s);
 
 	/* need a copy, so that delimiters aren't lost
 	 * in case there are more fields than variables */
 	backup = sstrdup(line);
 
 	arglist.lastp = &arglist.list;
-	
+
 	ifsbreakup(s, &arglist);
 	*arglist.lastp = NULL;
 	ifsfree();
@@ -109,16 +106,16 @@ readcmd_handle_line(char *s, char **ap)
 			size_t offset;
 			char *remainder;
 
-			/* FIXME little bit hacky, assuming that ifsbreakup 
+			/* FIXME little bit hacky, assuming that ifsbreakup
 			 * will not modify the length of the string */
-			offset = sl->text - s;
+			offset    = sl->text - s;
 			remainder = backup + offset;
 			rmescapes(remainder);
 			setvar(*ap, remainder, 0);
 
 			return;
 		}
-		
+
 		/* set variable to field */
 		rmescapes(sl->text);
 		setvar(*ap, sl->text, 0);
@@ -134,9 +131,7 @@ readcmd_handle_line(char *s, char **ap)
  * This uses unbuffered input, which may be avoidable in some cases.
  */
 
-int
-readcmd(int argc, char **argv)
-{
+int readcmd(int argc, char **argv) {
 	char **ap;
 	char c;
 	int rflag;
@@ -147,7 +142,7 @@ readcmd(int argc, char **argv)
 	int status;
 	int i;
 
-	rflag = 0;
+	rflag  = 0;
 	prompt = NULL;
 	while ((i = nextopt("p:r")) != '\0') {
 		if (i == 'p')
@@ -176,7 +171,7 @@ readcmd(int argc, char **argv)
 		default:
 			if (errno == EINTR && !pendingsigs)
 				continue;
-				/* fall through */
+		/* fall through */
 		case 0:
 			status = 1;
 			goto out;
@@ -194,18 +189,18 @@ readcmd(int argc, char **argv)
 		}
 		if (c == '\n')
 			break;
-put:
+	put:
 		CHECKSTRSPACE(2, p);
 		if (strchr(qchars, c))
 			USTPUTC(CTLESC, p);
 		USTPUTC(c, p);
 
 		if (newloc >= startloc) {
-resetbs:
+		resetbs:
 			recordregion(startloc, newloc, 0);
-start:
+		start:
 			startloc = p - (char *)stackblock();
-			newloc = startloc - 1;
+			newloc   = startloc - 1;
 		}
 	}
 out:
@@ -214,8 +209,6 @@ out:
 	readcmd_handle_line(p + 1, ap);
 	return status;
 }
-
-
 
 /*
  * umask builtin
@@ -226,9 +219,7 @@ out:
  * Public domain.
  */
 
-int
-umaskcmd(int argc, char **argv)
-{
+int umaskcmd(int argc, char **argv) {
 	char *ap;
 	int mask;
 	int i;
@@ -254,9 +245,9 @@ umaskcmd(int argc, char **argv)
 				*ap++ = "ugo"[i];
 				*ap++ = '=';
 				for (j = 0; j < 3; j++)
-					if (mask & (1 << (8 - (3*i + j))))
+					if (mask & (1 << (8 - (3 * i + j))))
 						*ap++ = "rwx"[j];
-				*ap++ = ',';
+				*ap++         = ',';
 			}
 			ap[-1] = '\0';
 			out1fmt("%s\n", buf);
@@ -266,7 +257,7 @@ umaskcmd(int argc, char **argv)
 	} else {
 		int new_mask;
 
-		if (isdigit((unsigned char) *ap)) {
+		if (isdigit((unsigned char)*ap)) {
 			new_mask = 0;
 			do {
 				if (*ap >= '8' || *ap < '0')
@@ -277,16 +268,24 @@ umaskcmd(int argc, char **argv)
 			int positions, new_val;
 			char op;
 
-			mask = ~mask;
-			new_mask = mask;
+			mask      = ~mask;
+			new_mask  = mask;
 			positions = 0;
 			while (*ap) {
 				while (*ap && strchr("augo", *ap))
 					switch (*ap++) {
-					case 'a': positions |= 0111; break;
-					case 'u': positions |= 0100; break;
-					case 'g': positions |= 0010; break;
-					case 'o': positions |= 0001; break;
+					case 'a':
+						positions |= 0111;
+						break;
+					case 'u':
+						positions |= 0100;
+						break;
+					case 'g':
+						positions |= 0010;
+						break;
+					case 'o':
+						positions |= 0001;
+						break;
 					}
 				if (!positions)
 					positions = 0111; /* default is a */
@@ -296,20 +295,30 @@ umaskcmd(int argc, char **argv)
 				new_val = 0;
 				while (*ap && strchr("rwxugoXs", *ap))
 					switch (*ap++) {
-					case 'r': new_val |= 04; break;
-					case 'w': new_val |= 02; break;
-					case 'x': new_val |= 01; break;
-					case 'u': new_val |= mask >> 6;
-						  break;
-					case 'g': new_val |= mask >> 3;
-						  break;
-					case 'o': new_val |= mask >> 0;
-						  break;
-					case 'X': if (mask & 0111)
+					case 'r':
+						new_val |= 04;
+						break;
+					case 'w':
+						new_val |= 02;
+						break;
+					case 'x':
+						new_val |= 01;
+						break;
+					case 'u':
+						new_val |= mask >> 6;
+						break;
+					case 'g':
+						new_val |= mask >> 3;
+						break;
+					case 'o':
+						new_val |= mask >> 0;
+						break;
+					case 'X':
+						if (mask & 0111)
 							new_val |= 01;
-						  break;
+						break;
 					case 's': /* ignored */
-						  break;
+						break;
 					}
 				new_val = (new_val & 07) * positions;
 				switch (op) {
@@ -317,8 +326,7 @@ umaskcmd(int argc, char **argv)
 					new_mask &= ~new_val;
 					break;
 				case '=':
-					new_mask = new_val
-					    | (new_mask & ~(positions * 07));
+					new_mask = new_val | (new_mask & ~(positions * 07));
 					break;
 				case '+':
 					new_mask |= new_val;
@@ -353,56 +361,53 @@ umaskcmd(int argc, char **argv)
 
 struct limits {
 	const char *name;
-	int	cmd;
-	int	factor;	/* multiply by to get rlim_{cur,max} values */
-	char	option;
+	int cmd;
+	int factor; /* multiply by to get rlim_{cur,max} values */
+	char option;
 };
 
 static const struct limits limits[] = {
 #ifdef RLIMIT_CPU
-	{ "time(seconds)",		RLIMIT_CPU,	   1, 't' },
+    {"time(seconds)", RLIMIT_CPU, 1, 't'},
 #endif
 #ifdef RLIMIT_FSIZE
-	{ "file(blocks)",		RLIMIT_FSIZE,	 512, 'f' },
+    {"file(blocks)", RLIMIT_FSIZE, 512, 'f'},
 #endif
 #ifdef RLIMIT_DATA
-	{ "data(kbytes)",		RLIMIT_DATA,	1024, 'd' },
+    {"data(kbytes)", RLIMIT_DATA, 1024, 'd'},
 #endif
 #ifdef RLIMIT_STACK
-	{ "stack(kbytes)",		RLIMIT_STACK,	1024, 's' },
+    {"stack(kbytes)", RLIMIT_STACK, 1024, 's'},
 #endif
 #ifdef RLIMIT_CORE
-	{ "coredump(blocks)",		RLIMIT_CORE,	 512, 'c' },
+    {"coredump(blocks)", RLIMIT_CORE, 512, 'c'},
 #endif
 #ifdef RLIMIT_RSS
-	{ "memory(kbytes)",		RLIMIT_RSS,	1024, 'm' },
+    {"memory(kbytes)", RLIMIT_RSS, 1024, 'm'},
 #endif
 #ifdef RLIMIT_MEMLOCK
-	{ "locked memory(kbytes)",	RLIMIT_MEMLOCK, 1024, 'l' },
+    {"locked memory(kbytes)", RLIMIT_MEMLOCK, 1024, 'l'},
 #endif
 #ifdef RLIMIT_NPROC
-	{ "process",			RLIMIT_NPROC,      1, 'p' },
+    {"process", RLIMIT_NPROC, 1, 'p'},
 #endif
 #ifdef RLIMIT_NOFILE
-	{ "nofiles",			RLIMIT_NOFILE,     1, 'n' },
+    {"nofiles", RLIMIT_NOFILE, 1, 'n'},
 #endif
 #ifdef RLIMIT_AS
-	{ "vmemory(kbytes)",		RLIMIT_AS,	1024, 'v' },
+    {"vmemory(kbytes)", RLIMIT_AS, 1024, 'v'},
 #endif
 #ifdef RLIMIT_LOCKS
-	{ "locks",			RLIMIT_LOCKS,	   1, 'w' },
+    {"locks", RLIMIT_LOCKS, 1, 'w'},
 #endif
 #ifdef RLIMIT_RTPRIO
-	{ "rtprio",			RLIMIT_RTPRIO,	   1, 'r' },
+    {"rtprio", RLIMIT_RTPRIO, 1, 'r'},
 #endif
-	{ (char *) 0,			0,		   0,  '\0' }
-};
+    {(char *)0, 0, 0, '\0'}};
 
 enum limtype { SOFT = 0x1, HARD = 0x2 };
 
-static void printlim(enum limtype how, const struct rlimit *limit,
-		     const struct limits *l)
-{
+static void printlim(enum limtype how, const struct rlimit *limit, const struct limits *l) {
 	rlim_t val;
 
 	val = limit->rlim_max;
@@ -413,57 +418,55 @@ static void printlim(enum limtype how, const struct rlimit *limit,
 		out1fmt("unlimited\n");
 	else {
 		val /= l->factor;
-		out1fmt("%" PRIdMAX "\n", (intmax_t) val);
+		out1fmt("%" PRIdMAX "\n", (intmax_t)val);
 	}
 }
 
-int
-ulimitcmd(int argc, char **argv)
-{
-	int	c;
-	rlim_t val = 0;
+int ulimitcmd(int argc, char **argv) {
+	int c;
+	rlim_t val       = 0;
 	enum limtype how = SOFT | HARD;
-	const struct limits	*l;
-	int		set, all = 0;
-	int		optc, what;
-	struct rlimit	limit;
+	const struct limits *l;
+	int set, all = 0;
+	int optc, what;
+	struct rlimit limit;
 
 	what = 'f';
 	while ((optc = nextopt("HSa"
 #ifdef RLIMIT_CPU
-			       "t"
+	                       "t"
 #endif
 #ifdef RLIMIT_FSIZE
-			       "f"
+	                       "f"
 #endif
 #ifdef RLIMIT_DATA
-			       "d"
+	                       "d"
 #endif
 #ifdef RLIMIT_STACK
-			       "s"
+	                       "s"
 #endif
 #ifdef RLIMIT_CORE
-			       "c"
+	                       "c"
 #endif
 #ifdef RLIMIT_RSS
-			       "m"
+	                       "m"
 #endif
 #ifdef RLIMIT_MEMLOCK
-			       "l"
+	                       "l"
 #endif
 #ifdef RLIMIT_NPROC
-			       "p"
+	                       "p"
 #endif
 #ifdef RLIMIT_NOFILE
-			       "n"
+	                       "n"
 #endif
 #ifdef RLIMIT_AS
-			       "v"
+	                       "v"
 #endif
 #ifdef RLIMIT_LOCKS
-			       "w"
+	                       "w"
 #endif
-	)) != '\0')
+	                       )) != '\0')
 		switch (optc) {
 		case 'H':
 			how = HARD;
@@ -490,12 +493,11 @@ ulimitcmd(int argc, char **argv)
 		if (strcmp(p, "unlimited") == 0)
 			val = RLIM_INFINITY;
 		else {
-			val = (rlim_t) 0;
+			val = (rlim_t)0;
 
-			while ((c = *p++) >= '0' && c <= '9')
-			{
+			while ((c = *p++) >= '0' && c <= '9') {
 				val = (val * 10) + (long)(c - '0');
-				if (val < (rlim_t) 0)
+				if (val < (rlim_t)0)
 					break;
 			}
 			if (c)

@@ -46,7 +46,7 @@
 #include "shell.h"
 #include "output.h"
 #include "expand.h"
-#include "nodes.h"	/* for other headers */
+#include "nodes.h" /* for other headers */
 #include "exec.h"
 #include "syntax.h"
 #include "options.h"
@@ -62,9 +62,7 @@
 #endif
 #include "system.h"
 
-
 #define VTABSIZE 39
-
 
 struct localvar_list {
 	struct localvar_list *next;
@@ -73,8 +71,7 @@ struct localvar_list {
 
 MKINIT struct localvar_list *localvar_stack;
 
-const char defpathvar[] =
-	"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
+const char defpathvar[] = "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
 #ifdef IFS_BROKEN
 const char defifsvar[] = "IFS= \t\n";
 #else
@@ -82,31 +79,31 @@ const char defifs[] = " \t\n";
 #endif
 
 int lineno;
-char linenovar[sizeof("LINENO=")+sizeof(int)*CHAR_BIT/3+1] = "LINENO=";
+char linenovar[sizeof("LINENO=") + sizeof(int) * CHAR_BIT / 3 + 1] = "LINENO=";
 
 /* Some macros in var.h depend on the order, add new variables to the end. */
 struct var varinit[] = {
 #if ATTY
-	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"ATTY\0",	0 },
+    {0, VSTRFIXED | VTEXTFIXED | VUNSET, "ATTY\0", 0},
 #endif
 #ifdef IFS_BROKEN
-	{ 0,	VSTRFIXED|VTEXTFIXED,		defifsvar,	0 },
+    {0, VSTRFIXED | VTEXTFIXED, defifsvar, 0},
 #else
-	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"IFS\0",	0 },
+    {0, VSTRFIXED | VTEXTFIXED | VUNSET, "IFS\0", 0},
 #endif
-	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"MAIL\0",	changemail },
-	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"MAILPATH\0",	changemail },
-	{ 0,	VSTRFIXED|VTEXTFIXED,		defpathvar,	changepath },
-	{ 0,	VSTRFIXED|VTEXTFIXED,		"PS1=$ ",	0 },
-	{ 0,	VSTRFIXED|VTEXTFIXED,		"PS2=> ",	0 },
-	{ 0,	VSTRFIXED|VTEXTFIXED,		"PS4=+ ",	0 },
-	{ 0,	VSTRFIXED|VTEXTFIXED,		"OPTIND=1",	getoptsreset },
+    {0, VSTRFIXED | VTEXTFIXED | VUNSET, "MAIL\0", changemail},
+    {0, VSTRFIXED | VTEXTFIXED | VUNSET, "MAILPATH\0", changemail},
+    {0, VSTRFIXED | VTEXTFIXED, defpathvar, changepath},
+    {0, VSTRFIXED | VTEXTFIXED, "PS1=$ ", 0},
+    {0, VSTRFIXED | VTEXTFIXED, "PS2=> ", 0},
+    {0, VSTRFIXED | VTEXTFIXED, "PS4=+ ", 0},
+    {0, VSTRFIXED | VTEXTFIXED, "OPTIND=1", getoptsreset},
 #ifdef WITH_LINENO
-	{ 0,	VSTRFIXED|VTEXTFIXED,		linenovar,	0 },
+    {0, VSTRFIXED | VTEXTFIXED, linenovar, 0},
 #endif
 #ifndef SMALL
-	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"TERM\0",	0 },
-	{ 0,	VSTRFIXED|VTEXTFIXED|VUNSET,	"HISTSIZE\0",	sethistsize },
+    {0, VSTRFIXED | VTEXTFIXED | VUNSET, "TERM\0", 0},
+    {0, VSTRFIXED | VTEXTFIXED | VUNSET, "HISTSIZE\0", sethistsize},
 #endif
 };
 
@@ -121,13 +118,8 @@ STATIC struct var **findvar(struct var **, const char *);
  */
 
 #ifdef mkinit
-INCLUDE <unistd.h>
-INCLUDE <sys/types.h>
-INCLUDE <sys/stat.h>
-INCLUDE "cd.h"
-INCLUDE "output.h"
-INCLUDE "var.h"
-MKINIT char **environ;
+INCLUDE<unistd.h> INCLUDE<sys / types.h> INCLUDE<sys / stat.h> INCLUDE "cd.h" INCLUDE "output.h" INCLUDE
+                                                                       "var.h" MKINIT char **environ;
 INIT {
 	char **envp;
 	static char ppid[32] = "PPID=";
@@ -135,22 +127,21 @@ INIT {
 	struct stat st1, st2;
 
 	initvar();
-	for (envp = environ ; *envp ; envp++) {
+	for (envp = environ; *envp; envp++) {
 		p = endofname(*envp);
 		if (p != *envp && *p == '=') {
-			setvareq(*envp, VEXPORT|VTEXTFIXED);
+			setvareq(*envp, VEXPORT | VTEXTFIXED);
 		}
 	}
 
 	setvarint("OPTIND", 1, 0);
 
-	fmtstr(ppid + 5, sizeof(ppid) - 5, "%ld", (long) getppid());
+	fmtstr(ppid + 5, sizeof(ppid) - 5, "%ld", (long)getppid());
 	setvareq(ppid, VTEXTFIXED);
 
 	p = lookupvar("PWD");
 	if (p)
-		if (*p != '/' || stat(p, &st1) || stat(".", &st2) ||
-		    st1.st_dev != st2.st_dev || st1.st_ino != st2.st_ino)
+		if (*p != '/' || stat(p, &st1) || stat(".", &st2) || st1.st_dev != st2.st_dev || st1.st_ino != st2.st_ino)
 			p = 0;
 	setpwd(p, 0);
 }
@@ -160,23 +151,20 @@ RESET {
 }
 #endif
 
-
 /*
  * This routine initializes the builtin variables.  It is called when the
  * shell is initialized.
  */
 
-void
-initvar(void)
-{
+void initvar(void) {
 	struct var *vp;
 	struct var *end;
 	struct var **vpp;
 
-	vp = varinit;
+	vp  = varinit;
 	end = vp + sizeof(varinit) / sizeof(varinit[0]);
 	do {
-		vpp = hashvar(vp->text);
+		vpp      = hashvar(vp->text);
 		vp->next = *vpp;
 		*vpp = vp;
 	} while (++vp < end);
@@ -192,16 +180,15 @@ initvar(void)
  * flags of the variable.  If val is NULL, the variable is unset.
  */
 
-struct var *setvar(const char *name, const char *val, int flags)
-{
+struct var *setvar(const char *name, const char *val, int flags) {
 	char *p, *q;
 	size_t namelen;
 	char *nameeq;
 	size_t vallen;
 	struct var *vp;
 
-	q = endofname(name);
-	p = strchrnul(q, '=');
+	q       = endofname(name);
+	p       = strchrnul(q, '=');
 	namelen = p - name;
 	if (!namelen || p != q)
 		sh_error("%.*s: bad variable name", namelen, name);
@@ -215,7 +202,7 @@ struct var *setvar(const char *name, const char *val, int flags)
 	p = mempcpy(nameeq = ckmalloc(namelen + vallen + 2), name, namelen);
 	if (val) {
 		*p++ = '=';
-		p = mempcpy(p, val, vallen);
+		p    = mempcpy(p, val, vallen);
 	}
 	*p = '\0';
 	vp = setvareq(nameeq, flags | VNOSAVE);
@@ -229,8 +216,7 @@ struct var *setvar(const char *name, const char *val, int flags)
  * ored with the flags of the variable.
  */
 
-intmax_t setvarint(const char *name, intmax_t val, int flags)
-{
+intmax_t setvarint(const char *name, intmax_t val, int flags) {
 	int len = max_int_length(sizeof(val));
 	char buf[len];
 
@@ -238,8 +224,6 @@ intmax_t setvarint(const char *name, intmax_t val, int flags)
 	setvar(name, buf, flags);
 	return val;
 }
-
-
 
 /*
  * Same as setvar except that the variable and value are passed in
@@ -249,12 +233,11 @@ intmax_t setvarint(const char *name, intmax_t val, int flags)
  * Called with interrupts off.
  */
 
-struct var *setvareq(char *s, int flags)
-{
+struct var *setvareq(char *s, int flags) {
 	struct var *vp, **vpp;
 
 	vpp = hashvar(s);
-	flags |= (VEXPORT & (((unsigned) (1 - aflag)) - 1));
+	flags |= (VEXPORT & (((unsigned)(1 - aflag)) - 1));
 	vpp = findvar(vpp, s);
 	vp = *vpp;
 	if (vp) {
@@ -264,8 +247,7 @@ struct var *setvareq(char *s, int flags)
 			if (flags & VNOSAVE)
 				free(s);
 			n = vp->text;
-			sh_error("%.*s: is read only", strchrnul(n, '=') - n,
-				 n);
+			sh_error("%.*s: is read only", strchrnul(n, '=') - n, n);
 		}
 
 		if (flags & VNOSET)
@@ -274,49 +256,44 @@ struct var *setvareq(char *s, int flags)
 		if (vp->func && (flags & VNOFUNC) == 0)
 			(*vp->func)(strchrnul(s, '=') + 1);
 
-		if ((vp->flags & (VTEXTFIXED|VSTACK)) == 0)
+		if ((vp->flags & (VTEXTFIXED | VSTACK)) == 0)
 			ckfree(vp->text);
 
-		if (((flags & (VEXPORT|VREADONLY|VSTRFIXED|VUNSET)) |
-		     (vp->flags & VSTRFIXED)) == VUNSET) {
+		if (((flags & (VEXPORT | VREADONLY | VSTRFIXED | VUNSET)) | (vp->flags & VSTRFIXED)) == VUNSET) {
 			*vpp = vp->next;
 			ckfree(vp);
-out_free:
-			if ((flags & (VTEXTFIXED|VSTACK|VNOSAVE)) == VNOSAVE)
+		out_free:
+			if ((flags & (VTEXTFIXED | VSTACK | VNOSAVE)) == VNOSAVE)
 				ckfree(s);
 			goto out;
 		}
 
-		flags |= vp->flags & ~(VTEXTFIXED|VSTACK|VNOSAVE|VUNSET);
+		flags |= vp->flags & ~(VTEXTFIXED | VSTACK | VNOSAVE | VUNSET);
 	} else {
 		if (flags & VNOSET)
 			goto out;
-		if ((flags & (VEXPORT|VREADONLY|VSTRFIXED|VUNSET)) == VUNSET)
+		if ((flags & (VEXPORT | VREADONLY | VSTRFIXED | VUNSET)) == VUNSET)
 			goto out_free;
 		/* not found */
-		vp = ckmalloc(sizeof (*vp));
+		vp       = ckmalloc(sizeof(*vp));
 		vp->next = *vpp;
 		vp->func = NULL;
-		*vpp = vp;
+		*vpp     = vp;
 	}
-	if (!(flags & (VTEXTFIXED|VSTACK|VNOSAVE)))
-		s = savestr(s);
-	vp->text = s;
+	if (!(flags & (VTEXTFIXED | VSTACK | VNOSAVE)))
+		s     = savestr(s);
+	vp->text  = s;
 	vp->flags = flags;
 
 out:
 	return vp;
 }
 
-
-
 /*
  * Process a linked list of variable assignments.
  */
 
-void
-listsetvar(struct strlist *list, int flags)
-{
+void listsetvar(struct strlist *list, int flags) {
 	struct strlist *lp;
 
 	lp = list;
@@ -329,20 +306,17 @@ listsetvar(struct strlist *list, int flags)
 	INTON;
 }
 
-
 /*
  * Find the value of a variable.  Returns NULL if not set.
  */
 
-char *
-lookupvar(const char *name)
-{
+char *lookupvar(const char *name) {
 	struct var *v;
 
 	if ((v = *findvar(hashvar(name), name)) && !(v->flags & VUNSET)) {
 #ifdef WITH_LINENO
 		if (v == &vlineno && v->text == linenovar) {
-			fmtstr(linenovar+7, sizeof(linenovar)-7, "%d", lineno);
+			fmtstr(linenovar + 7, sizeof(linenovar) - 7, "%d", lineno);
 		}
 #endif
 		return strchrnul(v->text, '=') + 1;
@@ -350,34 +324,29 @@ lookupvar(const char *name)
 	return NULL;
 }
 
-intmax_t lookupvarint(const char *name)
-{
+intmax_t lookupvarint(const char *name) {
 	return atomax(lookupvar(name) ?: nullstr, 0);
 }
-
-
 
 /*
  * Generate a list of variables satisfying the given conditions.
  */
 
-char **
-listvars(int on, int off, char ***end)
-{
+char **listvars(int on, int off, char ***end) {
 	struct var **vpp;
 	struct var *vp;
 	char **ep;
 	int mask;
 
 	STARTSTACKSTR(ep);
-	vpp = vartab;
+	vpp  = vartab;
 	mask = on | off;
 	do {
-		for (vp = *vpp ; vp ; vp = vp->next)
+		for (vp = *vpp; vp; vp = vp->next)
 			if ((vp->flags & mask) == on) {
 				if (ep == stackstrend())
 					ep = growstackstr();
-				*ep++ = (char *) vp->text;
+				*ep++  = (char *)vp->text;
 			}
 	} while (++vpp < vartab + VTABSIZE);
 	if (ep == stackstrend())
@@ -388,8 +357,6 @@ listvars(int on, int off, char ***end)
 	return grabstackstr(ep);
 }
 
-
-
 /*
  * POSIX requires that 'set' (but not export or readonly) output the
  * variables in lexicographic order - by the locale's collating order (sigh).
@@ -398,9 +365,7 @@ listvars(int on, int off, char ***end)
  * For now just roll 'em through qsort for printing...
  */
 
-int
-showvars(const char *prefix, int on, int off)
-{
+int showvars(const char *prefix, int on, int off) {
 	const char *sep;
 	char **ep, **epend;
 
@@ -424,20 +389,16 @@ showvars(const char *prefix, int on, int off)
 	return 0;
 }
 
-
-
 /*
  * The export and readonly commands.
  */
 
-int
-exportcmd(int argc, char **argv)
-{
+int exportcmd(int argc, char **argv) {
 	struct var *vp;
 	char *name;
 	const char *p;
 	char **aptr;
-	int flag = argv[0][0] == 'r'? VREADONLY : VEXPORT;
+	int flag = argv[0][0] == 'r' ? VREADONLY : VEXPORT;
 	int notp;
 
 	notp = nextopt("p") - 'p';
@@ -459,14 +420,11 @@ exportcmd(int argc, char **argv)
 	return 0;
 }
 
-
 /*
  * The "local" command.
  */
 
-int
-localcmd(int argc, char **argv)
-{
+int localcmd(int argc, char **argv) {
 	char *name;
 
 	if (!localvar_stack)
@@ -479,7 +437,6 @@ localcmd(int argc, char **argv)
 	return 0;
 }
 
-
 /*
  * Make a variable a local variable.  When a variable is made local, it's
  * value and flags are saved in a localvar structure.  The saved values
@@ -487,60 +444,56 @@ localcmd(int argc, char **argv)
  * "-" as a special case.
  */
 
-void mklocal(char *name)
-{
+void mklocal(char *name) {
 	struct localvar *lvp;
 	struct var **vpp;
 	struct var *vp;
 
 	INTOFF;
-	lvp = ckmalloc(sizeof (struct localvar));
+	lvp = ckmalloc(sizeof(struct localvar));
 	if (name[0] == '-' && name[1] == '\0') {
 		char *p;
-		p = ckmalloc(sizeof(optlist));
+		p         = ckmalloc(sizeof(optlist));
 		lvp->text = memcpy(p, optlist, sizeof(optlist));
-		vp = NULL;
+		vp        = NULL;
 	} else {
 		char *eq;
 
 		vpp = hashvar(name);
-		vp = *findvar(vpp, name);
+		vp  = *findvar(vpp, name);
 		eq = strchr(name, '=');
 		if (vp == NULL) {
 			if (eq)
 				vp = setvareq(name, VSTRFIXED);
 			else
-				vp = setvar(name, NULL, VSTRFIXED);
+				vp     = setvar(name, NULL, VSTRFIXED);
 			lvp->flags = VUNSET;
 		} else {
-			lvp->text = vp->text;
+			lvp->text  = vp->text;
 			lvp->flags = vp->flags;
-			vp->flags |= VSTRFIXED|VTEXTFIXED;
+			vp->flags |= VSTRFIXED | VTEXTFIXED;
 			if (eq)
 				setvareq(name, 0);
 		}
 	}
-	lvp->vp = vp;
-	lvp->next = localvar_stack->lv;
+	lvp->vp            = vp;
+	lvp->next          = localvar_stack->lv;
 	localvar_stack->lv = lvp;
 	INTON;
 }
-
 
 /*
  * Called after a function returns.
  * Interrupts must be off.
  */
 
-void
-poplocalvars(int keep)
-{
+void poplocalvars(int keep) {
 	struct localvar_list *ll;
 	struct localvar *lvp, *next;
 	struct var *vp;
 
 	INTOFF;
-	ll = localvar_stack;
+	ll             = localvar_stack;
 	localvar_stack = ll->next;
 
 	next = ll->lv;
@@ -556,61 +509,55 @@ poplocalvars(int keep)
 			if (lvp->flags != VUNSET) {
 				if (vp->text == lvp->text)
 					bits |= VTEXTFIXED;
-				else if (!(lvp->flags & (VTEXTFIXED|VSTACK)))
+				else if (!(lvp->flags & (VTEXTFIXED | VSTACK)))
 					ckfree(lvp->text);
 			}
 
 			vp->flags &= ~bits;
 			vp->flags |= (lvp->flags & bits);
 
-			if ((vp->flags &
-			     (VEXPORT|VREADONLY|VSTRFIXED|VUNSET)) == VUNSET)
+			if ((vp->flags & (VEXPORT | VREADONLY | VSTRFIXED | VUNSET)) == VUNSET)
 				unsetvar(vp->text);
-		} else if (vp == NULL) {	/* $- saved */
+		} else if (vp == NULL) { /* $- saved */
 			memcpy(optlist, lvp->text, sizeof(optlist));
 			ckfree(lvp->text);
 			optschanged();
 		} else if (lvp->flags == VUNSET) {
-			vp->flags &= ~(VSTRFIXED|VREADONLY);
+			vp->flags &= ~(VSTRFIXED | VREADONLY);
 			unsetvar(vp->text);
 		} else {
 			if (vp->func)
 				(*vp->func)(strchrnul(lvp->text, '=') + 1);
-			if ((vp->flags & (VTEXTFIXED|VSTACK)) == 0)
+			if ((vp->flags & (VTEXTFIXED | VSTACK)) == 0)
 				ckfree(vp->text);
 			vp->flags = lvp->flags;
-			vp->text = lvp->text;
+			vp->text  = lvp->text;
 		}
 		ckfree(lvp);
 	}
 	INTON;
 }
 
-
 /*
  * Create a new localvar environment.
  */
-struct localvar_list *pushlocalvars(void)
-{
+struct localvar_list *pushlocalvars(void) {
 	struct localvar_list *ll;
 
 	INTOFF;
-	ll = ckmalloc(sizeof(*ll));
-	ll->lv = NULL;
-	ll->next = localvar_stack;
+	ll             = ckmalloc(sizeof(*ll));
+	ll->lv         = NULL;
+	ll->next       = localvar_stack;
 	localvar_stack = ll;
 	INTON;
 
 	return ll->next;
 }
 
-
-void unwindlocalvars(struct localvar_list *stop)
-{
+void unwindlocalvars(struct localvar_list *stop) {
 	while (localvar_stack != stop)
 		poplocalvars(0);
 }
-
 
 /*
  * The unset builtin command.  We unset the function before we unset the
@@ -618,9 +565,7 @@ void unwindlocalvars(struct localvar_list *stop)
  * with the same name.
  */
 
-int
-unsetcmd(int argc, char **argv)
-{
+int unsetcmd(int argc, char **argv) {
 	char **ap;
 	int i;
 	int flag = 0;
@@ -629,7 +574,7 @@ unsetcmd(int argc, char **argv)
 		flag = i;
 	}
 
-	for (ap = argptr; *ap ; ap++) {
+	for (ap = argptr; *ap; ap++) {
 		if (flag != 'f') {
 			unsetvar(*ap);
 			continue;
@@ -640,34 +585,26 @@ unsetcmd(int argc, char **argv)
 	return 0;
 }
 
-
 /*
  * Unset the specified variable.
  */
 
-void unsetvar(const char *s)
-{
+void unsetvar(const char *s) {
 	setvar(s, 0, 0);
 }
-
-
 
 /*
  * Find the appropriate entry in the hash table from the name.
  */
 
-STATIC struct var **
-hashvar(const char *p)
-{
+STATIC struct var **hashvar(const char *p) {
 	unsigned int hashval;
 
-	hashval = ((unsigned char) *p) << 4;
+	hashval = ((unsigned char)*p) << 4;
 	while (*p && *p != '=')
-		hashval += (unsigned char) *p++;
+		hashval += (unsigned char)*p++;
 	return &vartab[hashval % VTABSIZE];
 }
-
-
 
 /*
  * Compares two strings up to the first = or '\0'.  The first
@@ -675,9 +612,7 @@ hashvar(const char *p)
  * either '=' or '\0'.
  */
 
-int
-varcmp(const char *p, const char *q)
-{
+int varcmp(const char *p, const char *q) {
 	int c, d;
 
 	while ((c = *p) == (d = *q)) {
@@ -694,15 +629,11 @@ out:
 	return c - d;
 }
 
-STATIC int
-vpcmp(const void *a, const void *b)
-{
+STATIC int vpcmp(const void *a, const void *b) {
 	return varcmp(*(const char **)a, *(const char **)b);
 }
 
-STATIC struct var **
-findvar(struct var **vpp, const char *name)
-{
+STATIC struct var **findvar(struct var **vpp, const char *name) {
 	for (; *vpp; vpp = &(*vpp)->next) {
 		if (varequal((*vpp)->text, name)) {
 			break;

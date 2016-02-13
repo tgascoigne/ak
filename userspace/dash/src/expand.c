@@ -73,18 +73,20 @@
 #include "show.h"
 #include "system.h"
 
+#define stat64 stat
+
 /*
  * _rmescape() flags
  */
-#define RMESCAPE_ALLOC	0x1	/* Allocate a new string */
-#define RMESCAPE_GLOB	0x2	/* Add backslashes for glob */
-#define RMESCAPE_GROW	0x8	/* Grow strings instead of stalloc */
-#define RMESCAPE_HEAP	0x10	/* Malloc strings instead of stalloc */
+#define RMESCAPE_ALLOC 0x1 /* Allocate a new string */
+#define RMESCAPE_GLOB 0x2  /* Add backslashes for glob */
+#define RMESCAPE_GROW 0x8  /* Grow strings instead of stalloc */
+#define RMESCAPE_HEAP 0x10 /* Malloc strings instead of stalloc */
 
 /* Add CTLESC when necessary. */
-#define QUOTES_ESC	(EXP_FULL | EXP_CASE | EXP_QPAT)
+#define QUOTES_ESC (EXP_FULL | EXP_CASE | EXP_QPAT)
 /* Do not skip NUL characters. */
-#define QUOTES_KEEPNUL	EXP_TILDE
+#define QUOTES_KEEPNUL EXP_TILDE
 
 /*
  * Structure specifying which parts of the string should be searched
@@ -92,10 +94,10 @@
  */
 
 struct ifsregion {
-	struct ifsregion *next;	/* next region in list */
-	int begoff;		/* offset of start of region */
-	int endoff;		/* offset of end of region */
-	int nulonly;		/* search for nul bytes only */
+	struct ifsregion *next; /* next region in list */
+	int begoff;             /* offset of start of region */
+	int endoff;             /* offset of end of region */
+	int nulonly;            /* search for nul bytes only */
 };
 
 /* output of current string */
@@ -136,9 +138,7 @@ STATIC int cvtnum(intmax_t);
 STATIC size_t esclen(const char *, const char *);
 STATIC char *scanleft(char *, char *, char *, char *, int, int);
 STATIC char *scanright(char *, char *, char *, char *, int, int);
-STATIC void varunset(const char *, const char *, const char *, int)
-	__attribute__((__noreturn__));
-
+STATIC void varunset(const char *, const char *, const char *, int) __attribute__((__noreturn__));
 
 /*
  * Prepare a pattern for a glob(3) call.
@@ -146,15 +146,12 @@ STATIC void varunset(const char *, const char *, const char *, int)
  * Returns an stalloced string.
  */
 
-STATIC inline char *
-preglob(const char *pattern, int flag) {
+STATIC inline char *preglob(const char *pattern, int flag) {
 	flag |= RMESCAPE_GLOB;
 	return _rmescapes((char *)pattern, flag);
 }
 
-
-STATIC size_t
-esclen(const char *start, const char *p) {
+STATIC size_t esclen(const char *start, const char *p) {
 	size_t esc = 0;
 
 	while (p > start && *--p == (char)CTLESC) {
@@ -163,9 +160,7 @@ esclen(const char *start, const char *p) {
 	return esc;
 }
 
-
-static inline const char *getpwhome(const char *name)
-{
+static inline const char *getpwhome(const char *name) {
 #ifdef HAVE_GETPWNAM
 	struct passwd *pw = getpwnam(name);
 	return pw ? pw->pw_dir : 0;
@@ -174,7 +169,6 @@ static inline const char *getpwhome(const char *name)
 #endif
 }
 
-
 /*
  * Perform variable substitution and command substitution on an argument,
  * placing the resulting list of arguments in arglist.  If EXP_FULL is true,
@@ -182,22 +176,20 @@ static inline const char *getpwhome(const char *name)
  * here document expansion.
  */
 
-void
-expandarg(union node *arg, struct arglist *arglist, int flag)
-{
+void expandarg(union node *arg, struct arglist *arglist, int flag) {
 	struct strlist *sp;
 	char *p;
 
 	argbackq = arg->narg.backquote;
 	STARTSTACKSTR(expdest);
 	argstr(arg->narg.text, flag);
-	p = _STPUTC('\0', expdest);
+	p       = _STPUTC('\0', expdest);
 	expdest = p - 1;
 	if (arglist == NULL) {
 		/* here document expanded */
 		goto out;
 	}
-	p = grabstackstr(p);
+	p            = grabstackstr(p);
 	exparg.lastp = &exparg.list;
 	/*
 	 * TODO - EXP_REDIR
@@ -208,22 +200,20 @@ expandarg(union node *arg, struct arglist *arglist, int flag)
 		exparg.lastp = &exparg.list;
 		expandmeta(exparg.list, flag);
 	} else {
-		sp = (struct strlist *)stalloc(sizeof (struct strlist));
-		sp->text = p;
+		sp            = (struct strlist *)stalloc(sizeof(struct strlist));
+		sp->text      = p;
 		*exparg.lastp = sp;
-		exparg.lastp = &sp->next;
+		exparg.lastp  = &sp->next;
 	}
 	*exparg.lastp = NULL;
 	if (exparg.list) {
 		*arglist->lastp = exparg.list;
-		arglist->lastp = exparg.lastp;
+		arglist->lastp  = exparg.lastp;
 	}
 
 out:
 	ifsfree();
 }
-
-
 
 /*
  * Perform variable and command substitution.  If EXP_FULL is set, output CTLESC
@@ -231,21 +221,9 @@ out:
  * $@ like $* since no splitting will be performed.
  */
 
-STATIC void
-argstr(char *p, int flag)
-{
-	static const char spclchars[] = {
-		'=',
-		':',
-		CTLQUOTEMARK,
-		CTLENDVAR,
-		CTLESC,
-		CTLVAR,
-		CTLBACKQ,
-		CTLENDARI,
-		0
-	};
-	const char *reject = spclchars;
+STATIC void argstr(char *p, int flag) {
+	static const char spclchars[] = {'=', ':', CTLQUOTEMARK, CTLENDVAR, CTLESC, CTLVAR, CTLBACKQ, CTLENDARI, 0};
+	const char *reject            = spclchars;
 	int c;
 	int breakall = (flag & (EXP_WORD | EXP_QUOTED)) == EXP_WORD;
 	int inquotes;
@@ -263,7 +241,7 @@ argstr(char *p, int flag)
 		char *q;
 
 		flag &= ~EXP_TILDE;
-tilde:
+	tilde:
 		q = p;
 		if (*q == '~')
 			p = exptilde(p, q, flag);
@@ -299,7 +277,7 @@ start:
 			}
 			flag |= EXP_VARTILDE2;
 			reject++;
-			/* fall through */
+		/* fall through */
 		case ':':
 			/*
 			 * sort of a hack - expand tildes in variable
@@ -317,12 +295,11 @@ start:
 		case CTLQUOTEMARK:
 			inquotes ^= EXP_QUOTED;
 			/* "$@" syntax adherence hack */
-			if (inquotes && !memcmp(p, dolatstr + 1,
-						DOLATSTRLEN - 1)) {
+			if (inquotes && !memcmp(p, dolatstr + 1, DOLATSTRLEN - 1)) {
 				p = evalvar(p + 1, flag | inquotes) + 1;
 				goto start;
 			}
-addquote:
+		addquote:
 			if (flag & QUOTES_ESC) {
 				p--;
 				length++;
@@ -338,8 +315,7 @@ addquote:
 			 * unless inside inner quotes or we have a literal
 			 * backslash.
 			 */
-			if (((flag | inquotes) & (EXP_QPAT | EXP_QUOTED)) ==
-			    EXP_QPAT && *p != '\\')
+			if (((flag | inquotes) & (EXP_QPAT | EXP_QUOTED)) == EXP_QPAT && *p != '\\')
 				break;
 
 			goto addquote;
@@ -356,13 +332,10 @@ addquote:
 			goto start;
 		}
 	}
-breakloop:
-	;
+breakloop:;
 }
 
-STATIC char *
-exptilde(char *startp, char *p, int flag)
-{
+STATIC char *exptilde(char *startp, char *p, int flag) {
 	signed char c;
 	char *name;
 	const char *home;
@@ -371,7 +344,7 @@ exptilde(char *startp, char *p, int flag)
 	name = p + 1;
 
 	while ((c = *++p) != '\0') {
-		switch(c) {
+		switch (c) {
 		case CTLESC:
 			return (startp);
 		case CTLQUOTEMARK:
@@ -402,10 +375,7 @@ lose:
 	return (startp);
 }
 
-
-void 
-removerecordregions(int endoff)
-{
+void removerecordregions(int endoff) {
 	if (ifslastp == NULL)
 		return;
 
@@ -421,15 +391,15 @@ removerecordregions(int endoff)
 		if (ifsfirst.begoff > endoff)
 			ifslastp = NULL;
 		else {
-			ifslastp = &ifsfirst;
+			ifslastp        = &ifsfirst;
 			ifsfirst.endoff = endoff;
 		}
 		return;
 	}
-	
+
 	ifslastp = &ifsfirst;
 	while (ifslastp->next && ifslastp->next->begoff < endoff)
-		ifslastp=ifslastp->next;
+		ifslastp = ifslastp->next;
 	while (ifslastp->next != NULL) {
 		struct ifsregion *ifsp;
 		INTOFF;
@@ -442,14 +412,11 @@ removerecordregions(int endoff)
 		ifslastp->endoff = endoff;
 }
 
-
 /*
  * Expand arithmetic expression.  Backup to start of expression,
  * evaluate, place result in (backed up) result, adjust string position.
  */
-void
-expari(int flag)
-{
+void expari(int flag) {
 	struct stackmark sm;
 	char *p, *start;
 	int begoff;
@@ -506,14 +473,11 @@ expari(int flag)
 		recordregion(begoff, begoff + len, 0);
 }
 
-
 /*
  * Expand stuff in backwards quotes.
  */
 
-STATIC void
-expbackq(union node *cmd, int flag)
-{
+STATIC void expbackq(union node *cmd, int flag) {
 	struct backcmd in;
 	int i;
 	char buf[128];
@@ -526,7 +490,7 @@ expbackq(union node *cmd, int flag)
 	INTOFF;
 	startloc = expdest - (char *)stackblock();
 	pushstackmark(&smark, startloc);
-	evalbackcmd(cmd, (struct backcmd *) &in);
+	evalbackcmd(cmd, (struct backcmd *)&in);
 	popstackmark(&smark);
 
 	p = in.buf;
@@ -535,7 +499,7 @@ expbackq(union node *cmd, int flag)
 		goto read;
 	for (;;) {
 		memtodest(p, i, syntax, flag & QUOTES_ESC);
-read:
+	read:
 		if (in.fd < 0)
 			break;
 		do {
@@ -563,23 +527,16 @@ read:
 
 	if (!(flag & EXP_QUOTED))
 		recordregion(startloc, dest - (char *)stackblock(), 0);
-	TRACE(("evalbackq: size=%d: \"%.*s\"\n",
-		(dest - (char *)stackblock()) - startloc,
-		(dest - (char *)stackblock()) - startloc,
-		stackblock() + startloc));
+	TRACE(("evalbackq: size=%d: \"%.*s\"\n", (dest - (char *)stackblock()) - startloc,
+	       (dest - (char *)stackblock()) - startloc, stackblock() + startloc));
 }
 
-
-STATIC char *
-scanleft(
-	char *startp, char *rmesc, char *rmescend, char *str, int quotes,
-	int zero
-) {
+STATIC char *scanleft(char *startp, char *rmesc, char *rmescend, char *str, int quotes, int zero) {
 	char *loc;
 	char *loc2;
 	char c;
 
-	loc = startp;
+	loc  = startp;
 	loc2 = rmesc;
 	do {
 		int match;
@@ -587,7 +544,7 @@ scanleft(
 		c = *loc2;
 		if (zero) {
 			*loc2 = '\0';
-			s = rmesc;
+			s     = rmesc;
 		}
 		match = pmatch(str, s);
 		*loc2 = c;
@@ -601,23 +558,18 @@ scanleft(
 	return 0;
 }
 
-
-STATIC char *
-scanright(
-	char *startp, char *rmesc, char *rmescend, char *str, int quotes,
-	int zero
-) {
+STATIC char *scanright(char *startp, char *rmesc, char *rmescend, char *str, int quotes, int zero) {
 	int esc = 0;
 	char *loc;
 	char *loc2;
 
 	for (loc = str - 1, loc2 = rmescend; loc >= startp; loc2--) {
 		int match;
-		char c = *loc2;
+		char c        = *loc2;
 		const char *s = loc2;
 		if (zero) {
 			*loc2 = '\0';
-			s = rmesc;
+			s     = rmesc;
 		}
 		match = pmatch(str, s);
 		*loc2 = c;
@@ -637,9 +589,7 @@ scanright(
 	return 0;
 }
 
-STATIC const char *
-subevalvar(char *p, char *str, int strloc, int subtype, int startloc, int varflags, int flag)
-{
+STATIC const char *subevalvar(char *p, char *str, int strloc, int subtype, int startloc, int varflags, int flag) {
 	int quotes = flag & QUOTES_ESC;
 	char *startp;
 	char *loc;
@@ -647,14 +597,14 @@ subevalvar(char *p, char *str, int strloc, int subtype, int startloc, int varfla
 	int amount;
 	char *rmesc, *rmescend;
 	int zero;
-	char *(*scan)(char *, char *, char *, char *, int , int);
+	char *(*scan)(char *, char *, char *, char *, int, int);
 
-	argstr(p, EXP_TILDE | (subtype != VSASSIGN && subtype != VSQUESTION ?
-			       (flag & (EXP_QUOTED | EXP_QPAT) ?
-			        EXP_QPAT : EXP_CASE) : 0));
+	argstr(p, EXP_TILDE |
+	              (subtype != VSASSIGN && subtype != VSQUESTION ? (flag & (EXP_QUOTED | EXP_QPAT) ? EXP_QPAT : EXP_CASE)
+	                                                            : 0));
 	STPUTC('\0', expdest);
 	argbackq = saveargbackq;
-	startp = stackblock() + startloc;
+	startp   = stackblock() + startloc;
 
 	switch (subtype) {
 	case VSASSIGN:
@@ -674,13 +624,13 @@ subevalvar(char *p, char *str, int strloc, int subtype, int startloc, int varfla
 		abort();
 #endif
 
-	rmesc = startp;
+	rmesc    = startp;
 	rmescend = stackblock() + strloc;
 	if (quotes) {
 		rmesc = _rmescapes(startp, RMESCAPE_ALLOC | RMESCAPE_GROW);
 		if (rmesc != startp) {
 			rmescend = expdest;
-			startp = stackblock() + startloc;
+			startp   = stackblock() + startloc;
 		}
 	}
 	rmescend--;
@@ -698,21 +648,18 @@ subevalvar(char *p, char *str, int strloc, int subtype, int startloc, int varfla
 			memmove(startp, loc, str - loc);
 			loc = startp + (str - loc) - 1;
 		}
-		*loc = '\0';
+		*loc   = '\0';
 		amount = loc - expdest;
 		STADJUST(amount, expdest);
 	}
 	return loc;
 }
 
-
 /*
  * Expand a variable, and return a pointer to the next character in the
  * input string.
  */
-STATIC char *
-evalvar(char *p, int flag)
-{
+STATIC char *evalvar(char *p, int flag) {
 	int subtype;
 	int varflags;
 	char *var;
@@ -724,16 +671,16 @@ evalvar(char *p, int flag)
 	int quoted;
 
 	varflags = *p++;
-	subtype = varflags & VSTYPE;
+	subtype  = varflags & VSTYPE;
 
 	if (!subtype)
 		sh_error("Bad substitution");
 
-	quoted = flag & EXP_QUOTED;
-	var = p;
-	easy = (!quoted || (*var == '@' && shellparam.nparam));
+	quoted   = flag & EXP_QUOTED;
+	var      = p;
+	easy     = (!quoted || (*var == '@' && shellparam.nparam));
 	startloc = expdest - (char *)stackblock();
-	p = strchr(p, '=') + 1;
+	p        = strchr(p, '=') + 1;
 
 again:
 	varlen = varvalue(var, varflags, flag);
@@ -746,7 +693,7 @@ again:
 	}
 
 	if (subtype == VSMINUS) {
-vsplus:
+	vsplus:
 		if (varlen < 0) {
 			argstr(p, flag | EXP_TILDE | EXP_WORD);
 			goto end;
@@ -758,12 +705,11 @@ vsplus:
 
 	if (subtype == VSASSIGN || subtype == VSQUESTION) {
 		if (varlen < 0) {
-			if (subevalvar(p, var, 0, subtype, startloc,
-				       varflags, flag & ~QUOTES_ESC)) {
+			if (subevalvar(p, var, 0, subtype, startloc, varflags, flag & ~QUOTES_ESC)) {
 				varflags &= ~VSNUL;
-				/* 
-				 * Remove any recorded regions beyond 
-				 * start of variable 
+				/*
+				 * Remove any recorded regions beyond
+				 * start of variable
 				 */
 				removerecordregions(startloc);
 				goto again;
@@ -786,7 +732,7 @@ vsplus:
 	if (subtype == VSNORMAL) {
 		if (!easy)
 			goto end;
-record:
+	record:
 		recordregion(startloc, expdest - (char *)stackblock(), quoted);
 		goto end;
 	}
@@ -810,11 +756,8 @@ record:
 		 */
 		STPUTC('\0', expdest);
 		patloc = expdest - (char *)stackblock();
-		if (subevalvar(p, NULL, patloc, subtype,
-			       startloc, varflags, flag) == 0) {
-			int amount = expdest - (
-				(char *)stackblock() + patloc - 1
-			);
+		if (subevalvar(p, NULL, patloc, subtype, startloc, varflags, flag) == 0) {
+			int amount = expdest - ((char *)stackblock() + patloc - 1);
 			STADJUST(-amount, expdest);
 		}
 		/* Remove any recorded regions beyond start of variable */
@@ -823,7 +766,7 @@ record:
 	}
 
 end:
-	if (subtype != VSNORMAL) {	/* skip to end of alternative */
+	if (subtype != VSNORMAL) { /* skip to end of alternative */
 		int nesting = 1;
 		for (;;) {
 			if ((c = (signed char)*p++) == CTLESC)
@@ -843,13 +786,11 @@ end:
 	return p;
 }
 
-
 /*
  * Put a string on the stack.
  */
 
-STATIC void
-memtodest(const char *p, size_t len, const char *syntax, int quotes) {
+STATIC void memtodest(const char *p, size_t len, const char *syntax, int quotes) {
 	char *q;
 
 	if (unlikely(!len))
@@ -861,9 +802,7 @@ memtodest(const char *p, size_t len, const char *syntax, int quotes) {
 		int c = (signed char)*p++;
 		if (c) {
 			if ((quotes & QUOTES_ESC) &&
-			    ((syntax[c] == CCTL) ||
-			     (((quotes & EXP_FULL) || syntax != BASESYNTAX) &&
-			      syntax[c] == CBACK)))
+			    ((syntax[c] == CCTL) || (((quotes & EXP_FULL) || syntax != BASESYNTAX) && syntax[c] == CBACK)))
 				USTPUTC(CTLESC, q);
 		} else if (!(quotes & QUOTES_KEEPNUL))
 			continue;
@@ -873,27 +812,20 @@ memtodest(const char *p, size_t len, const char *syntax, int quotes) {
 	expdest = q;
 }
 
-
-STATIC size_t
-strtodest(p, syntax, quotes)
-	const char *p;
-	const char *syntax;
-	int quotes;
+STATIC size_t strtodest(p, syntax, quotes) const char *p;
+const char *syntax;
+int quotes;
 {
 	size_t len = strlen(p);
 	memtodest(p, len, syntax, quotes);
 	return len;
 }
 
-
-
 /*
  * Add the value of a specialized variable to the stack string.
  */
 
-STATIC ssize_t
-varvalue(char *name, int varflags, int flags)
-{
+STATIC ssize_t varvalue(char *name, int varflags, int flags) {
 	int num;
 	char *p;
 	int i;
@@ -901,13 +833,13 @@ varvalue(char *name, int varflags, int flags)
 	char sepc;
 	char **ap;
 	char const *syntax;
-	int quoted = flags & EXP_QUOTED;
+	int quoted  = flags & EXP_QUOTED;
 	int subtype = varflags & VSTYPE;
 	int discard = subtype == VSPLUS || subtype == VSLENGTH;
-	int quotes = (discard ? 0 : (flags & QUOTES_ESC)) | QUOTES_KEEPNUL;
+	int quotes  = (discard ? 0 : (flags & QUOTES_ESC)) | QUOTES_KEEPNUL;
 	ssize_t len = 0;
 
-	sep = quoted ? ((flags & EXP_FULL) << CHAR_BIT) : 0;
+	sep    = quoted ? ((flags & EXP_FULL) << CHAR_BIT) : 0;
 	syntax = quoted ? DQSYNTAX : BASESYNTAX;
 
 	switch (*name) {
@@ -924,7 +856,7 @@ varvalue(char *name, int varflags, int flags)
 		num = backgndpid;
 		if (num == 0)
 			return -1;
-numvar:
+	numvar:
 		len = cvtnum(num);
 		break;
 	case '-':
@@ -940,10 +872,10 @@ numvar:
 	case '@':
 		if (sep)
 			goto param;
-		/* fall through */
+	/* fall through */
 	case '*':
 		sep = ifsset() ? ifsval()[0] : ' ';
-param:
+	param:
 		if (!(ap = shellparam.p))
 			return -1;
 		sepc = sep;
@@ -973,7 +905,7 @@ param:
 		goto value;
 	default:
 		p = lookupvar(name);
-value:
+	value:
 		if (!p)
 			return -1;
 
@@ -986,43 +918,35 @@ value:
 	return len;
 }
 
-
-
 /*
  * Record the fact that we have to scan this region of the
  * string for IFS characters.
  */
 
-void
-recordregion(int start, int end, int nulonly)
-{
+void recordregion(int start, int end, int nulonly) {
 	struct ifsregion *ifsp;
 
 	if (ifslastp == NULL) {
 		ifsp = &ifsfirst;
 	} else {
 		INTOFF;
-		ifsp = (struct ifsregion *)ckmalloc(sizeof (struct ifsregion));
-		ifsp->next = NULL;
+		ifsp           = (struct ifsregion *)ckmalloc(sizeof(struct ifsregion));
+		ifsp->next     = NULL;
 		ifslastp->next = ifsp;
 		INTON;
 	}
-	ifslastp = ifsp;
-	ifslastp->begoff = start;
-	ifslastp->endoff = end;
+	ifslastp          = ifsp;
+	ifslastp->begoff  = start;
+	ifslastp->endoff  = end;
 	ifslastp->nulonly = nulonly;
 }
-
-
 
 /*
  * Break the argument string into pieces based upon IFS and add the
  * strings to the argument list.  The regions of the string to be
  * searched for IFS characters have been stored by recordregion.
  */
-void
-ifsbreakup(char *string, struct arglist *arglist)
-{
+void ifsbreakup(char *string, struct arglist *arglist) {
 	struct ifsregion *ifsp;
 	struct strlist *sp;
 	char *start;
@@ -1032,17 +956,16 @@ ifsbreakup(char *string, struct arglist *arglist)
 	int ifsspc;
 	int nulonly;
 
-
 	start = string;
 	if (ifslastp != NULL) {
-		ifsspc = 0;
+		ifsspc  = 0;
 		nulonly = 0;
 		realifs = ifsset() ? ifsval() : defifs;
-		ifsp = &ifsfirst;
+		ifsp    = &ifsfirst;
 		do {
-			p = string + ifsp->begoff;
+			p       = string + ifsp->begoff;
 			nulonly = ifsp->nulonly;
-			ifs = nulonly ? nullstr : realifs;
+			ifs     = nulonly ? nullstr : realifs;
 			ifsspc = 0;
 			while (p < string + ifsp->endoff) {
 				q = p;
@@ -1057,11 +980,11 @@ ifsbreakup(char *string, struct arglist *arglist)
 						start = p;
 						continue;
 					}
-					*q = '\0';
-					sp = (struct strlist *)stalloc(sizeof *sp);
-					sp->text = start;
+					*q              = '\0';
+					sp              = (struct strlist *)stalloc(sizeof *sp);
+					sp->text        = start;
 					*arglist->lastp = sp;
-					arglist->lastp = &sp->next;
+					arglist->lastp  = &sp->next;
 					p++;
 					if (!nulonly) {
 						for (;;) {
@@ -1071,7 +994,7 @@ ifsbreakup(char *string, struct arglist *arglist)
 							q = p;
 							if (*p == (char)CTLESC)
 								p++;
-							if (strchr(ifs, *p) == NULL ) {
+							if (strchr(ifs, *p) == NULL) {
 								p = q;
 								break;
 							} else if (strchr(defifs, *p) == NULL) {
@@ -1099,14 +1022,13 @@ ifsbreakup(char *string, struct arglist *arglist)
 		return;
 
 add:
-	sp = (struct strlist *)stalloc(sizeof *sp);
-	sp->text = start;
+	sp              = (struct strlist *)stalloc(sizeof *sp);
+	sp->text        = start;
 	*arglist->lastp = sp;
-	arglist->lastp = &sp->next;
+	arglist->lastp  = &sp->next;
 }
 
-void ifsfree(void)
-{
+void ifsfree(void) {
 	struct ifsregion *p = ifsfirst.next;
 
 	if (!p)
@@ -1126,18 +1048,14 @@ out:
 	ifslastp = NULL;
 }
 
-
-
 /*
  * Expand shell metacharacters.  At this point, the only control characters
  * should be escapes.  The results are stored in the list exparg.
  */
 
 #ifdef HAVE_GLOB
-STATIC void
-expandmeta(str, flag)
-	struct strlist *str;
-	int flag;
+STATIC void expandmeta(str, flag) struct strlist *str;
+int flag;
 {
 	/* TODO - EXP_REDIR */
 
@@ -1162,29 +1080,26 @@ expandmeta(str, flag)
 			INTON;
 			break;
 		case GLOB_NOMATCH:
-nometa2:
+		nometa2:
 			globfree(&pglob);
 			INTON;
-nometa:
+		nometa:
 			*exparg.lastp = str;
 			rmescapes(str->text);
 			exparg.lastp = &str->next;
 			break;
-		default:	/* GLOB_NOSPACE */
+		default: /* GLOB_NOSPACE */
 			sh_error("Out of space");
 		}
 		str = str->next;
 	}
 }
 
-
 /*
  * Add the result of glob(3) to the list.
  */
 
-STATIC void
-addglob(pglob)
-	const glob_t *pglob;
+STATIC void addglob(pglob) const glob_t *pglob;
 {
 	char **p = pglob->gl_pathv;
 
@@ -1193,17 +1108,11 @@ addglob(pglob)
 	} while (*++p);
 }
 
-
-#else	/* HAVE_GLOB */
+#else  /* HAVE_GLOB */
 STATIC char *expdir;
 
-
-STATIC void
-expandmeta(struct strlist *str, int flag)
-{
-	static const char metachars[] = {
-		'*', '?', '[', 0
-	};
+STATIC void expandmeta(struct strlist *str, int flag) {
+	static const char metachars[] = {'*', '?', '[', 0};
 	/* TODO - EXP_REDIR */
 
 	while (str) {
@@ -1220,7 +1129,7 @@ expandmeta(struct strlist *str, int flag)
 		INTOFF;
 		p = preglob(str->text, RMESCAPE_ALLOC | RMESCAPE_HEAP);
 		{
-			int i = strlen(str->text);
+			int i  = strlen(str->text);
 			expdir = ckmalloc(i < 2048 ? 2048 : i); /* XXX */
 		}
 
@@ -1230,10 +1139,10 @@ expandmeta(struct strlist *str, int flag)
 			ckfree(p);
 		INTON;
 		if (exparg.lastp == savelastp) {
-			/*
-			 * no matches
-			 */
-nometa:
+		/*
+		 * no matches
+		 */
+		nometa:
 			*exparg.lastp = str;
 			rmescapes(str->text);
 			exparg.lastp = &str->next;
@@ -1241,21 +1150,18 @@ nometa:
 			*exparg.lastp = NULL;
 			*savelastp = sp = expsort(*savelastp);
 			while (sp->next != NULL)
-				sp = sp->next;
+				sp       = sp->next;
 			exparg.lastp = &sp->next;
 		}
 		str = str->next;
 	}
 }
 
-
 /*
  * Do metacharacter (i.e. *, ?, [...]) expansion.
  */
 
-STATIC void
-expmeta(char *enddir, char *name)
-{
+STATIC void expmeta(char *enddir, char *name) {
 	char *p;
 	const char *cp;
 	char *start;
@@ -1297,7 +1203,7 @@ expmeta(char *enddir, char *name)
 			}
 		}
 	}
-	if (metaflag == 0) {	/* we've reached the end of the file name */
+	if (metaflag == 0) { /* we've reached the end of the file name */
 		if (enddir != expdir)
 			metaflag++;
 		p = name;
@@ -1324,7 +1230,7 @@ expmeta(char *enddir, char *name)
 	} else if (enddir == expdir + 1 && *expdir == '/') {
 		cp = "/";
 	} else {
-		cp = expdir;
+		cp         = expdir;
 		enddir[-1] = '\0';
 	}
 	if ((dirp = opendir(cp)) == NULL)
@@ -1334,7 +1240,7 @@ expmeta(char *enddir, char *name)
 	if (*endname == 0) {
 		atend = 1;
 	} else {
-		atend = 0;
+		atend    = 0;
 		*endname = '\0';
 		endname += esc + 1;
 	}
@@ -1344,16 +1250,15 @@ expmeta(char *enddir, char *name)
 		p++;
 	if (*p == '.')
 		matchdot++;
-	while (! int_pending() && (dp = readdir(dirp)) != NULL) {
-		if (dp->d_name[0] == '.' && ! matchdot)
+	while (!int_pending() && (dp = readdir(dirp)) != NULL) {
+		if (dp->d_name[0] == '.' && !matchdot)
 			continue;
 		if (pmatch(start, dp->d_name)) {
 			if (atend) {
 				scopy(dp->d_name, enddir);
 				addfname(expdir);
 			} else {
-				for (p = enddir, cp = dp->d_name;
-				     (*p++ = *cp++) != '\0';)
+				for (p = enddir, cp = dp->d_name; (*p++ = *cp++) != '\0';)
 					continue;
 				p[-1] = '/';
 				expmeta(p, endname);
@@ -1361,27 +1266,23 @@ expmeta(char *enddir, char *name)
 		}
 	}
 	closedir(dirp);
-	if (! atend)
+	if (!atend)
 		endname[-esc - 1] = esc ? '\\' : '/';
 }
-#endif	/* HAVE_GLOB */
-
+#endif /* HAVE_GLOB */
 
 /*
  * Add a file name to the list.
  */
 
-STATIC void
-addfname(char *name)
-{
+STATIC void addfname(char *name) {
 	struct strlist *sp;
 
-	sp = (struct strlist *)stalloc(sizeof *sp);
-	sp->text = sstrdup(name);
+	sp            = (struct strlist *)stalloc(sizeof *sp);
+	sp->text      = sstrdup(name);
 	*exparg.lastp = sp;
-	exparg.lastp = &sp->next;
+	exparg.lastp  = &sp->next;
 }
-
 
 #ifndef HAVE_GLOB
 /*
@@ -1390,22 +1291,17 @@ addfname(char *name)
  * work.
  */
 
-STATIC struct strlist *
-expsort(struct strlist *str)
-{
+STATIC struct strlist *expsort(struct strlist *str) {
 	int len;
 	struct strlist *sp;
 
 	len = 0;
-	for (sp = str ; sp ; sp = sp->next)
+	for (sp = str; sp; sp = sp->next)
 		len++;
 	return msort(str, len);
 }
 
-
-STATIC struct strlist *
-msort(struct strlist *list, int len)
-{
+STATIC struct strlist *msort(struct strlist *list, int len) {
 	struct strlist *p, *q = NULL;
 	struct strlist **lpp;
 	int half;
@@ -1415,13 +1311,13 @@ msort(struct strlist *list, int len)
 		return list;
 	half = len >> 1;
 	p = list;
-	for (n = half ; --n >= 0 ; ) {
+	for (n = half; --n >= 0;) {
 		q = p;
 		p = p->next;
 	}
-	q->next = NULL;			/* terminate first half of list */
-	q = msort(list, half);		/* sort first half of list */
-	p = msort(p, len - half);		/* sort second half */
+	q->next = NULL;                 /* terminate first half of list */
+	q       = msort(list, half);    /* sort first half of list */
+	p       = msort(p, len - half); /* sort second half */
 	lpp = &list;
 	for (;;) {
 		if (strcmp(p->text, q->text) < 0) {
@@ -1444,42 +1340,29 @@ msort(struct strlist *list, int len)
 }
 #endif
 
-
 /*
  * Returns true if the pattern matches the string.
  */
 
-STATIC inline int
-patmatch(char *pattern, const char *string)
-{
+STATIC inline int patmatch(char *pattern, const char *string) {
 	return pmatch(preglob(pattern, 0), string);
 }
 
-
 #ifndef HAVE_FNMATCH
-STATIC int ccmatch(const char *p, int chr, const char **r)
-{
+STATIC int ccmatch(const char *p, int chr, const char **r) {
 	static const struct class {
 		char name[10];
 		int (*fn)(int);
 	} classes[] = {
-		{ .name = ":alnum:]", .fn = isalnum },
-		{ .name = ":cntrl:]", .fn = iscntrl },
-		{ .name = ":lower:]", .fn = islower },
-		{ .name = ":space:]", .fn = isspace },
-		{ .name = ":alpha:]", .fn = isalpha },
-		{ .name = ":digit:]", .fn = isdigit },
-		{ .name = ":print:]", .fn = isprint },
-		{ .name = ":upper:]", .fn = isupper },
-		{ .name = ":blank:]", .fn = isblank },
-		{ .name = ":graph:]", .fn = isgraph },
-		{ .name = ":punct:]", .fn = ispunct },
-		{ .name = ":xdigit:]", .fn = isxdigit },
+	    {.name = ":alnum:]", .fn = isalnum}, {.name = ":cntrl:]", .fn = iscntrl}, {.name = ":lower:]", .fn = islower},
+	    {.name = ":space:]", .fn = isspace}, {.name = ":alpha:]", .fn = isalpha}, {.name = ":digit:]", .fn = isdigit},
+	    {.name = ":print:]", .fn = isprint}, {.name = ":upper:]", .fn = isupper}, {.name = ":blank:]", .fn = isblank},
+	    {.name = ":graph:]", .fn = isgraph}, {.name = ":punct:]", .fn = ispunct}, {.name = ":xdigit:]", .fn = isxdigit},
 	};
 	const struct class *class, *end;
 
 	end = classes + sizeof(classes) / sizeof(classes[0]);
-	for (class = classes; class < end; class++) {
+	for (class = classes; class < end; class ++) {
 		const char *q;
 
 		q = prefix(p, class->name);
@@ -1493,9 +1376,7 @@ STATIC int ccmatch(const char *p, int chr, const char **r)
 	return 0;
 }
 
-STATIC int
-pmatch(const char *pattern, const char *string)
-{
+STATIC int pmatch(const char *pattern, const char *string) {
 	const char *p, *q;
 	char c;
 
@@ -1578,7 +1459,8 @@ pmatch(const char *pattern, const char *string)
 				return 0;
 			break;
 		}
-dft:	        default:
+		dft:
+		default:
 			if (*q++ != c)
 				return 0;
 			break;
@@ -1591,15 +1473,11 @@ breakloop:
 }
 #endif
 
-
-
 /*
  * Remove any CTLESC characters from a string.
  */
 
-char *
-_rmescapes(char *str, int flag)
-{
+char *_rmescapes(char *str, int flag) {
 	char *p, *q, *r;
 	unsigned inquotes;
 	int notescaped;
@@ -1612,13 +1490,13 @@ _rmescapes(char *str, int flag)
 	q = p;
 	r = str;
 	if (flag & RMESCAPE_ALLOC) {
-		size_t len = p - str;
+		size_t len     = p - str;
 		size_t fulllen = len + strlen(p) + 1;
 
 		if (flag & RMESCAPE_GROW) {
 			int strloc = str - (char *)stackblock();
 
-			r = makestrspace(fulllen, expdest);
+			r   = makestrspace(fulllen, expdest);
 			str = (char *)stackblock() + strloc;
 			p = str + len;
 		} else if (flag & RMESCAPE_HEAP) {
@@ -1631,8 +1509,8 @@ _rmescapes(char *str, int flag)
 			q = mempcpy(q, str, len);
 		}
 	}
-	inquotes = 0;
-	globbing = flag & RMESCAPE_GLOB;
+	inquotes   = 0;
+	globbing   = flag & RMESCAPE_GLOB;
 	notescaped = globbing;
 	while (*p) {
 		if (*p == (char)CTLQUOTEMARK) {
@@ -1651,7 +1529,7 @@ _rmescapes(char *str, int flag)
 			goto copy;
 		}
 		notescaped = globbing;
-copy:
+	copy:
 		*q++ = *p++;
 	}
 	*q = '\0';
@@ -1662,15 +1540,11 @@ copy:
 	return r;
 }
 
-
-
 /*
  * See if a pattern matches in a case statement.
  */
 
-int
-casematch(union node *pattern, char *val)
-{
+int casematch(union node *pattern, char *val) {
 	struct stackmark smark;
 	int result;
 
@@ -1689,9 +1563,7 @@ casematch(union node *pattern, char *val)
  * Our own itoa().
  */
 
-STATIC int
-cvtnum(intmax_t num)
-{
+STATIC int cvtnum(intmax_t num) {
 	int len = max_int_length(sizeof(num));
 
 	expdest = makestrspace(len, expdest);
@@ -1700,9 +1572,7 @@ cvtnum(intmax_t num)
 	return len;
 }
 
-STATIC void
-varunset(const char *end, const char *var, const char *umsg, int varflags)
-{
+STATIC void varunset(const char *end, const char *var, const char *umsg, int varflags) {
 	const char *msg;
 	const char *tail;
 
@@ -1722,7 +1592,7 @@ varunset(const char *end, const char *var, const char *umsg, int varflags)
 
 INCLUDE "expand.h"
 
-RESET {
+    RESET {
 	ifsfree();
 }
 

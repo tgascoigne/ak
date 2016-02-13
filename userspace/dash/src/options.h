@@ -35,14 +35,12 @@
  */
 
 struct shparam {
-	int nparam;		/* # of positional parameters (without $0) */
-	unsigned char malloc;	/* if parameter list dynamically allocated */
-	char **p;		/* parameter list */
-	int optind;		/* next parameter to be processed by getopts */
-	int optoff;		/* used by getopts */
+	int nparam;           /* # of positional parameters (without $0) */
+	unsigned char malloc; /* if parameter list dynamically allocated */
+	char **p;             /* parameter list */
+	int optind;           /* next parameter to be processed by getopts */
+	int optoff;           /* used by getopts */
 };
-
-
 
 #define eflag optlist[0]
 #define fflag optlist[1]
@@ -54,26 +52,25 @@ struct shparam {
 #define xflag optlist[7]
 #define vflag optlist[8]
 #define Vflag optlist[9]
-#define	Eflag optlist[10]
-#define	Cflag optlist[11]
-#define	aflag optlist[12]
-#define	bflag optlist[13]
-#define	uflag optlist[14]
-#define	nolog optlist[15]
-#define	debug optlist[16]
+#define Eflag optlist[10]
+#define Cflag optlist[11]
+#define aflag optlist[12]
+#define bflag optlist[13]
+#define uflag optlist[14]
+#define nolog optlist[15]
+#define debug optlist[16]
 
-#define NOPTS	17
+#define NOPTS 17
 
 extern const char optletters[NOPTS];
 extern char optlist[NOPTS];
 
-
-extern char *minusc;		/* argument to -c option */
-extern char *arg0;		/* $0 */
-extern struct shparam shellparam;  /* $@ */
-extern char **argptr;		/* argument list for builtin commands */
-extern char *optionarg;		/* set by nextopt */
-extern char *optptr;		/* used by nextopt */
+extern char *minusc;              /* argument to -c option */
+extern char *arg0;                /* $0 */
+extern struct shparam shellparam; /* $@ */
+extern char **argptr;             /* argument list for builtin commands */
+extern char *optionarg;           /* set by nextopt */
+extern char *optptr;              /* used by nextopt */
 
 int procargs(int, char **);
 void optschanged(void);

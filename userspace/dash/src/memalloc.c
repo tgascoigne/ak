@@ -47,9 +47,7 @@
  * Like malloc, but returns an error when out of space.
  */
 
-pointer
-ckmalloc(size_t nbytes)
-{
+pointer ckmalloc(size_t nbytes) {
 	pointer p;
 
 	p = malloc(nbytes);
@@ -58,34 +56,27 @@ ckmalloc(size_t nbytes)
 	return p;
 }
 
-
 /*
  * Same for realloc.
  */
 
-pointer
-ckrealloc(pointer p, size_t nbytes)
-{
+pointer ckrealloc(pointer p, size_t nbytes) {
 	p = realloc(p, nbytes);
 	if (p == NULL)
 		sh_error("Out of space");
 	return p;
 }
 
-
 /*
  * Make a copy of a string in safe storage.
  */
 
-char *
-savestr(const char *s)
-{
+char *savestr(const char *s) {
 	char *p = strdup(s);
 	if (!p)
 		sh_error("Out of space");
 	return p;
 }
-
 
 /*
  * Parse trees for commands are allocated in lifo order, so we use a stack
@@ -106,13 +97,11 @@ struct stack_block {
 
 struct stack_block stackbase;
 struct stack_block *stackp = &stackbase;
-char *stacknxt = stackbase.space;
-size_t stacknleft = MINSIZE;
-char *sstrend = stackbase.space + MINSIZE;
+char *stacknxt             = stackbase.space;
+size_t stacknleft          = MINSIZE;
+char *sstrend              = stackbase.space + MINSIZE;
 
-pointer
-stalloc(size_t nbytes)
-{
+pointer stalloc(size_t nbytes) {
 	char *p;
 	size_t aligned;
 
@@ -129,12 +118,12 @@ stalloc(size_t nbytes)
 		if (len < blocksize)
 			sh_error("Out of space");
 		INTOFF;
-		sp = ckmalloc(len);
-		sp->prev = stackp;
-		stacknxt = sp->space;
+		sp         = ckmalloc(len);
+		sp->prev   = stackp;
+		stacknxt   = sp->space;
 		stacknleft = blocksize;
-		sstrend = stacknxt + blocksize;
-		stackp = sp;
+		sstrend    = stacknxt + blocksize;
+		stackp     = sp;
 		INTON;
 	}
 	p = stacknxt;
@@ -143,10 +132,7 @@ stalloc(size_t nbytes)
 	return p;
 }
 
-
-void
-stunalloc(pointer p)
-{
+void stunalloc(pointer p) {
 #ifdef DEBUG
 	if (!p || (stacknxt < (char *)p) || ((char *)p < stackp->space)) {
 		write(2, "stunalloc\n", 10);
@@ -157,39 +143,31 @@ stunalloc(pointer p)
 	stacknxt = p;
 }
 
-
-
-void pushstackmark(struct stackmark *mark, size_t len)
-{
-	mark->stackp = stackp;
-	mark->stacknxt = stacknxt;
+void pushstackmark(struct stackmark *mark, size_t len) {
+	mark->stackp     = stackp;
+	mark->stacknxt   = stacknxt;
 	mark->stacknleft = stacknleft;
 	grabstackblock(len);
 }
 
-void setstackmark(struct stackmark *mark)
-{
+void setstackmark(struct stackmark *mark) {
 	pushstackmark(mark, stacknxt == stackp->space && stackp != &stackbase);
 }
 
-
-void
-popstackmark(struct stackmark *mark)
-{
+void popstackmark(struct stackmark *mark) {
 	struct stack_block *sp;
 
 	INTOFF;
 	while (stackp != mark->stackp) {
-		sp = stackp;
+		sp     = stackp;
 		stackp = sp->prev;
 		ckfree(sp);
 	}
-	stacknxt = mark->stacknxt;
+	stacknxt   = mark->stacknxt;
 	stacknleft = mark->stacknleft;
-	sstrend = mark->stacknxt + mark->stacknleft;
+	sstrend    = mark->stacknxt + mark->stacknleft;
 	INTON;
 }
-
 
 /*
  * When the parser reads in a string, it wants to stick the string on the
@@ -201,9 +179,7 @@ popstackmark(struct stackmark *mark)
  * part of the block that has been used.
  */
 
-void
-growstackblock(void)
-{
+void growstackblock(void) {
 	size_t newlen;
 
 	newlen = stacknleft * 2;
@@ -218,20 +194,20 @@ growstackblock(void)
 		size_t grosslen;
 
 		INTOFF;
-		sp = stackp;
+		sp         = stackp;
 		prevstackp = sp->prev;
-		grosslen = newlen + sizeof(struct stack_block) - MINSIZE;
-		sp = ckrealloc((pointer)sp, grosslen);
-		sp->prev = prevstackp;
-		stackp = sp;
-		stacknxt = sp->space;
+		grosslen   = newlen + sizeof(struct stack_block) - MINSIZE;
+		sp         = ckrealloc((pointer)sp, grosslen);
+		sp->prev   = prevstackp;
+		stackp     = sp;
+		stacknxt   = sp->space;
 		stacknleft = newlen;
-		sstrend = sp->space + newlen;
+		sstrend    = sp->space + newlen;
 		INTON;
 	} else {
 		char *oldspace = stacknxt;
-		int oldlen = stacknleft;
-		char *p = stalloc(newlen);
+		int oldlen     = stacknleft;
+		char *p        = stalloc(newlen);
 
 		/* free the space we just allocated */
 		stacknxt = memcpy(p, oldspace, oldlen);
@@ -257,9 +233,7 @@ growstackblock(void)
  * is space for at least one character.
  */
 
-void *
-growstackstr(void)
-{
+void *growstackstr(void) {
 	size_t len = stackblocksize();
 	growstackblock();
 	return stackblock() + len;
@@ -269,16 +243,14 @@ growstackstr(void)
  * Called from CHECKSTRSPACE.
  */
 
-char *
-makestrspace(size_t newlen, char *p)
-{
+char *makestrspace(size_t newlen, char *p) {
 	size_t len = p - stacknxt;
 	size_t size;
 
 	for (;;) {
 		size_t nleft;
 
-		size = stackblocksize();
+		size  = stackblocksize();
 		nleft = size - len;
 		if (nleft >= newlen)
 			break;
@@ -287,16 +259,12 @@ makestrspace(size_t newlen, char *p)
 	return stackblock() + len;
 }
 
-char *
-stnputs(const char *s, size_t n, char *p)
-{
+char *stnputs(const char *s, size_t n, char *p) {
 	p = makestrspace(n, p);
 	p = mempcpy(p, s, n);
 	return p;
 }
 
-char *
-stputs(const char *s, char *p)
-{
+char *stputs(const char *s, char *p) {
 	return stnputs(s, strlen(s), p);
 }

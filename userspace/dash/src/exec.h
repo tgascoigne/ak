@@ -35,11 +35,10 @@
  */
 
 /* values of cmdtype */
-#define CMDUNKNOWN	-1	/* no entry in table for command */
-#define CMDNORMAL	0	/* command is an executable program */
-#define CMDFUNCTION	1	/* command is a shell function */
-#define CMDBUILTIN	2	/* command is a shell builtin */
-
+#define CMDUNKNOWN -1 /* no entry in table for command */
+#define CMDNORMAL 0   /* command is an executable program */
+#define CMDFUNCTION 1 /* command is a shell function */
+#define CMDBUILTIN 2  /* command is a shell builtin */
 
 struct cmdentry {
 	int cmdtype;
@@ -50,18 +49,16 @@ struct cmdentry {
 	} u;
 };
 
-
 /* action to find_command() */
-#define DO_ERR		0x01	/* prints errors */
-#define DO_ABS		0x02	/* checks absolute paths */
-#define DO_NOFUNC	0x04	/* don't return shell functions, for command */
-#define DO_ALTPATH	0x08	/* using alternate path */
-#define DO_ALTBLTIN	0x20	/* %builtin in alt. path */
+#define DO_ERR 0x01      /* prints errors */
+#define DO_ABS 0x02      /* checks absolute paths */
+#define DO_NOFUNC 0x04   /* don't return shell functions, for command */
+#define DO_ALTPATH 0x08  /* using alternate path */
+#define DO_ALTBLTIN 0x20 /* %builtin in alt. path */
 
-extern const char *pathopt;	/* set by padvance */
+extern const char *pathopt; /* set by padvance */
 
-void shellexec(char **, const char *, int)
-    __attribute__((__noreturn__));
+void shellexec(char **, const char *, int) __attribute__((__noreturn__));
 char *padvance(const char **, const char *);
 int hashcmd(int, char **);
 void find_command(char *, struct cmdentry *, int, const char *);

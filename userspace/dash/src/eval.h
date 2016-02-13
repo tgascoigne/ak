@@ -34,30 +34,29 @@
  *	@(#)eval.h	8.2 (Berkeley) 5/4/95
  */
 
-extern char *commandname;	/* currently executing command */
-extern int exitstatus;		/* exit status of last command */
-extern int back_exitstatus;	/* exit status of backquoted command */
+extern char *commandname;   /* currently executing command */
+extern int exitstatus;      /* exit status of last command */
+extern int back_exitstatus; /* exit status of backquoted command */
 
-
-struct backcmd {		/* result of evalbackcmd */
-	int fd;			/* file descriptor to read from */
-	char *buf;		/* buffer */
-	int nleft;		/* number of chars in buffer */
-	struct job *jp;		/* job structure for command */
+struct backcmd {    /* result of evalbackcmd */
+	int fd;         /* file descriptor to read from */
+	char *buf;      /* buffer */
+	int nleft;      /* number of chars in buffer */
+	struct job *jp; /* job structure for command */
 };
 
 /* flags in argument to evaltree */
-#define EV_EXIT 01		/* exit after evaluating tree */
-#define EV_TESTED 02		/* exit status is checked; ignore -e flag */
+#define EV_EXIT 01   /* exit after evaluating tree */
+#define EV_TESTED 02 /* exit status is checked; ignore -e flag */
 
 int evalstring(char *, int);
-union node;	/* BLETCH for ansi C */
+union node; /* BLETCH for ansi C */
 void evaltree(union node *, int);
 void evalbackcmd(union node *, struct backcmd *);
 
 extern int evalskip;
 
 /* reasons for skipping commands (see comment on breakcmd routine) */
-#define SKIPBREAK	(1 << 0)
-#define SKIPCONT	(1 << 1)
-#define SKIPFUNC	(1 << 2)
+#define SKIPBREAK (1 << 0)
+#define SKIPCONT (1 << 1)
+#define SKIPFUNC (1 << 2)

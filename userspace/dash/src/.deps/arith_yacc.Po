@@ -1,0 +1,193 @@
+arith_yacc.o: arith_yacc.c /usr/include/stdc-predef.h ../config.h \
+ /usr/i386-linux-uclibc/usr/include/inttypes.h \
+ /usr/i386-linux-uclibc/usr/include/features.h \
+ /usr/i386-linux-uclibc/usr/include/bits/uClibc_config.h \
+ /usr/i386-linux-uclibc/usr/include/sys/cdefs.h \
+ /usr/i386-linux-uclibc/usr/include/stdint.h \
+ /usr/i386-linux-uclibc/usr/include/bits/wchar.h \
+ /usr/i386-linux-uclibc/usr/include/bits/wordsize.h \
+ /usr/i386-linux-uclibc/usr/include/stdlib.h \
+ /usr/lib/gcc/x86_64-redhat-linux/5.3.1/include/stddef.h \
+ /usr/i386-linux-uclibc/usr/include/bits/waitflags.h \
+ /usr/i386-linux-uclibc/usr/include/bits/waitstatus.h \
+ /usr/i386-linux-uclibc/usr/include/endian.h \
+ /usr/i386-linux-uclibc/usr/include/bits/endian.h \
+ /usr/i386-linux-uclibc/usr/include/byteswap.h \
+ /usr/i386-linux-uclibc/usr/include/bits/byteswap.h \
+ /usr/i386-linux-uclibc/usr/include/bits/byteswap-common.h \
+ /usr/i386-linux-uclibc/usr/include/sys/types.h \
+ /usr/i386-linux-uclibc/usr/include/bits/types.h \
+ /usr/i386-linux-uclibc/usr/include/bits/typesizes.h \
+ /usr/i386-linux-uclibc/usr/include/time.h \
+ /usr/i386-linux-uclibc/usr/include/sys/select.h \
+ /usr/i386-linux-uclibc/usr/include/bits/select.h \
+ /usr/i386-linux-uclibc/usr/include/bits/sigset.h \
+ /usr/i386-linux-uclibc/usr/include/bits/time.h \
+ /usr/i386-linux-uclibc/usr/include/sys/sysmacros.h \
+ /usr/i386-linux-uclibc/usr/include/alloca.h arith_yacc.h expand.h \
+ shell.h /usr/i386-linux-uclibc/usr/include/sys/param.h \
+ /usr/i386-linux-uclibc/usr/include/limits.h \
+ /usr/lib/gcc/x86_64-redhat-linux/5.3.1/include/limits.h \
+ /usr/i386-linux-uclibc/usr/include/bits/posix1_lim.h \
+ /usr/i386-linux-uclibc/usr/include/bits/local_lim.h \
+ /usr/include/linux/limits.h \
+ /usr/i386-linux-uclibc/usr/include/bits/uClibc_local_lim.h \
+ /usr/i386-linux-uclibc/usr/include/bits/posix2_lim.h \
+ /usr/i386-linux-uclibc/usr/include/bits/xopen_lim.h \
+ /usr/i386-linux-uclibc/usr/include/bits/stdio_lim.h \
+ /usr/include/linux/param.h /usr/include/asm/param.h \
+ /usr/include/asm-generic/param.h error.h \
+ /usr/i386-linux-uclibc/usr/include/setjmp.h \
+ /usr/i386-linux-uclibc/usr/include/bits/setjmp.h \
+ /usr/i386-linux-uclibc/usr/include/signal.h \
+ /usr/i386-linux-uclibc/usr/include/bits/signum.h \
+ /usr/i386-linux-uclibc/usr/include/bits/siginfo.h \
+ /usr/i386-linux-uclibc/usr/include/bits/sigaction.h \
+ /usr/i386-linux-uclibc/usr/include/bits/sigcontext.h \
+ /usr/include/asm/sigcontext.h /usr/include/linux/types.h \
+ /usr/include/asm/types.h /usr/include/asm-generic/types.h \
+ /usr/include/asm-generic/int-ll64.h /usr/include/asm/bitsperlong.h \
+ /usr/include/asm-generic/bitsperlong.h /usr/include/linux/posix_types.h \
+ /usr/include/linux/stddef.h /usr/include/asm/posix_types.h \
+ /usr/include/asm/posix_types_32.h /usr/include/asm-generic/posix_types.h \
+ /usr/i386-linux-uclibc/usr/include/bits/sigstack.h \
+ /usr/i386-linux-uclibc/usr/include/sys/ucontext.h output.h \
+ /usr/lib/gcc/x86_64-redhat-linux/5.3.1/include/stdarg.h var.h
+
+/usr/include/stdc-predef.h:
+
+../config.h:
+
+/usr/i386-linux-uclibc/usr/include/inttypes.h:
+
+/usr/i386-linux-uclibc/usr/include/features.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/uClibc_config.h:
+
+/usr/i386-linux-uclibc/usr/include/sys/cdefs.h:
+
+/usr/i386-linux-uclibc/usr/include/stdint.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/wchar.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/wordsize.h:
+
+/usr/i386-linux-uclibc/usr/include/stdlib.h:
+
+/usr/lib/gcc/x86_64-redhat-linux/5.3.1/include/stddef.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/waitflags.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/waitstatus.h:
+
+/usr/i386-linux-uclibc/usr/include/endian.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/endian.h:
+
+/usr/i386-linux-uclibc/usr/include/byteswap.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/byteswap.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/byteswap-common.h:
+
+/usr/i386-linux-uclibc/usr/include/sys/types.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/types.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/typesizes.h:
+
+/usr/i386-linux-uclibc/usr/include/time.h:
+
+/usr/i386-linux-uclibc/usr/include/sys/select.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/select.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/sigset.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/time.h:
+
+/usr/i386-linux-uclibc/usr/include/sys/sysmacros.h:
+
+/usr/i386-linux-uclibc/usr/include/alloca.h:
+
+arith_yacc.h:
+
+expand.h:
+
+shell.h:
+
+/usr/i386-linux-uclibc/usr/include/sys/param.h:
+
+/usr/i386-linux-uclibc/usr/include/limits.h:
+
+/usr/lib/gcc/x86_64-redhat-linux/5.3.1/include/limits.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/posix1_lim.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/uClibc_local_lim.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/posix2_lim.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/xopen_lim.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/stdio_lim.h:
+
+/usr/include/linux/param.h:
+
+/usr/include/asm/param.h:
+
+/usr/include/asm-generic/param.h:
+
+error.h:
+
+/usr/i386-linux-uclibc/usr/include/setjmp.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/setjmp.h:
+
+/usr/i386-linux-uclibc/usr/include/signal.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/signum.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/siginfo.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/sigaction.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/sigcontext.h:
+
+/usr/include/asm/sigcontext.h:
+
+/usr/include/linux/types.h:
+
+/usr/include/asm/types.h:
+
+/usr/include/asm-generic/types.h:
+
+/usr/include/asm-generic/int-ll64.h:
+
+/usr/include/asm/bitsperlong.h:
+
+/usr/include/asm-generic/bitsperlong.h:
+
+/usr/include/linux/posix_types.h:
+
+/usr/include/linux/stddef.h:
+
+/usr/include/asm/posix_types.h:
+
+/usr/include/asm/posix_types_32.h:
+
+/usr/include/asm-generic/posix_types.h:
+
+/usr/i386-linux-uclibc/usr/include/bits/sigstack.h:
+
+/usr/i386-linux-uclibc/usr/include/sys/ucontext.h:
+
+output.h:
+
+/usr/lib/gcc/x86_64-redhat-linux/5.3.1/include/stdarg.h:
+
+var.h:

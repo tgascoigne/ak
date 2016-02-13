@@ -62,6 +62,7 @@ static pgentry_t NilPgEnt = (pgentry_t)0;
 extern pgentry_t KernelPageDir[1024];
 
 void pg_init(void);
+void pg_unmap_low_kernel(void);
 void pg_map_sequence(pgaddr_t paddr, vaddr_t vaddr, size_t length);
 void pg_map(pgaddr_t paddr, vaddr_t vaddr);
 void pg_unmap(vaddr_t vaddr);
@@ -77,6 +78,7 @@ bool pg_is_allocated(vaddr_t addr);
 bool pg_is_reserved(vaddr_t addr);
 pgaddr_t pg_clone_dir(pgaddr_t dirframe);
 pgaddr_t pg_dir_new(void);
+void memcpy_phys(void *dest, paddr_t src, size_t len);
 
 bool mmu_is_ready(void);
 #endif

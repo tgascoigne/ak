@@ -26,5 +26,9 @@ extern syscall_fn_t syscall_funcs[NUM_SYSCALLS];
 #define SYS_UNAME 0x7a
 #define SYS_SCHED_YIELD 0x9e
 #define SYS_MMAP_PGOFF 0xc0
+#define SYS_GETUID 0xc7
+#define SYS_GETGID 0xc8
+#define SYS_GETEUID 0xc9
+#define SYS_GETEGID 0xca
 
 void syscall_register(int syscall, syscall_fn_t fn, int argc);

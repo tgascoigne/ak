@@ -49,9 +49,7 @@
 
 extern const char *arith_buf;
 
-int
-yylex()
-{
+int yylex() {
 	int value;
 	const char *buf = arith_buf;
 	const char *p;
@@ -140,9 +138,9 @@ yylex()
 			goto out;
 		case '=':
 			value += ARITH_ASS - '=';
-checkeq:
+		checkeq:
 			buf++;
-checkeqcur:
+		checkeqcur:
 			if (*buf != '=')
 				goto out;
 			value += 11;

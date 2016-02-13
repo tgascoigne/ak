@@ -40,7 +40,7 @@
 #include "memalloc.h"
 #include "mystring.h"
 #include "alias.h"
-#include "options.h"	/* XXX for argptr (should remove?) */
+#include "options.h" /* XXX for argptr (should remove?) */
 
 #define ATABSIZE 39
 
@@ -51,35 +51,31 @@ STATIC struct alias *freealias(struct alias *);
 STATIC struct alias **__lookupalias(const char *);
 
 STATIC
-void
-setalias(const char *name, const char *val)
-{
+void setalias(const char *name, const char *val) {
 	struct alias *ap, **app;
 
 	app = __lookupalias(name);
-	ap = *app;
+	ap  = *app;
 	INTOFF;
 	if (ap) {
 		if (!(ap->flag & ALIASINUSE)) {
 			ckfree(ap->val);
 		}
-		ap->val	= savestr(val);
+		ap->val = savestr(val);
 		ap->flag &= ~ALIASDEAD;
 	} else {
 		/* not found */
-		ap = ckmalloc(sizeof (struct alias));
+		ap       = ckmalloc(sizeof(struct alias));
 		ap->name = savestr(name);
-		ap->val = savestr(val);
+		ap->val  = savestr(val);
 		ap->flag = 0;
 		ap->next = 0;
-		*app = ap;
+		*app     = ap;
 	}
 	INTON;
 }
 
-int
-unalias(const char *name)
-{
+int unalias(const char *name) {
 	struct alias **app;
 
 	app = __lookupalias(name);
@@ -94,9 +90,7 @@ unalias(const char *name)
 	return (1);
 }
 
-void
-rmaliases(void)
-{
+void rmaliases(void) {
 	struct alias *ap, **app;
 	int i;
 
@@ -113,9 +107,7 @@ rmaliases(void)
 	INTON;
 }
 
-struct alias *
-lookupalias(const char *name, int check)
-{
+struct alias *lookupalias(const char *name, int check) {
 	struct alias *ap = *__lookupalias(name);
 
 	if (check && ap && (ap->flag & ALIASINUSE))
@@ -126,9 +118,7 @@ lookupalias(const char *name, int check)
 /*
  * TODO - sort output
  */
-int
-aliascmd(int argc, char **argv)
-{
+int aliascmd(int argc, char **argv) {
 	char *n, *v;
 	int ret = 0;
 	struct alias *ap;
@@ -143,7 +133,7 @@ aliascmd(int argc, char **argv)
 		return (0);
 	}
 	while ((n = *++argv) != NULL) {
-		if ((v = strchr(n+1, '=')) == NULL) { /* n+1: funny ksh stuff */
+		if ((v = strchr(n + 1, '=')) == NULL) { /* n+1: funny ksh stuff */
 			if ((ap = *__lookupalias(n)) == NULL) {
 				outfmt(out2, "%s: %s not found\n", "alias", n);
 				ret = 1;
@@ -158,9 +148,7 @@ aliascmd(int argc, char **argv)
 	return (ret);
 }
 
-int
-unaliascmd(int argc, char **argv)
-{
+int unaliascmd(int argc, char **argv) {
 	int i;
 
 	while ((i = nextopt("a")) != '\0') {
@@ -179,8 +167,7 @@ unaliascmd(int argc, char **argv)
 	return (i);
 }
 
-STATIC struct alias *
-freealias(struct alias *ap) {
+STATIC struct alias *freealias(struct alias *ap) {
 	struct alias *next;
 
 	if (ap->flag & ALIASINUSE) {
@@ -195,13 +182,11 @@ freealias(struct alias *ap) {
 	return next;
 }
 
-void
-printalias(const struct alias *ap) {
+void printalias(const struct alias *ap) {
 	out1fmt("%s=%s\n", ap->name, single_quote(ap->val));
 }
 
-STATIC struct alias **
-__lookupalias(const char *name) {
+STATIC struct alias **__lookupalias(const char *name) {
 	unsigned int hashval;
 	struct alias **app;
 	const char *p;
@@ -209,7 +194,7 @@ __lookupalias(const char *name) {
 
 	p = name;
 
-	ch = (unsigned char)*p;
+	ch      = (unsigned char)*p;
 	hashval = ch << 4;
 	while (ch) {
 		hashval += ch;

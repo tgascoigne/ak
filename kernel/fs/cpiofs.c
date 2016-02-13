@@ -71,13 +71,13 @@ cpiohdr_t *cpiofs_unpack_file(fsnode_t *parent, cpiohdr_t *hdr) {
 	}
 
 	// For some reason the low and high u16s are swapped in u32 values
-	hdr->filesize = ((hdr->filesize >> 16) & 0xFFFF) + ((hdr->filesize << 16) & 0xFFFF0000);
-	hdr->mtime    = ((hdr->mtime >> 16) & 0xFFFF) + ((hdr->mtime << 16) & 0xFFFF0000);
+	//	hdr->filesize = ((hdr->filesize >> 16) & 0xFFFF) + ((hdr->filesize << 16) & 0xFFFF0000);
+	//	hdr->mtime    = ((hdr->mtime >> 16) & 0xFFFF) + ((hdr->mtime << 16) & 0xFFFF0000);
 
 	cpiofiledev_t *file = (cpiofiledev_t *)malloc(sizeof(cpiofiledev_t));
 	memcpy(&file->iodev, &cpiofiledev_tmpl, sizeof(iodev_t));
 	file->pos    = 0;
-	file->length = (ssize_t)hdr->filesize;
+	file->length = (ssize_t)(hdr->filesize[0] << 16) + hdr->filesize[1];
 	file->data   = data;
 
 	cpionode_t *node = (cpionode_t *)malloc(sizeof(cpionode_t));
@@ -87,12 +87,13 @@ cpiohdr_t *cpiofs_unpack_file(fsnode_t *parent, cpiohdr_t *hdr) {
 
 	fs_link_child(parent, (fsnode_t *)&node->node);
 
-	if ((hdr->filesize % 2) != 0) {
+	ssize_t padded_len = file->length;
+	if ((padded_len % 2) != 0) {
 		/* file is padded to an even length */
-		hdr->filesize++;
+		padded_len++;
 	}
 
-	cpiohdr_t *next_hdr = (cpiohdr_t *)(data + hdr->filesize);
+	cpiohdr_t *next_hdr = (cpiohdr_t *)(data + padded_len);
 	return next_hdr;
 }
 

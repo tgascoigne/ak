@@ -43,11 +43,11 @@
  *	Our output routines may be smaller than the stdio routines.
  */
 
-#include <sys/types.h>		/* quad_t */
-#include <sys/param.h>		/* BSD4_4 */
+#include <sys/types.h> /* quad_t */
+#include <sys/param.h> /* BSD4_4 */
 #include <sys/ioctl.h>
 
-#include <stdio.h>	/* defines BUFSIZ */
+#include <stdio.h> /* defines BUFSIZ */
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -64,53 +64,36 @@
 #include "main.h"
 #include "system.h"
 
-
 #define OUTBUFSIZ BUFSIZ
-#define MEM_OUT -3		/* output to dynamically allocated memory */
-
+#define MEM_OUT -3 /* output to dynamically allocated memory */
 
 #ifdef USE_GLIBC_STDIO
-struct output output = {
-	stream: 0, nextc: 0, end: 0, buf: 0, bufsize: 0, fd: 1, flags: 0
-};
-struct output errout = {
-	stream: 0, nextc: 0, end: 0, buf: 0, bufsize: 0, fd: 2, flags: 0
-}
+struct output output = {stream : 0, nextc : 0, end : 0, buf : 0, bufsize : 0, fd : 1, flags : 0};
+struct output errout = {stream : 0, nextc : 0, end : 0, buf : 0, bufsize : 0, fd : 2, flags : 0}
 #ifdef notyet
-struct output memout = {
-	stream: 0, nextc: 0, end: 0, buf: 0, bufsize: 0, fd: MEM_OUT, flags: 0
-};
+struct output memout = {stream : 0, nextc : 0, end : 0, buf : 0, bufsize : 0, fd : MEM_OUT, flags : 0};
 #endif
 #else
-struct output output = {
-	nextc: 0, end: 0, buf: 0, bufsize: OUTBUFSIZ, fd: 1, flags: 0
-};
-struct output errout = {
-	nextc: 0, end: 0, buf: 0, bufsize: 0, fd: 2, flags: 0
-};
+struct output output = {nextc : 0, end : 0, buf : 0, bufsize : OUTBUFSIZ, fd : 1, flags : 0};
+struct output errout = {nextc : 0, end : 0, buf : 0, bufsize : 0, fd : 2, flags : 0};
 struct output preverrout;
 #ifdef notyet
-struct output memout = {
-	nextc: 0, end: 0, buf: 0, bufsize: 0, fd: MEM_OUT, flags: 0
-};
+struct output memout = {nextc : 0, end : 0, buf : 0, bufsize : 0, fd : MEM_OUT, flags : 0};
 #endif
 #endif
 struct output *out1 = &output;
 struct output *out2 = &errout;
-
 
 #ifndef USE_GLIBC_STDIO
 static void __outstr(const char *, size_t, struct output *);
 #endif
 static int xvsnprintf(char *, size_t, const char *, va_list);
 
-
 #ifdef mkinit
 
-INCLUDE "output.h"
-INCLUDE "memalloc.h"
+INCLUDE "output.h" INCLUDE "memalloc.h"
 
-INIT {
+    INIT {
 #ifdef USE_GLIBC_STDIO
 	initstreams();
 #endif
@@ -133,18 +116,15 @@ RESET {
 
 #endif
 
-
 #ifndef USE_GLIBC_STDIO
-static void
-__outstr(const char *p, size_t len, struct output *dest)
-{
+static void __outstr(const char *p, size_t len, struct output *dest) {
 	size_t bufsize;
 	size_t offset;
 	size_t nleft;
 
 	nleft = dest->end - dest->nextc;
 	if (nleft >= len) {
-buffered:
+	buffered:
 		dest->nextc = mempcpy(dest->nextc, p, len);
 		return;
 	}
@@ -167,12 +147,12 @@ buffered:
 		}
 		if (bufsize < offset)
 			goto err;
-alloc:
+	alloc:
 		INTOFF;
-		dest->buf = ckrealloc(dest->buf, bufsize);
+		dest->buf     = ckrealloc(dest->buf, bufsize);
 		dest->bufsize = bufsize;
-		dest->end = dest->buf + bufsize;
-		dest->nextc = dest->buf + offset;
+		dest->end     = dest->buf + bufsize;
+		dest->nextc   = dest->buf + offset;
 		INTON;
 	} else {
 		flushout(dest);
@@ -183,16 +163,13 @@ alloc:
 		goto buffered;
 
 	if ((xwrite(dest->fd, p, len))) {
-err:
+	err:
 		dest->flags |= OUTPUT_ERR;
 	}
 }
 #endif
 
-
-void
-outstr(const char *p, struct output *file)
-{
+void outstr(const char *p, struct output *file) {
 #ifdef USE_GLIBC_STDIO
 	INTOFF;
 	fputs(p, file->stream);
@@ -205,32 +182,22 @@ outstr(const char *p, struct output *file)
 #endif
 }
 
-
 #ifndef USE_GLIBC_STDIO
 
-
-void
-outcslow(int c, struct output *dest)
-{
+void outcslow(int c, struct output *dest) {
 	char buf = c;
 	__outstr(&buf, 1, dest);
 }
 #endif
 
-
-void
-flushall(void)
-{
+void flushall(void) {
 	flushout(&output);
 #ifdef FLUSHERR
 	flushout(&errout);
 #endif
 }
 
-
-void
-flushout(struct output *dest)
-{
+void flushout(struct output *dest) {
 #ifdef USE_GLIBC_STDIO
 	INTOFF;
 	fflush(dest->stream);
@@ -247,10 +214,7 @@ flushout(struct output *dest)
 #endif
 }
 
-
-void
-outfmt(struct output *file, const char *fmt, ...)
-{
+void outfmt(struct output *file, const char *fmt, ...) {
 	va_list ap;
 
 	va_start(ap, fmt);
@@ -258,10 +222,7 @@ outfmt(struct output *file, const char *fmt, ...)
 	va_end(ap);
 }
 
-
-void
-out1fmt(const char *fmt, ...)
-{
+void out1fmt(const char *fmt, ...) {
 	va_list ap;
 
 	va_start(ap, fmt);
@@ -269,10 +230,7 @@ out1fmt(const char *fmt, ...)
 	va_end(ap);
 }
 
-
-int
-fmtstr(char *outbuf, size_t length, const char *fmt, ...)
-{
+int fmtstr(char *outbuf, size_t length, const char *fmt, ...) {
 	va_list ap;
 	int ret;
 
@@ -282,11 +240,8 @@ fmtstr(char *outbuf, size_t length, const char *fmt, ...)
 	return ret;
 }
 
-
 #ifndef USE_GLIBC_STDIO
-void
-doformat(struct output *dest, const char *f, va_list ap)
-{
+void doformat(struct output *dest, const char *f, va_list ap) {
 	struct stackmark smark;
 	char *s;
 	int len, ret;
@@ -306,7 +261,7 @@ doformat(struct output *dest, const char *f, va_list ap)
 		return;
 	}
 	setstackmark(&smark);
-	s = stalloc((len >= stackblocksize() ? len : stackblocksize()) + 1);
+	s   = stalloc((len >= stackblocksize() ? len : stackblocksize()) + 1);
 	ret = xvsnprintf(s, len + 1, f, ap);
 	if (ret == len)
 		__outstr(s, len, dest);
@@ -316,15 +271,11 @@ doformat(struct output *dest, const char *f, va_list ap)
 }
 #endif
 
-
-
 /*
  * Version of write which resumes after a signal is caught.
  */
 
-int
-xwrite(int fd, const void *p, size_t n)
-{
+int xwrite(int fd, const void *p, size_t n) {
 	const char *buf = p;
 
 	while (n) {
@@ -345,7 +296,6 @@ xwrite(int fd, const void *p, size_t n)
 	return 0;
 }
 
-
 #ifdef notyet
 #ifdef USE_GLIBC_STDIO
 void initstreams() {
@@ -353,29 +303,22 @@ void initstreams() {
 	errout.stream = stderr;
 }
 
-
-void
-openmemout(void) {
+void openmemout(void) {
 	INTOFF;
 	memout.stream = open_memstream(&memout.buf, &memout.bufsize);
 	INTON;
 }
 
-
-int
-__closememout(void) {
+int __closememout(void) {
 	int error;
-	error = fclose(memout.stream);
+	error         = fclose(memout.stream);
 	memout.stream = NULL;
 	return error;
 }
 #endif
 #endif
 
-
-static int
-xvsnprintf(char *outbuf, size_t length, const char *fmt, va_list ap)
-{
+static int xvsnprintf(char *outbuf, size_t length, const char *fmt, va_list ap) {
 	int ret;
 
 #ifdef __sun

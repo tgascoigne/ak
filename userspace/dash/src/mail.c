@@ -41,7 +41,7 @@
 
 #include "shell.h"
 #include "nodes.h"
-#include "exec.h"	/* defines padvance() */
+#include "exec.h" /* defines padvance() */
 #include "var.h"
 #include "output.h"
 #include "memalloc.h"
@@ -49,6 +49,7 @@
 #include "mail.h"
 #include "mystring.h"
 
+#define stat64 stat
 
 #define MAXMBOXES 10
 
@@ -57,16 +58,12 @@ static time_t mailtime[MAXMBOXES];
 /* Set if MAIL or MAILPATH is changed. */
 static int changed;
 
-
-
 /*
  * Print appropriate message(s) if mail has arrived.  If changed is set,
  * then the value of MAIL has changed, so we just update the values.
  */
 
-void
-chkmail(void)
-{
+void chkmail(void) {
 	const char *mpath;
 	char *p;
 	char *q;
@@ -82,21 +79,19 @@ chkmail(void)
 			break;
 		if (*p == '\0')
 			continue;
-		for (q = p ; *q ; q++);
+		for (q = p; *q; q++)
+			;
 #ifdef DEBUG
 		if (q[-1] != '/')
 			abort();
 #endif
-		q[-1] = '\0';			/* delete trailing '/' */
+		q[-1] = '\0'; /* delete trailing '/' */
 		if (stat64(p, &statb) < 0) {
 			*mtp = 0;
 			continue;
 		}
 		if (!changed && statb.st_mtime != *mtp) {
-			outfmt(
-				&errout, snlfmt,
-				pathopt ? pathopt : "you have mail"
-			);
+			outfmt(&errout, snlfmt, pathopt ? pathopt : "you have mail");
 		}
 		*mtp = statb.st_mtime;
 	}
@@ -104,9 +99,6 @@ chkmail(void)
 	popstackmark(&smark);
 }
 
-
-void
-changemail(const char *val)
-{
+void changemail(const char *val) {
 	changed++;
 }

@@ -15,9 +15,9 @@ typedef struct {
 	uint16_t gid;
 	uint16_t nlink;
 	uint16_t rdev;
-	uint32_t mtime;
+	uint16_t mtime[2];
 	uint16_t namesize;
-	uint32_t filesize;
+	uint16_t filesize[2];
 } __attribute__((packed)) cpiohdr_t;
 
 typedef struct {

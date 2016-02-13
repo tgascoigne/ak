@@ -34,8 +34,7 @@
 #define SSIZE_MAX ((ssize_t)((size_t)-1 >> 1))
 #endif
 
-static inline void sigclearmask(void)
-{
+static inline void sigclearmask(void) {
 #ifdef HAVE_SIGSETMASK
 	sigsetmask(0);
 #else
@@ -62,8 +61,7 @@ char *strsignal(int);
 #endif
 
 #ifndef HAVE_STRTOD
-static inline double strtod(const char *nptr, char **endptr)
-{
+static inline double strtod(const char *nptr, char **endptr) {
 	*endptr = (char *)nptr;
 	return 0;
 }
@@ -78,13 +76,11 @@ static inline double strtod(const char *nptr, char **endptr)
 #endif
 
 #ifndef HAVE_BSEARCH
-void *bsearch(const void *, const void *, size_t, size_t,
-	      int (*)(const void *, const void *));
+void *bsearch(const void *, const void *, size_t, size_t, int (*)(const void *, const void *));
 #endif
 
 #ifndef HAVE_KILLPG
-static inline int killpg(pid_t pid, int signal)
-{
+static inline int killpg(pid_t pid, int signal) {
 #ifdef DEBUG
 	if (pid < 0)
 		abort();

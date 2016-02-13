@@ -43,10 +43,9 @@
 #define FORK_NOJOB 2
 
 /* mode flags for showjob(s) */
-#define	SHOW_PGID	0x01	/* only show pgid - for jobs -p */
-#define	SHOW_PID	0x04	/* include process pid */
-#define	SHOW_CHANGED	0x08	/* only jobs whose state has changed */
-
+#define SHOW_PGID 0x01    /* only show pgid - for jobs -p */
+#define SHOW_PID 0x04     /* include process pid */
+#define SHOW_CHANGED 0x08 /* only jobs whose state has changed */
 
 /*
  * A job structure contains information about a job.  A job is either a
@@ -56,37 +55,36 @@
  */
 
 struct procstat {
-	pid_t	pid;		/* process id */
- 	int	status;		/* last process status from wait() */
- 	char	*cmd;		/* text of command being run */
+	pid_t pid;  /* process id */
+	int status; /* last process status from wait() */
+	char *cmd;  /* text of command being run */
 };
 
 struct job {
-	struct procstat ps0;	/* status of process */
-	struct procstat *ps;	/* status or processes when more than one */
+	struct procstat ps0; /* status of process */
+	struct procstat *ps; /* status or processes when more than one */
 #if JOBS
-	int stopstatus;		/* status of a stopped job */
+	int stopstatus; /* status of a stopped job */
 #endif
-	uint32_t
-		nprocs: 16,	/* number of processes */
-		state: 8,
-#define	JOBRUNNING	0	/* at least one proc running */
-#define	JOBSTOPPED	1	/* all procs are stopped */
-#define	JOBDONE		2	/* all procs are completed */
+	uint32_t nprocs : 16, /* number of processes */
+	    state : 8,
+#define JOBRUNNING 0 /* at least one proc running */
+#define JOBSTOPPED 1 /* all procs are stopped */
+#define JOBDONE 2    /* all procs are completed */
 #if JOBS
-		sigint: 1,	/* job was killed by SIGINT */
-		jobctl: 1,	/* job running under job control */
+	    sigint : 1, /* job was killed by SIGINT */
+	    jobctl : 1, /* job running under job control */
 #endif
-		waited: 1,	/* true if this entry has been waited for */
-		used: 1,	/* true if this entry is in used */
-		changed: 1;	/* true if status has changed */
-	struct job *prev_job;	/* previous job */
+	    waited : 1,       /* true if this entry has been waited for */
+	    used : 1,         /* true if this entry is in used */
+	    changed : 1;      /* true if status has changed */
+	struct job *prev_job; /* previous job */
 };
 
-extern pid_t backgndpid;	/* pid of last background process */
-extern int job_warning;		/* user was warned about stopped jobs */
+extern pid_t backgndpid; /* pid of last background process */
+extern int job_warning;  /* user was warned about stopped jobs */
 #if JOBS
-extern int jobctl;		/* true if doing job control */
+extern int jobctl; /* true if doing job control */
 #else
 #define jobctl 0
 #endif
@@ -104,6 +102,6 @@ int forkshell(struct job *, union node *, int);
 int waitforjob(struct job *);
 int stoppedjobs(void);
 
-#if ! JOBS
-#define setjobctl(on) ((void)(on))	/* do nothing */
+#if !JOBS
+#define setjobctl(on) ((void)(on)) /* do nothing */
 #endif

@@ -42,26 +42,19 @@
 #include "show.h"
 #include "options.h"
 
-
 #ifdef DEBUG
-static void shtree(union node *, int, char *, FILE*);
+static void shtree(union node *, int, char *, FILE *);
 static void shcmd(union node *, FILE *);
 static void sharg(union node *, FILE *);
 static void indent(int, char *, FILE *);
 static void trstring(char *);
 
-
-void
-showtree(union node *n)
-{
+void showtree(union node *n) {
 	trputs("showtree called\n");
 	shtree(n, 1, NULL, stdout);
 }
 
-
-static void
-shtree(union node *n, int ind, char *pfx, FILE *fp)
-{
+static void shtree(union node *n, int ind, char *pfx, FILE *fp) {
 	struct nodelist *lp;
 	const char *s;
 
@@ -69,7 +62,7 @@ shtree(union node *n, int ind, char *pfx, FILE *fp)
 		return;
 
 	indent(ind, pfx, fp);
-	switch(n->type) {
+	switch (n->type) {
 	case NSEMI:
 		s = "; ";
 		goto binop;
@@ -78,10 +71,10 @@ shtree(union node *n, int ind, char *pfx, FILE *fp)
 		goto binop;
 	case NOR:
 		s = " || ";
-binop:
+	binop:
 		shtree(n->nbinary.ch1, ind, NULL, fp);
-	   /*    if (ind < 0) */
-			fputs(s, fp);
+		/*    if (ind < 0) */
+		fputs(s, fp);
 		shtree(n->nbinary.ch2, ind, NULL, fp);
 		break;
 	case NCMD:
@@ -90,7 +83,7 @@ binop:
 			putc('\n', fp);
 		break;
 	case NPIPE:
-		for (lp = n->npipe.cmdlist ; lp ; lp = lp->next) {
+		for (lp = n->npipe.cmdlist; lp; lp = lp->next) {
 			shcmd(lp->n, fp);
 			if (lp->next)
 				fputs(" | ", fp);
@@ -108,35 +101,55 @@ binop:
 	}
 }
 
-
-
-static void
-shcmd(union node *cmd, FILE *fp)
-{
+static void shcmd(union node *cmd, FILE *fp) {
 	union node *np;
 	int first;
 	const char *s;
 	int dftfd;
 
 	first = 1;
-	for (np = cmd->ncmd.args ; np ; np = np->narg.next) {
-		if (! first)
+	for (np = cmd->ncmd.args; np; np = np->narg.next) {
+		if (!first)
 			putchar(' ');
 		sharg(np, fp);
 		first = 0;
 	}
-	for (np = cmd->ncmd.redirect ; np ; np = np->nfile.next) {
-		if (! first)
+	for (np = cmd->ncmd.redirect; np; np = np->nfile.next) {
+		if (!first)
 			putchar(' ');
 		switch (np->nfile.type) {
-			case NTO:	s = ">";  dftfd = 1; break;
-			case NCLOBBER:	s = ">|"; dftfd = 1; break;
-			case NAPPEND:	s = ">>"; dftfd = 1; break;
-			case NTOFD:	s = ">&"; dftfd = 1; break;
-			case NFROM:	s = "<";  dftfd = 0; break;
-			case NFROMFD:	s = "<&"; dftfd = 0; break;
-			case NFROMTO:	s = "<>"; dftfd = 0; break;
-			default:  	s = "*error*"; dftfd = 0; break;
+		case NTO:
+			s     = ">";
+			dftfd = 1;
+			break;
+		case NCLOBBER:
+			s     = ">|";
+			dftfd = 1;
+			break;
+		case NAPPEND:
+			s     = ">>";
+			dftfd = 1;
+			break;
+		case NTOFD:
+			s     = ">&";
+			dftfd = 1;
+			break;
+		case NFROM:
+			s     = "<";
+			dftfd = 0;
+			break;
+		case NFROMFD:
+			s     = "<&";
+			dftfd = 0;
+			break;
+		case NFROMTO:
+			s     = "<>";
+			dftfd = 0;
+			break;
+		default:
+			s     = "*error*";
+			dftfd = 0;
+			break;
 		}
 		if (np->nfile.fd != dftfd)
 			fprintf(fp, "%d", np->nfile.fd);
@@ -150,11 +163,7 @@ shcmd(union node *cmd, FILE *fp)
 	}
 }
 
-
-
-static void
-sharg(union node *arg, FILE *fp)
-{
+static void sharg(union node *arg, FILE *fp) {
 	char *p;
 	struct nodelist *bqlist;
 	int subtype;
@@ -164,7 +173,7 @@ sharg(union node *arg, FILE *fp)
 		abort();
 	}
 	bqlist = arg->narg.backquote;
-	for (p = arg->narg.text ; *p ; p++) {
+	for (p = arg->narg.text; *p; p++) {
 		switch ((signed char)*p) {
 		case CTLESC:
 			putc(*++p, fp);
@@ -219,8 +228,8 @@ sharg(union node *arg, FILE *fp)
 			}
 			break;
 		case CTLENDVAR:
-		     putc('}', fp);
-		     break;
+			putc('}', fp);
+			break;
 		case CTLBACKQ:
 			putc('$', fp);
 			putc('(', fp);
@@ -234,87 +243,85 @@ sharg(union node *arg, FILE *fp)
 	}
 }
 
-
-static void
-indent(int amount, char *pfx, FILE *fp)
-{
+static void indent(int amount, char *pfx, FILE *fp) {
 	int i;
 
-	for (i = 0 ; i < amount ; i++) {
+	for (i = 0; i < amount; i++) {
 		if (pfx && i == amount - 1)
 			fputs(pfx, fp);
 		putc('\t', fp);
 	}
 }
 
-
-
 /*
  * Debugging stuff.
  */
 
-
 FILE *tracefile;
 
-
-void
-trputc(int c)
-{
+void trputc(int c) {
 	if (debug != 1)
 		return;
 	putc(c, tracefile);
 }
 
-void
-trace(const char *fmt, ...)
-{
+void trace(const char *fmt, ...) {
 	va_list va;
 
 	if (debug != 1)
 		return;
 	va_start(va, fmt);
-	(void) vfprintf(tracefile, fmt, va);
+	(void)vfprintf(tracefile, fmt, va);
 	va_end(va);
 }
 
-void
-tracev(const char *fmt, va_list va)
-{
+void tracev(const char *fmt, va_list va) {
 	if (debug != 1)
 		return;
-	(void) vfprintf(tracefile, fmt, va);
+	(void)vfprintf(tracefile, fmt, va);
 }
 
-
-void
-trputs(const char *s)
-{
+void trputs(const char *s) {
 	if (debug != 1)
 		return;
 	fputs(s, tracefile);
 }
 
-
-static void
-trstring(char *s)
-{
+static void trstring(char *s) {
 	char *p;
 	char c;
 
 	if (debug != 1)
 		return;
 	putc('"', tracefile);
-	for (p = s ; *p ; p++) {
+	for (p = s; *p; p++) {
 		switch ((signed char)*p) {
-		case '\n':  c = 'n';  goto backslash;
-		case '\t':  c = 't';  goto backslash;
-		case '\r':  c = 'r';  goto backslash;
-		case '"':  c = '"';  goto backslash;
-		case '\\':  c = '\\';  goto backslash;
-		case CTLESC:  c = 'e';  goto backslash;
-		case CTLVAR:  c = 'v';  goto backslash;
-		case CTLBACKQ:  c = 'q';  goto backslash;
-backslash:	  putc('\\', tracefile);
+		case '\n':
+			c = 'n';
+			goto backslash;
+		case '\t':
+			c = 't';
+			goto backslash;
+		case '\r':
+			c = 'r';
+			goto backslash;
+		case '"':
+			c = '"';
+			goto backslash;
+		case '\\':
+			c = '\\';
+			goto backslash;
+		case CTLESC:
+			c = 'e';
+			goto backslash;
+		case CTLVAR:
+			c = 'v';
+			goto backslash;
+		case CTLBACKQ:
+			c = 'q';
+			goto backslash;
+		backslash:
+			putc('\\', tracefile);
 			putc(c, tracefile);
 			break;
 		default:
@@ -332,10 +339,7 @@ backslash:	  putc('\\', tracefile);
 	putc('"', tracefile);
 }
 
-
-void
-trargs(char **ap)
-{
+void trargs(char **ap) {
 	if (debug != 1)
 		return;
 	while (*ap) {
@@ -347,10 +351,7 @@ trargs(char **ap)
 	}
 }
 
-
-void
-opentrace(void)
-{
+void opentrace(void) {
 	char s[100];
 #ifdef O_APPEND
 	int flags;

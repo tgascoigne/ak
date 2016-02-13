@@ -3,4 +3,5 @@ SOURCES += $(addprefix kernel/syscall/, \
                 fdio.c                  \
                 proc.c                  \
                 mem.c                   \
-                uname.c)
+                uname.c                 \
+                user.c)

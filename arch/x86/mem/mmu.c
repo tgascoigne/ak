@@ -26,9 +26,6 @@ void pg_fault_handler(isrargs_t *regs);
 void pg_init(void) {
 	idt_set_handler(INT_PAGE_FAULT, pg_fault_handler);
 
-	// unmap the kernel from 0x0
-	KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
-
 	// point the last 4m at the temp page table
 	KernelPageDir[ADDR_PDE(KTMPMEM)] = PAGE_ENTRY(KBSSTOPHYS(&TmpPageTbl), KERNEL_FLAGS | PAGE_LINK);
 
@@ -54,6 +51,12 @@ void pg_init(void) {
 
 	tlb_flush();
 	MMUReady = true;
+}
+
+void pg_unmap_low_kernel(void) {
+	// unmap the kernel from 0x0
+	KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
+	tlb_flush();
 }
 
 bool mmu_is_ready(void) {
@@ -284,6 +287,31 @@ bool pg_is_reserved(vaddr_t addr) {
 	}
 
 	return false;
+}
+
+void memcpy_phys(void *dest, paddr_t src, size_t len) {
+	for (paddr_t x = 0; x < len;) {
+		// seek is the physical addr that we're copying this chunk from
+		paddr_t seek = src + x;
+
+		// pg is the physical page that this chunk is in
+		pgaddr_t pg = PGADDR(seek);
+
+		// ofs is the offset within this page that we're copying from
+		paddr_t ofs = seek - pg;
+
+		// sz is the amount we're copying this chunk
+		paddr_t sz = PAGE_SIZE - ofs;
+		if ((len - x) < sz) {
+			sz = len - x;
+		}
+
+		void *tmpmap = pg_tmp_map(pg);
+		memcpy((void *)((vaddr_t)dest + x), (void *)((vaddr_t)tmpmap + ofs), sz);
+		pg_tmp_unmap(tmpmap);
+
+		x += sz;
+	}
 }
 
 void pg_fault_handler(isrargs_t *regs) {

@@ -51,7 +51,6 @@ void setinteractive(int);
 void exitshell(void) __attribute__((__noreturn__));
 int decode_signal(const char *, int);
 
-static inline int have_traps(void)
-{
+static inline int have_traps(void) {
 	return trapcnt;
 }

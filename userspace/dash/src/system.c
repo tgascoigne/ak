@@ -62,15 +62,13 @@
 #include "system.h"
 
 #ifndef HAVE_MEMPCPY
-void *mempcpy(void *dest, const void *src, size_t n)
-{
+void *mempcpy(void *dest, const void *src, size_t n) {
 	return memcpy(dest, src, n) + n;
 }
 #endif
 
 #ifndef HAVE_STPCPY
-char *stpcpy(char *dest, const char *src)
-{
+char *stpcpy(char *dest, const char *src) {
 	size_t len = strlen(src);
 	dest[len] = 0;
 	return mempcpy(dest, src, len);
@@ -78,8 +76,7 @@ char *stpcpy(char *dest, const char *src)
 #endif
 
 #ifndef HAVE_STRCHRNUL
-char *strchrnul(const char *s, int c)
-{
+char *strchrnul(const char *s, int c) {
 	char *p = strchr(s, c);
 	if (!p)
 		p = (char *)s + strlen(s);
@@ -88,25 +85,22 @@ char *strchrnul(const char *s, int c)
 #endif
 
 #ifndef HAVE_STRSIGNAL
-char *strsignal(int sig)
-{
+char *strsignal(int sig) {
 	static char buf[19];
 
 	if ((unsigned)sig < NSIG && sys_siglist[sig])
 		return (char *)sys_siglist[sig];
-	fmtstr(buf, sizeof(buf), "Signal %d", sig); 
+	fmtstr(buf, sizeof(buf), "Signal %d", sig);
 	return buf;
 }
 #endif
 
 #ifndef HAVE_BSEARCH
-void *bsearch(const void *key, const void *base, size_t nmemb,
-	      size_t size, int (*cmp)(const void *, const void *))
-{
+void *bsearch(const void *key, const void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *)) {
 	while (nmemb) {
-		size_t mididx = nmemb / 2;
+		size_t mididx      = nmemb / 2;
 		const void *midobj = base + mididx * size;
-		int diff = cmp(key, midobj);
+		int diff           = cmp(key, midobj);
 
 		if (diff == 0)
 			return (void *)midobj;
@@ -123,8 +117,7 @@ void *bsearch(const void *key, const void *base, size_t nmemb,
 #endif
 
 #ifndef HAVE_SYSCONF
-long sysconf(int name)
-{
+long sysconf(int name) {
 	sh_error("no sysconf for: %d", name);
 }
 #endif
@@ -134,41 +127,33 @@ int isalnum(int c) {
 	return _isalnum(c);
 }
 
-
 int iscntrl(int c) {
 	return _iscntrl(c);
 }
-
 
 int islower(int c) {
 	return _islower(c);
 }
 
-
 int isspace(int c) {
 	return _isspace(c);
 }
-
 
 int isalpha(int c) {
 	return _isalpha(c);
 }
 
-
 int isdigit(int c) {
 	return _isdigit(c);
 }
-
 
 int isprint(int c) {
 	return _isprint(c);
 }
 
-
 int isupper(int c) {
 	return _isupper(c);
 }
-
 
 #if HAVE_DECL_ISBLANK
 int isblank(int c) {
@@ -176,16 +161,13 @@ int isblank(int c) {
 }
 #endif
 
-
 int isgraph(int c) {
 	return _isgraph(c);
 }
 
-
 int ispunct(int c) {
 	return _ispunct(c);
 }
-
 
 int isxdigit(int c) {
 	return _isxdigit(c);

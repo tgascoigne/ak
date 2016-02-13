@@ -36,13 +36,13 @@ void frame_set(paddr_t ptr) {
 }
 
 void frame_clear_range(paddr_t begin, paddr_t end) {
-	for (paddr_t i = begin; i < end; i += PAGE_SIZE) {
+	for (paddr_t i = begin; i < (end + PAGE_SIZE); i += PAGE_SIZE) {
 		frame_clear(i);
 	}
 }
 
 void frame_set_range(paddr_t begin, paddr_t end) {
-	for (paddr_t i = begin; i < end; i += PAGE_SIZE) {
+	for (paddr_t i = begin; i < (end + PAGE_SIZE); i += PAGE_SIZE) {
 		frame_set(i);
 	}
 }
