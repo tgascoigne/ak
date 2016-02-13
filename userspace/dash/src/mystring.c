@@ -56,13 +56,15 @@
 #include "parser.h"
 #include "system.h"
 
-char nullstr[1]; /* zero length string */
-const char spcstr[]   = " ";
-const char snlfmt[]   = "%s\n";
-const char dolatstr[] = {CTLQUOTEMARK, CTLVAR, VSNORMAL, '@', '=', CTLQUOTEMARK, '\0'};
-const char qchars[]   = {CTLESC, CTLQUOTEMARK, 0};
-const char illnum[]   = "Illegal number: %s";
-const char homestr[]  = "HOME";
+
+char nullstr[1];		/* zero length string */
+const char spcstr[] = " ";
+const char snlfmt[] = "%s\n";
+const char dolatstr[] = { CTLQUOTEMARK, CTLVAR, VSNORMAL, '@', '=',
+			  CTLQUOTEMARK, '\0' };
+const char qchars[] = { CTLESC, CTLQUOTEMARK, 0 };
+const char illnum[] = "Illegal number: %s";
+const char homestr[] = "HOME";
 
 /*
  * equal - #defined in mystring.h
@@ -71,6 +73,7 @@ const char homestr[]  = "HOME";
 /*
  * scopy - #defined in mystring.h
  */
+
 
 #if 0
 /*
@@ -91,31 +94,36 @@ scopyn(const char *from, char *to, int size)
 }
 #endif
 
+
 /*
  * prefix -- see if pfx is a prefix of string.
  */
 
-char *prefix(const char *string, const char *pfx) {
+char *
+prefix(const char *string, const char *pfx)
+{
 	while (*pfx) {
 		if (*pfx++ != *string++)
 			return 0;
 	}
-	return (char *)string;
+	return (char *) string;
 }
 
-void badnum(const char *s) {
+void badnum(const char *s)
+{
 	sh_error(illnum, s);
 }
 
 /*
  * Convert a string into an integer of type intmax_t.  Alow trailing spaces.
  */
-intmax_t atomax(const char *s, int base) {
+intmax_t atomax(const char *s, int base)
+{
 	char *p;
 	intmax_t r;
 
 	errno = 0;
-	r     = strtoimax(s, &p, base);
+	r = strtoimax(s, &p, base);
 
 	if (errno != 0)
 		badnum(s);
@@ -128,7 +136,7 @@ intmax_t atomax(const char *s, int base) {
 		badnum(s);
 
 	while (isspace((unsigned char)*p))
-		p++;
+	      p++;
 
 	if (*p)
 		badnum(s);
@@ -136,7 +144,8 @@ intmax_t atomax(const char *s, int base) {
 	return r;
 }
 
-intmax_t atomax10(const char *s) {
+intmax_t atomax10(const char *s)
+{
 	return atomax(s, 10);
 }
 
@@ -145,7 +154,9 @@ intmax_t atomax10(const char *s) {
  * failure.
  */
 
-int number(const char *s) {
+int
+number(const char *s)
+{
 	intmax_t n = atomax10(s);
 
 	if (n < 0 || n > INT_MAX)
@@ -154,24 +165,30 @@ int number(const char *s) {
 	return n;
 }
 
+
+
 /*
  * Check for a valid number.  This should be elsewhere.
  */
 
-int is_number(const char *p) {
+int
+is_number(const char *p)
+{
 	do {
-		if (!is_digit(*p))
+		if (! is_digit(*p))
 			return 0;
 	} while (*++p != '\0');
 	return 1;
 }
+
 
 /*
  * Produce a possibly single quoted string suitable as input to the shell.
  * The return string is allocated on the stack.
  */
 
-char *single_quote(const char *s) {
+char *
+single_quote(const char *s) {
 	char *p;
 
 	STARTSTACKSTR(p);
@@ -185,7 +202,7 @@ char *single_quote(const char *s) {
 		q = p = makestrspace(len + 3, p);
 
 		*q++ = '\'';
-		q    = mempcpy(q, s, len);
+		q = mempcpy(q, s, len);
 		*q++ = '\'';
 		s += len;
 
@@ -198,7 +215,7 @@ char *single_quote(const char *s) {
 		q = p = makestrspace(len + 3, p);
 
 		*q++ = '"';
-		q    = mempcpy(q, s, len);
+		q = mempcpy(q, s, len);
 		*q++ = '"';
 		s += len;
 
@@ -214,7 +231,9 @@ char *single_quote(const char *s) {
  * Like strdup but works with the ash stack.
  */
 
-char *sstrdup(const char *p) {
+char *
+sstrdup(const char *p)
+{
 	size_t len = strlen(p) + 1;
 	return memcpy(stalloc(len), p, len);
 }
@@ -222,13 +241,17 @@ char *sstrdup(const char *p) {
 /*
  * Wrapper around strcmp for qsort/bsearch/...
  */
-int pstrcmp(const void *a, const void *b) {
-	return strcmp(*(const char *const *)a, *(const char *const *)b);
+int
+pstrcmp(const void *a, const void *b)
+{
+	return strcmp(*(const char *const *) a, *(const char *const *) b);
 }
 
 /*
  * Find a string is in a sorted array.
  */
-const char *const *findstring(const char *s, const char *const *array, size_t nmemb) {
+const char *const *
+findstring(const char *s, const char *const *array, size_t nmemb)
+{
 	return bsearch(&s, array, nmemb, sizeof(const char *), pstrcmp);
 }

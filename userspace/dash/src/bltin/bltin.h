@@ -56,8 +56,8 @@
 #define stdout out1
 #define stderr out2
 #define printf out1fmt
-#define putc(c, file) outc(c, file)
-#define putchar(c) out1c(c)
+#define putc(c, file)	outc(c, file)
+#define putchar(c)	out1c(c)
 #define FILE struct output
 #define fprintf outfmt
 #define fputs outstr
@@ -66,27 +66,24 @@
 #define ferror outerr
 #endif
 #define INITARGS(argv)
-#define error sh_error
-#define warn sh_warn
-#define warnx sh_warnx
+#define	error sh_error
+#define	warn sh_warn
+#define	warnx sh_warnx
 #define exit sh_exit
 #define setprogname(s)
 #define getprogname() commandname
-#define setlocate(l, s) 0
+#define setlocate(l,s) 0
 
-#define getenv(p) bltinlookup((p), 0)
+#define getenv(p) bltinlookup((p),0)
 
 #else
 #undef NULL
 #include <stdio.h>
 #undef main
-#define INITARGS(argv)                     \
-	if ((commandname = argv[0]) == NULL) { \
-		fputs("Argc is zero\n", stderr);   \
-		exit(2);                           \
-	} else
+#define INITARGS(argv)	if ((commandname = argv[0]) == NULL) {fputs("Argc is zero\n", stderr); exit(2);} else
 #endif
 
 int echocmd(int, char **);
+
 
 extern const char *commandname;

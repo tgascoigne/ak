@@ -69,9 +69,12 @@ void outcslow(int, struct output *);
 #endif
 void flushall(void);
 void flushout(struct output *);
-void outfmt(struct output *, const char *, ...) __attribute__((__format__(__printf__, 2, 3)));
-void out1fmt(const char *, ...) __attribute__((__format__(__printf__, 1, 2)));
-int fmtstr(char *, size_t, const char *, ...) __attribute__((__format__(__printf__, 3, 4)));
+void outfmt(struct output *, const char *, ...)
+    __attribute__((__format__(__printf__,2,3)));
+void out1fmt(const char *, ...)
+    __attribute__((__format__(__printf__,1,2)));
+int fmtstr(char *, size_t, const char *, ...)
+    __attribute__((__format__(__printf__,3,4)));
 #ifndef USE_GLIBC_STDIO
 void doformat(struct output *, const char *, va_list);
 #endif
@@ -84,20 +87,24 @@ int __closememout(void);
 #endif
 #endif
 
-static inline void freestdout() {
+static inline void
+freestdout()
+{
 	output.nextc = output.buf;
 	output.flags = 0;
 }
 
-#define OUTPUT_ERR 01 /* error occurred on output */
+#define OUTPUT_ERR 01		/* error occurred on output */
 
 #ifdef USE_GLIBC_STDIO
-static inline void outc(int ch, struct output *file) {
+static inline void outc(int ch, struct output *file)
+{
 	putc(ch, file->stream);
 }
-#define doformat(d, f, a) vfprintf((d)->stream, (f), (a))
+#define doformat(d, f, a)	vfprintf((d)->stream, (f), (a))
 #else
-static inline void outc(int ch, struct output *file) {
+static inline void outc(int ch, struct output *file)
+{
 	if (file->nextc == file->end)
 		outcslow(ch, file);
 	else {
@@ -106,11 +113,11 @@ static inline void outc(int ch, struct output *file) {
 	}
 }
 #endif
-#define out1c(c) outc((c), out1)
-#define out2c(c) outcslow((c), out2)
-#define out1str(s) outstr((s), out1)
-#define out2str(s) outstr((s), out2)
-#define outerr(f) (f)->flags
+#define out1c(c)	outc((c), out1)
+#define out2c(c)	outcslow((c), out2)
+#define out1str(s)	outstr((s), out1)
+#define out2str(s)	outstr((s), out2)
+#define outerr(f)	(f)->flags
 
 #define OUTPUT_INCL
 #endif

@@ -53,6 +53,7 @@
 #include "parser.h"
 #include "system.h"
 
+
 /*
  * Code to handle exceptions in C.
  */
@@ -63,7 +64,9 @@ int suppressint;
 volatile sig_atomic_t intpending;
 int errlinno;
 
-static void exverror(int, const char *, va_list) __attribute__((__noreturn__));
+
+static void exverror(int, const char *, va_list)
+    __attribute__((__noreturn__));
 
 /*
  * Called to raise an exception.  Since C doesn't include exceptions, we
@@ -71,7 +74,9 @@ static void exverror(int, const char *, va_list) __attribute__((__noreturn__));
  * stored in the global variable "exception".
  */
 
-void exraise(int e) {
+void
+exraise(int e)
+{
 #ifdef DEBUG
 	if (handler == NULL)
 		abort();
@@ -82,6 +87,7 @@ void exraise(int e) {
 	longjmp(handler->loc, 1);
 }
 
+
 /*
  * Called from trap.c when a SIGINT is received.  (If the user specifies
  * that SIGINT is to be trapped or ignored using the trap builtin, then
@@ -90,7 +96,8 @@ void exraise(int e) {
  * defensive programming.)
  */
 
-void onint(void) {
+void
+onint(void) {
 
 	intpending = 0;
 	sigclearmask();
@@ -102,7 +109,9 @@ void onint(void) {
 	/* NOTREACHED */
 }
 
-static void exvwarning2(const char *msg, va_list ap) {
+static void
+exvwarning2(const char *msg, va_list ap)
+{
 	struct output *errs;
 	const char *name;
 	const char *fmt;
@@ -129,7 +138,9 @@ static void exvwarning2(const char *msg, va_list ap) {
  * is not NULL then error prints an error message using printf style
  * formatting.  It then raises the error exception.
  */
-static void exverror(int cond, const char *msg, va_list ap) {
+static void
+exverror(int cond, const char *msg, va_list ap)
+{
 #ifdef DEBUG
 	if (msg) {
 		va_list aq;
@@ -149,7 +160,10 @@ static void exverror(int cond, const char *msg, va_list ap) {
 	/* NOTREACHED */
 }
 
-void sh_error(const char *msg, ...) {
+
+void
+sh_error(const char *msg, ...)
+{
 	va_list ap;
 
 	exitstatus = 2;
@@ -160,7 +174,10 @@ void sh_error(const char *msg, ...) {
 	va_end(ap);
 }
 
-void exerror(int cond, const char *msg, ...) {
+
+void
+exerror(int cond, const char *msg, ...)
+{
 	va_list ap;
 
 	va_start(ap, msg);
@@ -173,7 +190,9 @@ void exerror(int cond, const char *msg, ...) {
  * error/warning routines for external builtins
  */
 
-void sh_warnx(const char *fmt, ...) {
+void
+sh_warnx(const char *fmt, ...)
+{
 	va_list ap;
 
 	va_start(ap, fmt);
@@ -181,13 +200,16 @@ void sh_warnx(const char *fmt, ...) {
 	va_end(ap);
 }
 
+
 /*
  * Return a string describing an error.  The returned string may be a
  * pointer to a static buffer that will be overwritten on the next call.
  * Action describes the operation that got the error.
  */
 
-const char *errmsg(int e, int action) {
+const char *
+errmsg(int e, int action)
+{
 	if (e != ENOENT && e != ENOTDIR)
 		return strerror(e);
 
@@ -199,8 +221,10 @@ const char *errmsg(int e, int action) {
 		return "not found";
 }
 
+
 #ifdef REALLY_SMALL
-void __inton() {
+void
+__inton() {
 	if (--suppressint == 0 && intpending) {
 		onint();
 	}

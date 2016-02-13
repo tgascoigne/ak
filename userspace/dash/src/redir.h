@@ -35,11 +35,11 @@
  */
 
 /* flags passed to redirect */
-#define REDIR_PUSH 01 /* save previous values of file descriptors */
+#define REDIR_PUSH 01		/* save previous values of file descriptors */
 #ifdef notyet
-#define REDIR_BACKQ 02 /* save the command output in memory */
+#define REDIR_BACKQ 02		/* save the command output in memory */
 #endif
-#define REDIR_SAVEFD2 03 /* set preverrout */
+#define REDIR_SAVEFD2 03	/* set preverrout */
 
 struct redirtab;
 union node;
@@ -50,3 +50,4 @@ int savefd(int, int);
 int redirectsafe(union node *, int);
 void unwindredir(struct redirtab *stop);
 struct redirtab *pushredir(union node *redir);
+

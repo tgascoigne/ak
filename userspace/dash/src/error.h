@@ -41,9 +41,10 @@
  * Types of operations (passed to the errmsg routine).
  */
 
-#define E_OPEN 01  /* opening a file */
-#define E_CREAT 02 /* creating a file */
-#define E_EXEC 04  /* executing a program */
+#define E_OPEN 01	/* opening a file */
+#define E_CREAT 02	/* creating a file */
+#define E_EXEC 04	/* executing a program */
+
 
 /*
  * We enclose jmp_buf in a structure so that we can declare pointers to
@@ -63,9 +64,10 @@ extern struct jmploc *handler;
 extern int exception;
 
 /* exceptions */
-#define EXINT 0   /* SIGINT received */
-#define EXERROR 1 /* a generic error */
-#define EXEXIT 4  /* exit the shell */
+#define EXINT 0		/* SIGINT received */
+#define EXERROR 1	/* a generic error */
+#define EXEXIT 4	/* exit the shell */
+
 
 /*
  * These macros allow the user to suspend the handling of interrupt signals
@@ -77,40 +79,37 @@ extern int exception;
 extern int suppressint;
 extern volatile sig_atomic_t intpending;
 
-#define barrier() ({ __asm__ __volatile__("" : : : "memory"); })
-#define INTOFF         \
-	({                 \
+#define barrier() ({ __asm__ __volatile__ ("": : :"memory"); })
+#define INTOFF \
+	({ \
 		suppressint++; \
-		barrier();     \
-		0;             \
+		barrier(); \
+		0; \
 	})
 #ifdef REALLY_SMALL
 void __inton(void);
 #define INTON __inton()
 #else
-#define INTON                                 \
-	({                                        \
-		barrier();                            \
-		if (--suppressint == 0 && intpending) \
-			onint();                          \
-		0;                                    \
+#define INTON \
+	({ \
+		barrier(); \
+		if (--suppressint == 0 && intpending) onint(); \
+		0; \
 	})
 #endif
-#define FORCEINTON       \
-	({                   \
-		barrier();       \
+#define FORCEINTON \
+	({ \
+		barrier(); \
 		suppressint = 0; \
-		if (intpending)  \
-			onint();     \
-		0;               \
+		if (intpending) onint(); \
+		0; \
 	})
 #define SAVEINT(v) ((v) = suppressint)
-#define RESTOREINT(v)                               \
-	({                                              \
-		barrier();                                  \
-		if ((suppressint = (v)) == 0 && intpending) \
-			onint();                                \
-		0;                                          \
+#define RESTOREINT(v) \
+	({ \
+		barrier(); \
+		if ((suppressint = (v)) == 0 && intpending) onint(); \
+		0; \
 	})
 #define CLEAR_PENDING_INT intpending = 0
 #define int_pending() intpending

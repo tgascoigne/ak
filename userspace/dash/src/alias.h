@@ -34,8 +34,8 @@
  *	@(#)alias.h	8.2 (Berkeley) 5/4/95
  */
 
-#define ALIASINUSE 1
-#define ALIASDEAD 2
+#define ALIASINUSE	1
+#define ALIASDEAD	2
 
 struct alias {
 	struct alias *next;

@@ -38,6 +38,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+
 #include "shell.h"
 #include "main.h"
 #include "mail.h"
@@ -88,7 +89,9 @@ int main(int, char **);
  * is used to figure out how far we had gotten.
  */
 
-int main(int argc, char **argv) {
+int
+main(int argc, char **argv)
+{
 	char *shinit;
 	volatile int state;
 	struct jmploc jmploc;
@@ -117,16 +120,16 @@ int main(int argc, char **argv) {
 
 		if (e == EXINT
 #if ATTY
-		    && (!attyset() || equal(termval(), "emacs"))
+		 && (! attyset() || equal(termval(), "emacs"))
 #endif
-		        ) {
+		 ) {
 			out2c('\n');
 #ifdef FLUSHERR
 			flushout(out2);
 #endif
 		}
 		popstackmark(&smark);
-		FORCEINTON; /* enable interrupts */
+		FORCEINTON;				/* enable interrupts */
 		if (s == 1)
 			goto state1;
 		else if (s == 2)
@@ -139,8 +142,7 @@ int main(int argc, char **argv) {
 	handler = &jmploc;
 #ifdef DEBUG
 	opentrace();
-	trputs("Shell args:  ");
-	trargs(argv);
+	trputs("Shell args:  ");  trargs(argv);
 #endif
 	rootpid = getpid();
 	init();
@@ -149,7 +151,7 @@ int main(int argc, char **argv) {
 	if (login) {
 		state = 1;
 		read_profile("/etc/profile");
-	state1:
+state1:
 		state = 2;
 		read_profile("$HOME/.profile");
 	}
@@ -157,9 +159,10 @@ state2:
 	state = 3;
 	if (
 #ifndef linux
-	    getuid() == geteuid() && getgid() == getegid() &&
+		getuid() == geteuid() && getgid() == getegid() &&
 #endif
-	    iflag) {
+		iflag
+	) {
 		if ((shinit = lookupvar("ENV")) != NULL && *shinit != '\0') {
 			read_profile(shinit);
 		}
@@ -171,7 +174,7 @@ state3:
 		evalstring(minusc, sflag ? 0 : EV_EXIT);
 
 	if (sflag || minusc == NULL) {
-	state4: /* XXX ??? - why isn't this before the "if" statement */
+state4:	/* XXX ??? - why isn't this before the "if" statement */
 		cmdloop(1);
 	}
 #if PROFILE
@@ -187,12 +190,15 @@ state3:
 	/* NOTREACHED */
 }
 
+
 /*
  * Read and execute commands.  "Top" is nonzero for the top level command
  * loop; it turns on prompting if the shell is interactive.
  */
 
-static int cmdloop(int top) {
+static int
+cmdloop(int top)
+{
 	union node *n;
 	struct stackmark smark;
 	int inter;
@@ -201,7 +207,7 @@ static int cmdloop(int top) {
 
 	TRACE(("cmdloop(%d) called\n", top));
 #ifdef HETIO
-	if (iflag && top)
+	if(iflag && top)
 		hetio_init();
 #endif
 	for (;;) {
@@ -244,11 +250,15 @@ static int cmdloop(int top) {
 	return status;
 }
 
+
+
 /*
  * Read /etc/profile or .profile.  Return on error.
  */
 
-STATIC void read_profile(const char *name) {
+STATIC void
+read_profile(const char *name)
+{
 	name = expandstr(name);
 	if (setinputfile(name, INPUT_PUSH_FILE | INPUT_NOFILE_OK) < 0)
 		return;
@@ -257,22 +267,31 @@ STATIC void read_profile(const char *name) {
 	popfile();
 }
 
+
+
 /*
  * Read a file containing shell functions.
  */
 
-void readcmdfile(char *name) {
+void
+readcmdfile(char *name)
+{
 	setinputfile(name, INPUT_PUSH_FILE);
 	cmdloop(0);
 	popfile();
 }
+
+
 
 /*
  * Take commands from a file.  To be compatible we should do a path
  * search for the file, which is necessary to find sub-commands.
  */
 
-STATIC char *find_dot_file(char *basename) {
+
+STATIC char *
+find_dot_file(char *basename)
+{
 	char *fullname;
 	const char *path = pathval();
 	struct stat statb;
@@ -297,10 +316,12 @@ STATIC char *find_dot_file(char *basename) {
 	/* NOTREACHED */
 }
 
-int dotcmd(int argc, char **argv) {
+int
+dotcmd(int argc, char **argv)
+{
 	int status = 0;
 
-	if (argc >= 2) { /* That's what SVR2 does */
+	if (argc >= 2) {		/* That's what SVR2 does */
 		char *fullname;
 
 		fullname = find_dot_file(argv[1]);
@@ -312,7 +333,10 @@ int dotcmd(int argc, char **argv) {
 	return status;
 }
 
-int exitcmd(int argc, char **argv) {
+
+int
+exitcmd(int argc, char **argv)
+{
 	if (stoppedjobs())
 		return 0;
 	if (argc > 1)

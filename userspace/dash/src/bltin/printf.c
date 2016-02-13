@@ -40,41 +40,41 @@
 #include <string.h>
 #include <unistd.h>
 
-static int conv_escape_str(char *);
-static char *conv_escape(char *, int *);
-static int getchr(void);
-static double getdouble(void);
-static intmax_t getintmax(void);
+static int	 conv_escape_str(char *);
+static char	*conv_escape(char *, int *);
+static int	 getchr(void);
+static double	 getdouble(void);
+static intmax_t	 getintmax(void);
 static uintmax_t getuintmax(void);
-static char *getstr(void);
-static char *mklong(const char *, const char *);
-static void check_conversion(const char *, const char *);
+static char	*getstr(void);
+static char	*mklong(const char *, const char *);
+static void      check_conversion(const char *, const char *);
 
-static int rval;
-static char **gargv;
+static int	rval;
+static char  **gargv;
 
-#define isodigit(c) ((c) >= '0' && (c) <= '7')
-#define octtobin(c) ((c) - '0')
+#define isodigit(c)	((c) >= '0' && (c) <= '7')
+#define octtobin(c)	((c) - '0')
 
 #include "bltin.h"
 #include "system.h"
 
-#define PF(f, func)                                     \
-	{                                                   \
-		switch ((char *)param - (char *)array) {        \
-		default:                                        \
-			(void) printf(f, array[0], array[1], func); \
-			break;                                      \
-		case sizeof(*param):                            \
-			(void) printf(f, array[0], func);           \
-			break;                                      \
-		case 0:                                         \
-			(void) printf(f, func);                     \
-			break;                                      \
-		}                                               \
-	}
+#define PF(f, func) { \
+	switch ((char *)param - (char *)array) { \
+	default: \
+		(void)printf(f, array[0], array[1], func); \
+		break; \
+	case sizeof(*param): \
+		(void)printf(f, array[0], func); \
+		break; \
+	case 0: \
+		(void)printf(f, func); \
+		break; \
+	} \
+}
 
-int printfcmd(int argc, char *argv[]) {
+int printfcmd(int argc, char *argv[])
+{
 	char *fmt;
 	char *format;
 	int ch;
@@ -83,7 +83,7 @@ int printfcmd(int argc, char *argv[]) {
 
 	nextopt(nullstr);
 
-	argv   = argptr;
+	argv = argptr;
 	format = *argv;
 
 	if (!format) {
@@ -93,20 +93,20 @@ int printfcmd(int argc, char *argv[]) {
 
 	gargv = ++argv;
 
-#define SKIP1 "#-+ 0"
-#define SKIP2 "*0123456789"
+#define SKIP1	"#-+ 0"
+#define SKIP2	"*0123456789"
 	do {
 		/*
 		 * Basic algorithm is to scan the format string for conversion
 		 * specifications -- once one is found, find out if the field
-		 * width or precision is a '*'; if it is, gather up value.
+		 * width or precision is a '*'; if it is, gather up value. 
 		 * Note, format strings are reused as necessary to use up the
-		 * provided arguments, arguments of zero/null string are
+		 * provided arguments, arguments of zero/null string are 
 		 * provided to use up the format string.
 		 */
 
 		/* find next format specification */
-		for (fmt = format; (ch = *fmt++);) {
+		for (fmt = format; (ch = *fmt++) ;) {
 			char *start;
 			char nextch;
 			int array[2];
@@ -115,11 +115,11 @@ int printfcmd(int argc, char *argv[]) {
 			if (ch == '\\') {
 				int c_ch;
 				fmt = conv_escape(fmt, &c_ch);
-				ch  = c_ch;
+				ch = c_ch;
 				goto pc;
 			}
 			if (ch != '%' || (*fmt == '%' && (++fmt || 1))) {
-			pc:
+pc:
 				putchar(ch);
 				continue;
 			}
@@ -156,7 +156,7 @@ int printfcmd(int argc, char *argv[]) {
 
 			case 'b': {
 				int done = conv_escape_str(getstr());
-				char *p  = stackblock();
+				char *p = stackblock();
 				*fmt = 's';
 				PF(start, p);
 				/* escape if a \c was encountered */
@@ -214,11 +214,14 @@ err:
 	return 1;
 }
 
+
 /*
- * Print SysV echo(1) style escape string
+ * Print SysV echo(1) style escape string 
  *	Halts processing string if a \c escape is encountered.
  */
-static int conv_escape_str(char *str) {
+static int
+conv_escape_str(char *str)
+{
 	int ch;
 	char *cp;
 
@@ -239,14 +242,14 @@ static int conv_escape_str(char *str) {
 			continue;
 		}
 
-		/*
+		/* 
 		 * %b string octal constants are not like those in C.
-		 * They start with a \0, and are followed by 0, 1, 2,
-		 * or 3 octal digits.
+		 * They start with a \0, and are followed by 0, 1, 2, 
+		 * or 3 octal digits. 
 		 */
 		if (ch == '0') {
 			unsigned char i;
-			i  = 3;
+			i = 3;
 			ch = 0;
 			do {
 				unsigned k = octtobin(*str);
@@ -268,9 +271,11 @@ static int conv_escape_str(char *str) {
 }
 
 /*
- * Print "standard" escape characters
+ * Print "standard" escape characters 
  */
-static char *conv_escape(char *str, int *conv_ch) {
+static char *
+conv_escape(char *str, int *conv_ch)
+{
 	int value;
 	int ch;
 
@@ -282,15 +287,9 @@ static char *conv_escape(char *str, int *conv_ch) {
 		value = '\\';
 		goto out;
 
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-		ch    = 3;
+	case '0': case '1': case '2': case '3':
+	case '4': case '5': case '6': case '7':
+		ch = 3;
 		value = 0;
 		do {
 			value <<= 3;
@@ -298,30 +297,14 @@ static char *conv_escape(char *str, int *conv_ch) {
 		} while (isodigit(*str) && --ch);
 		goto out;
 
-	case '\\':
-		value = '\\';
-		break; /* backslash */
-	case 'a':
-		value = '\a';
-		break; /* alert */
-	case 'b':
-		value = '\b';
-		break; /* backspace */
-	case 'f':
-		value = '\f';
-		break; /* form-feed */
-	case 'n':
-		value = '\n';
-		break; /* newline */
-	case 'r':
-		value = '\r';
-		break; /* carriage-return */
-	case 't':
-		value = '\t';
-		break; /* tab */
-	case 'v':
-		value = '\v';
-		break; /* vertical-tab */
+	case '\\':	value = '\\';	break;	/* backslash */
+	case 'a':	value = '\a';	break;	/* alert */
+	case 'b':	value = '\b';	break;	/* backspace */
+	case 'f':	value = '\f';	break;	/* form-feed */
+	case 'n':	value = '\n';	break;	/* newline */
+	case 'r':	value = '\r';	break;	/* carriage-return */
+	case 't':	value = '\t';	break;	/* tab */
+	case 'v':	value = '\v';	break;	/* vertical-tab */
 	}
 
 	str++;
@@ -330,7 +313,9 @@ out:
 	return str;
 }
 
-static char *mklong(const char *str, const char *ch) {
+static char *
+mklong(const char *str, const char *ch)
+{
 	/*
 	 * Replace a string like "%92.3u" with "%92.3"PRIuMAX.
 	 *
@@ -341,7 +326,7 @@ static char *mklong(const char *str, const char *ch) {
 	 */
 
 	char *copy;
-	size_t len;
+	size_t len;	
 
 	len = ch - str + sizeof(PRIdMAX);
 	STARTSTACKSTR(copy);
@@ -349,10 +334,12 @@ static char *mklong(const char *str, const char *ch) {
 	memcpy(copy, str, len - sizeof(PRIdMAX));
 	memcpy(copy + len - sizeof(PRIdMAX), PRIdMAX, sizeof(PRIdMAX));
 	copy[len - 2] = *ch;
-	return (copy);
+	return (copy);	
 }
 
-static int getchr(void) {
+static int
+getchr(void)
+{
 	int val = 0;
 
 	if (*gargv)
@@ -360,7 +347,9 @@ static int getchr(void) {
 	return val;
 }
 
-static char *getstr(void) {
+static char *
+getstr(void)
+{
 	char *val = nullstr;
 
 	if (*gargv)
@@ -368,7 +357,9 @@ static char *getstr(void) {
 	return val;
 }
 
-static intmax_t getintmax(void) {
+static intmax_t
+getintmax(void)
+{
 	intmax_t val = 0;
 	char *cp, *ep;
 
@@ -377,7 +368,7 @@ static intmax_t getintmax(void) {
 		goto out;
 	gargv++;
 
-	val = (unsigned char)cp[1];
+	val = (unsigned char) cp[1];
 	if (*cp == '\"' || *cp == '\'')
 		goto out;
 
@@ -388,7 +379,9 @@ out:
 	return val;
 }
 
-static uintmax_t getuintmax(void) {
+static uintmax_t
+getuintmax(void)
+{
 	uintmax_t val = 0;
 	char *cp, *ep;
 
@@ -397,7 +390,7 @@ static uintmax_t getuintmax(void) {
 		goto out;
 	gargv++;
 
-	val = (unsigned char)cp[1];
+	val = (unsigned char) cp[1];
 	if (*cp == '\"' || *cp == '\'')
 		goto out;
 
@@ -408,7 +401,9 @@ out:
 	return val;
 }
 
-static double getdouble(void) {
+static double
+getdouble(void)
+{
 	double val;
 	char *cp, *ep;
 
@@ -418,7 +413,7 @@ static double getdouble(void) {
 	gargv++;
 
 	if (*cp == '\"' || *cp == '\'')
-		return (unsigned char)cp[1];
+		return (unsigned char) cp[1];
 
 	errno = 0;
 	val = strtod(cp, &ep);
@@ -426,7 +421,9 @@ static double getdouble(void) {
 	return val;
 }
 
-static void check_conversion(const char *s, const char *ep) {
+static void
+check_conversion(const char *s, const char *ep)
+{
 	if (*ep) {
 		if (ep == s)
 			warnx("%s: expected numeric value", s);
@@ -439,8 +436,10 @@ static void check_conversion(const char *s, const char *ep) {
 	}
 }
 
-int echocmd(int argc, char **argv) {
-	int nonl            = 0;
+int
+echocmd(int argc, char **argv)
+{
+	int nonl = 0;
 	struct output *outs = out1;
 
 	if (!*++argv)
@@ -461,7 +460,7 @@ int echocmd(int argc, char **argv) {
 
 		c = ' ';
 		if (!*++argv) {
-		end:
+end:
 			if (nonl) {
 				break;
 			}

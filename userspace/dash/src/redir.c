@@ -34,7 +34,7 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/param.h> /* PIPE_BUF */
+#include <sys/param.h>	/* PIPE_BUF */
 #include <signal.h>
 #include <string.h>
 #include <fcntl.h>
@@ -56,23 +56,24 @@
 #include "memalloc.h"
 #include "error.h"
 
-#define stat64 stat
 
-#define REALLY_CLOSED -3 /* fd that was closed and still is */
-#define EMPTY -2         /* marks an unused slot in redirtab */
-#define CLOSED -1        /* fd opened for redir needs to be closed */
+#define REALLY_CLOSED -3	/* fd that was closed and still is */
+#define EMPTY -2		/* marks an unused slot in redirtab */
+#define CLOSED -1		/* fd opened for redir needs to be closed */
 
 #ifndef PIPE_BUF
-#define PIPESIZE 4096 /* amount of buffering in a pipe */
+# define PIPESIZE 4096		/* amount of buffering in a pipe */
 #else
-#define PIPESIZE PIPE_BUF
+# define PIPESIZE PIPE_BUF
 #endif
+
 
 MKINIT
 struct redirtab {
 	struct redirtab *next;
 	int renamed[10];
 };
+
 
 MKINIT struct redirtab *redirlist;
 
@@ -84,6 +85,7 @@ STATIC void dupredirect(union node *, int);
 #endif
 STATIC int openhere(union node *);
 
+
 /*
  * Process a list of redirection commands.  If the REDIR_PUSH flag is set,
  * old file descriptors are stashed away so that the redirection can be
@@ -92,7 +94,9 @@ STATIC int openhere(union node *);
  * stdout, is saved in memory.
  */
 
-void redirect(union node *redir, int flags) {
+void
+redirect(union node *redir, int flags)
+{
 	union node *n;
 	struct redirtab *sv;
 	int i;
@@ -100,11 +104,11 @@ void redirect(union node *redir, int flags) {
 	int newfd;
 	int *p;
 #if notyet
-	char memory[10]; /* file descriptors to write to memory */
+	char memory[10];	/* file descriptors to write to memory */
 
-	for (i = 10; --i >= 0;)
+	for (i = 10 ; --i >= 0 ; )
 		memory[i] = 0;
-	memory[1]     = flags & REDIR_BACKQ;
+	memory[1] = flags & REDIR_BACKQ;
 #endif
 	if (!redir)
 		return;
@@ -112,7 +116,7 @@ void redirect(union node *redir, int flags) {
 	INTOFF;
 	if (likely(flags & REDIR_PUSH))
 		sv = redirlist;
-	n      = redir;
+	n = redir;
 	do {
 		newfd = openredirect(n);
 		if (newfd < -1)
@@ -127,7 +131,7 @@ void redirect(union node *redir, int flags) {
 			if (likely(i == EMPTY)) {
 				i = CLOSED;
 				if (fd != newfd) {
-					i  = savefd(fd, fd);
+					i = savefd(fd, fd);
 					fd = -1;
 				}
 			}
@@ -159,7 +163,10 @@ void redirect(union node *redir, int flags) {
 		preverrout.fd = sv->renamed[2];
 }
 
-STATIC int openredirect(union node *redir) {
+
+STATIC int
+openredirect(union node *redir)
+{
 	struct stat64 sb;
 	char *fname;
 	int f;
@@ -172,7 +179,7 @@ STATIC int openredirect(union node *redir) {
 		break;
 	case NFROMTO:
 		fname = redir->nfile.expfname;
-		if ((f = open64(fname, O_RDWR | O_CREAT, 0666)) < 0)
+		if ((f = open64(fname, O_RDWR|O_CREAT, 0666)) < 0)
 			goto ecreate;
 		break;
 	case NTO:
@@ -180,7 +187,7 @@ STATIC int openredirect(union node *redir) {
 		if (Cflag) {
 			fname = redir->nfile.expfname;
 			if (stat64(fname, &sb) < 0) {
-				if ((f = open64(fname, O_WRONLY | O_CREAT | O_EXCL, 0666)) < 0)
+				if ((f = open64(fname, O_WRONLY|O_CREAT|O_EXCL, 0666)) < 0)
 					goto ecreate;
 			} else if (!S_ISREG(sb.st_mode)) {
 				if ((f = open64(fname, O_WRONLY, 0666)) < 0)
@@ -196,15 +203,15 @@ STATIC int openredirect(union node *redir) {
 			}
 			break;
 		}
-	/* FALLTHROUGH */
+		/* FALLTHROUGH */
 	case NCLOBBER:
 		fname = redir->nfile.expfname;
-		if ((f = open64(fname, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
+		if ((f = open64(fname, O_WRONLY|O_CREAT|O_TRUNC, 0666)) < 0)
 			goto ecreate;
 		break;
 	case NAPPEND:
 		fname = redir->nfile.expfname;
-		if ((f = open64(fname, O_WRONLY | O_CREAT | O_APPEND, 0666)) < 0)
+		if ((f = open64(fname, O_WRONLY|O_CREAT|O_APPEND, 0666)) < 0)
 			goto ecreate;
 		break;
 	case NTOFD:
@@ -217,7 +224,7 @@ STATIC int openredirect(union node *redir) {
 #ifdef DEBUG
 		abort();
 #endif
-	/* Fall through to eliminate warning. */
+		/* Fall through to eliminate warning. */
 	case NHERE:
 	case NXHERE:
 		f = openhere(redir);
@@ -231,19 +238,20 @@ eopen:
 	sh_error("cannot open %s: %s", fname, errmsg(errno, E_OPEN));
 }
 
+
 STATIC void
 #ifdef notyet
-    dupredirect(redir, f, memory)
+dupredirect(redir, f, memory)
 #else
-    dupredirect(redir, f)
+dupredirect(redir, f)
 #endif
-        union node *redir;
-int f;
+	union node *redir;
+	int f;
 #ifdef notyet
-char memory[10];
+	char memory[10];
 #endif
-{
-	int fd  = redir->nfile.fd;
+	{
+	int fd = redir->nfile.fd;
 	int err = 0;
 
 #ifdef notyet
@@ -257,10 +265,10 @@ char memory[10];
 				memory[fd] = 1;
 			else
 #endif
-			    if (dup2(f, fd) < 0) {
-				err = errno;
-				goto err;
-			}
+				if (dup2(f, fd) < 0) {
+					err = errno;
+					goto err;
+				}
 			return;
 		}
 		f = fd;
@@ -277,13 +285,16 @@ err:
 	sh_error("%d: %s", f, strerror(err));
 }
 
+
 /*
  * Handle here documents.  Normally we fork off a process to write the
  * data to a pipe.  If the document is short, we can stuff the data in
  * the pipe without forking.
  */
 
-STATIC int openhere(union node *redir) {
+STATIC int
+openhere(union node *redir)
+{
 	char *p;
 	int pip[2];
 	size_t len = 0;
@@ -320,17 +331,21 @@ out:
 	return pip[0];
 }
 
+
+
 /*
  * Undo the effects of the last redirection.
  */
 
-void popredir(int drop) {
+void
+popredir(int drop)
+{
 	struct redirtab *rp;
 	int i;
 
 	INTOFF;
 	rp = redirlist;
-	for (i = 0; i < 10; i++) {
+	for (i = 0 ; i < 10 ; i++) {
 		switch (rp->renamed[i]) {
 		case CLOSED:
 			if (!drop)
@@ -359,7 +374,7 @@ void popredir(int drop) {
 
 INCLUDE "redir.h"
 
-    RESET {
+RESET {
 	/*
 	 * Discard all saved file descriptors.
 	 */
@@ -368,12 +383,16 @@ INCLUDE "redir.h"
 
 #endif
 
+
+
 /*
  * Move a file descriptor to > 10.  Invokes sh_error on error unless
  * the original file dscriptor is not open.
  */
 
-int savefd(int from, int ofd) {
+int
+savefd(int from, int ofd)
+{
 	int newfd;
 	int err;
 
@@ -390,7 +409,10 @@ int savefd(int from, int ofd) {
 	return newfd;
 }
 
-int redirectsafe(union node *redir, int flags) {
+
+int
+redirectsafe(union node *redir, int flags)
+{
 	int err;
 	volatile int saveint;
 	struct jmploc *volatile savehandler = handler;
@@ -408,12 +430,16 @@ int redirectsafe(union node *redir, int flags) {
 	return err;
 }
 
-void unwindredir(struct redirtab *stop) {
+
+void unwindredir(struct redirtab *stop)
+{
 	while (redirlist != stop)
 		popredir(0);
 }
 
-struct redirtab *pushredir(union node *redir) {
+
+struct redirtab *pushredir(union node *redir)
+{
 	struct redirtab *sv;
 	struct redirtab *q;
 	int i;
@@ -422,8 +448,8 @@ struct redirtab *pushredir(union node *redir) {
 	if (!redir)
 		goto out;
 
-	sv        = ckmalloc(sizeof(struct redirtab));
-	sv->next  = q;
+	sv = ckmalloc(sizeof (struct redirtab));
+	sv->next = q;
 	redirlist = sv;
 	for (i = 0; i < 10; i++)
 		sv->renamed[i] = EMPTY;

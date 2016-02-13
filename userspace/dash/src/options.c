@@ -40,7 +40,7 @@
 #define DEFINE_OPTIONS
 #include "options.h"
 #undef DEFINE_OPTIONS
-#include "nodes.h" /* for other header files */
+#include "nodes.h"	/* for other header files */
 #include "eval.h"
 #include "jobs.h"
 #include "input.h"
@@ -55,35 +55,70 @@
 #endif
 #include "show.h"
 
-char *arg0;                /* value of $0 */
-struct shparam shellparam; /* current positional parameters */
-char **argptr;             /* argument list for builtin commands */
-char *optionarg;           /* set by nextopt (like getopt) */
-char *optptr;              /* used by nextopt */
+char *arg0;			/* value of $0 */
+struct shparam shellparam;	/* current positional parameters */
+char **argptr;			/* argument list for builtin commands */
+char *optionarg;		/* set by nextopt (like getopt) */
+char *optptr;			/* used by nextopt */
 
-char *minusc; /* argument to -c option */
+char *minusc;			/* argument to -c option */
 
 static const char *const optnames[NOPTS] = {
-    "errexit", "noglob", "ignoreeof", "interactive", "monitor", "noexec",  "stdin", "xtrace", "verbose",
-    "vi",      "emacs",  "noclobber", "allexport",   "notify",  "nounset", "nolog", "debug",
+	"errexit",
+	"noglob",
+	"ignoreeof",
+	"interactive",
+	"monitor",
+	"noexec",
+	"stdin",
+	"xtrace",
+	"verbose",
+	"vi",
+	"emacs",
+	"noclobber",
+	"allexport",
+	"notify",
+	"nounset",
+	"nolog",
+	"debug",
 };
 
 const char optletters[NOPTS] = {
-    'e', 'f', 'I', 'i', 'm', 'n', 's', 'x', 'v', 'V', 'E', 'C', 'a', 'b', 'u', 0, 0,
+	'e',
+	'f',
+	'I',
+	'i',
+	'm',
+	'n',
+	's',
+	'x',
+	'v',
+	'V',
+	'E',
+	'C',
+	'a',
+	'b',
+	'u',
+	0,
+	0,
 };
 
 char optlist[NOPTS];
+
 
 static int options(int);
 STATIC void minus_o(char *, int);
 STATIC void setoption(int, int);
 STATIC int getopts(char *, char *, char **);
 
+
 /*
  * Process the shell command line arguments.
  */
 
-int procargs(int argc, char **argv) {
+int
+procargs(int argc, char **argv)
+{
 	int i;
 	const char *xminusc;
 	char **xargv;
@@ -98,7 +133,7 @@ int procargs(int argc, char **argv) {
 		optlist[i] = 2;
 	argptr = xargv;
 	login |= options(1);
-	xargv   = argptr;
+	xargv = argptr;
 	xminusc = minusc;
 	if (*xargv == NULL) {
 		if (xminusc)
@@ -122,12 +157,12 @@ int procargs(int argc, char **argv) {
 			goto setarg0;
 	} else if (!sflag) {
 		setinputfile(*xargv, 0);
-	setarg0:
-		arg0        = *xargv++;
+setarg0:
+		arg0 = *xargv++;
 		commandname = arg0;
 	}
 
-	shellparam.p      = xargv;
+	shellparam.p = xargv;
 	shellparam.optind = 1;
 	shellparam.optoff = -1;
 	/* assert(shellparam.malloc == 0 && shellparam.nparam == 0); */
@@ -140,7 +175,10 @@ int procargs(int argc, char **argv) {
 	return login;
 }
 
-void optschanged(void) {
+
+void
+optschanged(void)
+{
 #ifdef DEBUG
 	opentrace();
 #endif
@@ -156,7 +194,9 @@ void optschanged(void) {
  * to the argument list; we advance it past the options.
  */
 
-STATIC int options(int cmdline) {
+STATIC int
+options(int cmdline)
+{
 	char *p;
 	int val;
 	int c;
@@ -168,16 +208,16 @@ STATIC int options(int cmdline) {
 		argptr++;
 		if ((c = *p++) == '-') {
 			val = 1;
-			if (p[0] == '\0' || (p[0] == '-' && p[1] == '\0')) {
-				if (!cmdline) {
-					/* "-" means turn off -x and -v */
-					if (p[0] == '\0')
-						xflag = vflag = 0;
-					/* "--" means reset params */
-					else if (*argptr == NULL)
+                        if (p[0] == '\0' || (p[0] == '-' && p[1] == '\0')) {
+                                if (!cmdline) {
+                                        /* "-" means turn off -x and -v */
+                                        if (p[0] == '\0')
+                                                xflag = vflag = 0;
+                                        /* "--" means reset params */
+                                        else if (*argptr == NULL)
 						setparam(argptr);
-				}
-				break; /* "-" or  "--" terminates options */
+                                }
+				break;	  /* "-" or  "--" terminates options */
 			}
 		} else if (c == '+') {
 			val = 0;
@@ -187,7 +227,7 @@ STATIC int options(int cmdline) {
 		}
 		while ((c = *p++) != '\0') {
 			if (c == 'c' && cmdline) {
-				minusc = p; /* command is after shell args*/
+				minusc = p;	/* command is after shell args*/
 			} else if (c == 'l' && cmdline) {
 				login = 1;
 			} else if (c == 'o') {
@@ -203,17 +243,23 @@ STATIC int options(int cmdline) {
 	return login;
 }
 
-STATIC void minus_o(char *name, int val) {
+STATIC void
+minus_o(char *name, int val)
+{
 	int i;
 
 	if (name == NULL) {
 		if (val) {
 			out1str("Current option settings\n");
 			for (i = 0; i < NOPTS; i++)
-				out1fmt("%-16s%s\n", optnames[i], optlist[i] ? "on" : "off");
+				out1fmt("%-16s%s\n", optnames[i],
+					optlist[i] ? "on" : "off");
 		} else {
 			for (i = 0; i < NOPTS; i++)
-				out1fmt("set %s %s\n", optlist[i] ? "-o" : "+o", optnames[i]);
+				out1fmt("set %s %s\n",
+					optlist[i] ? "-o" : "+o",
+					optnames[i]);
+
 		}
 	} else {
 		for (i = 0; i < NOPTS; i++)
@@ -225,7 +271,10 @@ STATIC void minus_o(char *name, int val) {
 	}
 }
 
-STATIC void setoption(int flag, int val) {
+
+STATIC void
+setoption(int flag, int val)
+{
 	int i;
 
 	for (i = 0; i < NOPTS; i++)
@@ -244,17 +293,20 @@ STATIC void setoption(int flag, int val) {
 	/* NOTREACHED */
 }
 
+
+
 /*
  * Set the shell parameters.
  */
 
-void setparam(char **argv) {
+void
+setparam(char **argv)
+{
 	char **newparam;
 	char **ap;
 	int nparam;
 
-	for (nparam = 0; argv[nparam]; nparam++)
-		;
+	for (nparam = 0 ; argv[nparam] ; nparam++);
 	ap = newparam = ckmalloc((nparam + 1) * sizeof *ap);
 	while (*argv) {
 		*ap++ = savestr(*argv++);
@@ -263,30 +315,37 @@ void setparam(char **argv) {
 	freeparam(&shellparam);
 	shellparam.malloc = 1;
 	shellparam.nparam = nparam;
-	shellparam.p      = newparam;
+	shellparam.p = newparam;
 	shellparam.optind = 1;
 	shellparam.optoff = -1;
 }
+
 
 /*
  * Free the list of positional parameters.
  */
 
-void freeparam(volatile struct shparam *param) {
+void
+freeparam(volatile struct shparam *param)
+{
 	char **ap;
 
 	if (param->malloc) {
-		for (ap = param->p; *ap; ap++)
+		for (ap = param->p ; *ap ; ap++)
 			ckfree(*ap);
 		ckfree(param->p);
 	}
 }
 
+
+
 /*
  * The shift builtin command.
  */
 
-int shiftcmd(int argc, char **argv) {
+int
+shiftcmd(int argc, char **argv)
+{
 	int n;
 	char **ap1, **ap2;
 
@@ -297,24 +356,27 @@ int shiftcmd(int argc, char **argv) {
 		sh_error("can't shift that many");
 	INTOFF;
 	shellparam.nparam -= n;
-	for (ap1 = shellparam.p; --n >= 0; ap1++) {
+	for (ap1 = shellparam.p ; --n >= 0 ; ap1++) {
 		if (shellparam.malloc)
 			ckfree(*ap1);
 	}
 	ap2 = shellparam.p;
-	while ((*ap2++ = *ap1++) != NULL)
-		;
+	while ((*ap2++ = *ap1++) != NULL);
 	shellparam.optind = 1;
 	shellparam.optoff = -1;
 	INTON;
 	return 0;
 }
 
+
+
 /*
  * The set command builtin.
  */
 
-int setcmd(int argc, char **argv) {
+int
+setcmd(int argc, char **argv)
+{
 	if (argc == 1)
 		return showvars(nullstr, 0, VUNSET);
 	INTOFF;
@@ -327,7 +389,10 @@ int setcmd(int argc, char **argv) {
 	return 0;
 }
 
-void getoptsreset(value) const char *value;
+
+void
+getoptsreset(value)
+	const char *value;
 {
 	shellparam.optind = number(value) ?: 1;
 	shellparam.optoff = -1;
@@ -340,7 +405,9 @@ void getoptsreset(value) const char *value;
  * then it's the first time getopts has been called.
  */
 
-int getoptscmd(int argc, char **argv) {
+int
+getoptscmd(int argc, char **argv)
+{
 	char **optbase;
 
 	if (argc < 3)
@@ -351,7 +418,8 @@ int getoptscmd(int argc, char **argv) {
 			shellparam.optind = 1;
 			shellparam.optoff = -1;
 		}
-	} else {
+	}
+	else {
 		optbase = &argv[3];
 		if ((unsigned)shellparam.optind > argc - 2) {
 			shellparam.optind = 1;
@@ -362,9 +430,11 @@ int getoptscmd(int argc, char **argv) {
 	return getopts(argv[1], argv[2], optbase);
 }
 
-STATIC int getopts(char *optstr, char *optvar, char **optfirst) {
+STATIC int
+getopts(char *optstr, char *optvar, char **optfirst)
+{
 	char *p, *q;
-	char c   = '?';
+	char c = '?';
 	int done = 0;
 	char s[2];
 	char **optnext;
@@ -372,7 +442,7 @@ STATIC int getopts(char *optstr, char *optvar, char **optfirst) {
 	int off = shellparam.optoff;
 
 	shellparam.optind = -1;
-	optnext           = optfirst + ind - 1;
+	optnext = optfirst + ind - 1;
 
 	if (ind <= 1 || off < 0 || strlen(optnext[-1]) < off)
 		p = NULL;
@@ -382,18 +452,18 @@ STATIC int getopts(char *optstr, char *optvar, char **optfirst) {
 		/* Current word is done, advance */
 		p = *optnext;
 		if (p == NULL || *p != '-' || *++p == '\0') {
-		atend:
-			p    = NULL;
+atend:
+			p = NULL;
 			done = 1;
 			goto out;
 		}
 		optnext++;
-		if (p[0] == '-' && p[1] == '\0') /* check for "--" */
+		if (p[0] == '-' && p[1] == '\0')	/* check for "--" */
 			goto atend;
 	}
 
 	c = *p++;
-	for (q = optstr; *q != c;) {
+	for (q = optstr; *q != c; ) {
 		if (*q == '\0') {
 			if (optstr[0] == ':') {
 				s[0] = c;
@@ -401,7 +471,7 @@ STATIC int getopts(char *optstr, char *optvar, char **optfirst) {
 				setvar("OPTARG", s, 0);
 			} else {
 				outfmt(&errout, "Illegal option -%c\n", c);
-				(void)unsetvar("OPTARG");
+				(void) unsetvar("OPTARG");
 			}
 			c = '?';
 			goto out;
@@ -419,7 +489,7 @@ STATIC int getopts(char *optstr, char *optvar, char **optfirst) {
 				c = ':';
 			} else {
 				outfmt(&errout, "No arg for -%c option\n", c);
-				(void)unsetvar("OPTARG");
+				(void) unsetvar("OPTARG");
 				c = '?';
 			}
 			goto out;
@@ -456,7 +526,9 @@ out:
  * end of input.
  */
 
-int nextopt(const char *optstring) {
+int
+nextopt(const char *optstring)
+{
 	char *p;
 	const char *q;
 	char c;
@@ -466,11 +538,11 @@ int nextopt(const char *optstring) {
 		if (p == NULL || *p != '-' || *++p == '\0')
 			return '\0';
 		argptr++;
-		if (p[0] == '-' && p[1] == '\0') /* check for "--" */
+		if (p[0] == '-' && p[1] == '\0')	/* check for "--" */
 			return '\0';
 	}
 	c = *p++;
-	for (q = optstring; *q != c;) {
+	for (q = optstring ; *q != c ; ) {
 		if (*q == '\0')
 			sh_error("Illegal option -%c", c);
 		if (*++q == ':')
@@ -480,7 +552,7 @@ int nextopt(const char *optstring) {
 		if (*p == '\0' && (p = *argptr++) == NULL)
 			sh_error("No arg for -%c option", c);
 		optionarg = p;
-		p         = NULL;
+		p = NULL;
 	}
 	optptr = p;
 	return c;

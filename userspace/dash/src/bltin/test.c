@@ -19,23 +19,21 @@
 #include <stdarg.h>
 #include "bltin.h"
 
-#define stat64 stat
-
 /* test(1) accepts the following grammar:
-    oexpr	::= aexpr | aexpr "-o" oexpr ;
-    aexpr	::= nexpr | nexpr "-a" aexpr ;
-    nexpr	::= primary | "!" primary
-    primary	::= unary-operator operand
-        | operand binary-operator operand
-        | operand
-        | "(" oexpr ")"
-        ;
-    unary-operator ::= "-r"|"-w"|"-x"|"-f"|"-d"|"-c"|"-b"|"-p"|
-        "-u"|"-g"|"-k"|"-s"|"-t"|"-z"|"-n"|"-o"|"-O"|"-G"|"-L"|"-S";
+	oexpr	::= aexpr | aexpr "-o" oexpr ;
+	aexpr	::= nexpr | nexpr "-a" aexpr ;
+	nexpr	::= primary | "!" primary
+	primary	::= unary-operator operand
+		| operand binary-operator operand
+		| operand
+		| "(" oexpr ")"
+		;
+	unary-operator ::= "-r"|"-w"|"-x"|"-f"|"-d"|"-c"|"-b"|"-p"|
+		"-u"|"-g"|"-k"|"-s"|"-t"|"-z"|"-n"|"-o"|"-O"|"-G"|"-L"|"-S";
 
-    binary-operator ::= "="|"!="|"-eq"|"-ne"|"-ge"|"-gt"|"-le"|"-lt"|
-            "-nt"|"-ot"|"-ef";
-    operand ::= <any legal UNIX file name>
+	binary-operator ::= "="|"!="|"-eq"|"-ne"|"-ge"|"-gt"|"-le"|"-lt"|
+			"-nt"|"-ot"|"-ef";
+	operand ::= <any legal UNIX file name>
 */
 
 enum token {
@@ -81,51 +79,59 @@ enum token {
 	OPERAND
 };
 
-enum token_types { UNOP, BINOP, BUNOP, BBINOP, PAREN };
+enum token_types {
+	UNOP,
+	BINOP,
+	BUNOP,
+	BBINOP,
+	PAREN
+};
 
 static struct t_op {
 	const char *op_text;
 	short op_num, op_type;
-} const ops[] = {{"-r", FILRD, UNOP},
-                 {"-w", FILWR, UNOP},
-                 {"-x", FILEX, UNOP},
-                 {"-e", FILEXIST, UNOP},
-                 {"-f", FILREG, UNOP},
-                 {"-d", FILDIR, UNOP},
-                 {"-c", FILCDEV, UNOP},
-                 {"-b", FILBDEV, UNOP},
-                 {"-p", FILFIFO, UNOP},
-                 {"-u", FILSUID, UNOP},
-                 {"-g", FILSGID, UNOP},
-                 {"-k", FILSTCK, UNOP},
-                 {"-s", FILGZ, UNOP},
-                 {"-t", FILTT, UNOP},
-                 {"-z", STREZ, UNOP},
-                 {"-n", STRNZ, UNOP},
-                 {"-h", FILSYM, UNOP}, /* for backwards compat */
-                 {"-O", FILUID, UNOP},
-                 {"-G", FILGID, UNOP},
-                 {"-L", FILSYM, UNOP},
-                 {"-S", FILSOCK, UNOP},
-                 {"=", STREQ, BINOP},
-                 {"!=", STRNE, BINOP},
-                 {"<", STRLT, BINOP},
-                 {">", STRGT, BINOP},
-                 {"-eq", INTEQ, BINOP},
-                 {"-ne", INTNE, BINOP},
-                 {"-ge", INTGE, BINOP},
-                 {"-gt", INTGT, BINOP},
-                 {"-le", INTLE, BINOP},
-                 {"-lt", INTLT, BINOP},
-                 {"-nt", FILNT, BINOP},
-                 {"-ot", FILOT, BINOP},
-                 {"-ef", FILEQ, BINOP},
-                 {"!", UNOT, BUNOP},
-                 {"-a", BAND, BBINOP},
-                 {"-o", BOR, BBINOP},
-                 {"(", LPAREN, PAREN},
-                 {")", RPAREN, PAREN},
-                 {0, 0, 0}};
+} const ops [] = {
+	{"-r",	FILRD,	UNOP},
+	{"-w",	FILWR,	UNOP},
+	{"-x",	FILEX,	UNOP},
+	{"-e",	FILEXIST,UNOP},
+	{"-f",	FILREG,	UNOP},
+	{"-d",	FILDIR,	UNOP},
+	{"-c",	FILCDEV,UNOP},
+	{"-b",	FILBDEV,UNOP},
+	{"-p",	FILFIFO,UNOP},
+	{"-u",	FILSUID,UNOP},
+	{"-g",	FILSGID,UNOP},
+	{"-k",	FILSTCK,UNOP},
+	{"-s",	FILGZ,	UNOP},
+	{"-t",	FILTT,	UNOP},
+	{"-z",	STREZ,	UNOP},
+	{"-n",	STRNZ,	UNOP},
+	{"-h",	FILSYM,	UNOP},		/* for backwards compat */
+	{"-O",	FILUID,	UNOP},
+	{"-G",	FILGID,	UNOP},
+	{"-L",	FILSYM,	UNOP},
+	{"-S",	FILSOCK,UNOP},
+	{"=",	STREQ,	BINOP},
+	{"!=",	STRNE,	BINOP},
+	{"<",	STRLT,	BINOP},
+	{">",	STRGT,	BINOP},
+	{"-eq",	INTEQ,	BINOP},
+	{"-ne",	INTNE,	BINOP},
+	{"-ge",	INTGE,	BINOP},
+	{"-gt",	INTGT,	BINOP},
+	{"-le",	INTLE,	BINOP},
+	{"-lt",	INTLT,	BINOP},
+	{"-nt",	FILNT,	BINOP},
+	{"-ot",	FILOT,	BINOP},
+	{"-ef",	FILEQ,	BINOP},
+	{"!",	UNOT,	BUNOP},
+	{"-a",	BAND,	BBINOP},
+	{"-o",	BOR,	BBINOP},
+	{"(",	LPAREN,	PAREN},
+	{")",	RPAREN,	PAREN},
+	{0,	0,	0}
+};
 
 static char **t_wp;
 static struct t_op const *t_wp_op;
@@ -149,11 +155,13 @@ static int test_st_mode(const struct stat64 *, int);
 static int bash_group_member(gid_t);
 #endif
 
-static inline intmax_t getn(const char *s) {
+static inline intmax_t getn(const char *s)
+{
 	return atomax10(s);
 }
 
-static const struct t_op *getop(const char *s) {
+static const struct t_op *getop(const char *s)
+{
 	const struct t_op *op;
 
 	for (op = ops; op->op_text; op++) {
@@ -164,7 +172,9 @@ static const struct t_op *getop(const char *s) {
 	return NULL;
 }
 
-int testcmd(int argc, char **argv) {
+int
+testcmd(int argc, char **argv)
+{
 	const struct t_op *op;
 	enum token n;
 	int res;
@@ -192,7 +202,7 @@ int testcmd(int argc, char **argv) {
 			n = OPERAND;
 			goto eval;
 		}
-	/* fall through */
+		/* fall through */
 
 	case 4:
 		if (!strcmp(argv[0], "(") && !strcmp(argv[argc - 1], ")")) {
@@ -206,7 +216,7 @@ int testcmd(int argc, char **argv) {
 
 eval:
 	t_wp = argv;
-	res  = !oexpr(n);
+	res = !oexpr(n);
 	argv = t_wp;
 
 	if (argv[0] != NULL && argv[1] != NULL)
@@ -215,14 +225,18 @@ eval:
 	return res;
 }
 
-static void syntax(const char *op, const char *msg) {
+static void
+syntax(const char *op, const char *msg)
+{
 	if (op && *op)
 		error("%s: %s", op, msg);
 	else
 		error("%s", msg);
 }
 
-static int oexpr(enum token n) {
+static int
+oexpr(enum token n)
+{
 	int res = 0;
 
 	for (;;) {
@@ -235,7 +249,9 @@ static int oexpr(enum token n) {
 	return res;
 }
 
-static int aexpr(enum token n) {
+static int
+aexpr(enum token n)
+{
 	int res = 1;
 
 	for (;;) {
@@ -249,7 +265,9 @@ static int aexpr(enum token n) {
 	return res;
 }
 
-static int nexpr(enum token n) {
+static int
+nexpr(enum token n)
+{
 	if (n != UNOT)
 		return primary(n);
 
@@ -259,15 +277,17 @@ static int nexpr(enum token n) {
 	return !nexpr(n);
 }
 
-static int primary(enum token n) {
+static int
+primary(enum token n)
+{
 	enum token nn;
 	int res;
 
 	if (n == EOI)
-		return 0; /* missing expression */
+		return 0;		/* missing expression */
 	if (n == LPAREN) {
 		if ((nn = t_lex(++t_wp)) == RPAREN)
-			return 0; /* missing expression */
+			return 0;	/* missing expression */
 		res = oexpr(nn);
 		if (t_lex(++t_wp) != RPAREN)
 			syntax(NULL, "closing paren expected");
@@ -304,12 +324,14 @@ static int primary(enum token n) {
 	return strlen(*t_wp) > 0;
 }
 
-static int binop(void) {
+static int
+binop(void)
+{
 	const char *opnd1, *opnd2;
 	struct t_op const *op;
 
 	opnd1 = *t_wp;
-	(void)t_lex(++t_wp);
+	(void) t_lex(++t_wp);
 	op = t_wp_op;
 
 	if ((opnd2 = *++t_wp) == (char *)0)
@@ -319,7 +341,7 @@ static int binop(void) {
 	default:
 #ifdef DEBUG
 		abort();
-/* NOTREACHED */
+		/* NOTREACHED */
 #endif
 	case STREQ:
 		return strcmp(opnd1, opnd2) == 0;
@@ -342,15 +364,17 @@ static int binop(void) {
 	case INTLT:
 		return getn(opnd1) < getn(opnd2);
 	case FILNT:
-		return newerf(opnd1, opnd2);
+		return newerf (opnd1, opnd2);
 	case FILOT:
-		return olderf(opnd1, opnd2);
+		return olderf (opnd1, opnd2);
 	case FILEQ:
-		return equalf(opnd1, opnd2);
+		return equalf (opnd1, opnd2);
 	}
 }
 
-static int filstat(char *nm, enum token mode) {
+static int
+filstat(char *nm, enum token mode)
+{
 	struct stat64 s;
 
 	if (mode == FILSYM ? lstat64(nm, &s) : stat64(nm, &s))
@@ -398,7 +422,8 @@ static int filstat(char *nm, enum token mode) {
 	}
 }
 
-static enum token t_lex(char **tp) {
+static enum token t_lex(char **tp)
+{
 	struct t_op const *op;
 	char *s = *tp;
 
@@ -408,7 +433,8 @@ static enum token t_lex(char **tp) {
 	}
 
 	op = getop(s);
-	if (op && !(op->op_type == UNOP && isoperand(tp)) && !(op->op_num == LPAREN && !tp[1])) {
+	if (op && !(op->op_type == UNOP && isoperand(tp)) &&
+	    !(op->op_num == LPAREN && !tp[1])) {
 		t_wp_op = op;
 		return op->op_num;
 	}
@@ -417,7 +443,8 @@ static enum token t_lex(char **tp) {
 	return OPERAND;
 }
 
-static int isoperand(char **tp) {
+static int isoperand(char **tp)
+{
 	struct t_op const *op;
 	char *s;
 
@@ -430,35 +457,51 @@ static int isoperand(char **tp) {
 	return op && op->op_type == BINOP;
 }
 
-static int newerf(const char *f1, const char *f2) {
+static int
+newerf (const char *f1, const char *f2)
+{
 	struct stat b1, b2;
 
-	return (stat(f1, &b1) == 0 && stat(f2, &b2) == 0 && b1.st_mtime > b2.st_mtime);
+	return (stat (f1, &b1) == 0 &&
+		stat (f2, &b2) == 0 &&
+		b1.st_mtime > b2.st_mtime);
 }
 
-static int olderf(const char *f1, const char *f2) {
+static int
+olderf (const char *f1, const char *f2)
+{
 	struct stat b1, b2;
 
-	return (stat(f1, &b1) == 0 && stat(f2, &b2) == 0 && b1.st_mtime < b2.st_mtime);
+	return (stat (f1, &b1) == 0 &&
+		stat (f2, &b2) == 0 &&
+		b1.st_mtime < b2.st_mtime);
 }
 
-static int equalf(const char *f1, const char *f2) {
+static int
+equalf (const char *f1, const char *f2)
+{
 	struct stat b1, b2;
 
-	return (stat(f1, &b1) == 0 && stat(f2, &b2) == 0 && b1.st_dev == b2.st_dev && b1.st_ino == b2.st_ino);
+	return (stat (f1, &b1) == 0 &&
+		stat (f2, &b2) == 0 &&
+		b1.st_dev == b2.st_dev &&
+		b1.st_ino == b2.st_ino);
 }
 
 #ifdef HAVE_FACCESSAT
-static int test_file_access(const char *path, int mode) {
+static int test_file_access(const char *path, int mode)
+{
 	return !faccessat(AT_FDCWD, path, mode, AT_EACCESS);
 }
-#else  /* HAVE_FACCESSAT */
+#else	/* HAVE_FACCESSAT */
 /*
  * Similar to what access(2) does, but uses the effective uid and gid.
  * Doesn't make the mistake of telling root that any file is executable.
  * Returns non-zero if the file is accessible.
  */
-static int test_st_mode(const struct stat64 *st, int mode) {
+static int
+test_st_mode(const struct stat64 *st, int mode)
+{
 	int euid = geteuid();
 
 	if (euid == 0) {
@@ -478,7 +521,9 @@ static int test_st_mode(const struct stat64 *st, int mode) {
 }
 
 /* Return non-zero if GID is one that we have in our groups list. */
-static int bash_group_member(gid_t gid) {
+static int
+bash_group_member(gid_t gid)
+{
 	register int i;
 	gid_t *group_array;
 	int ngroups;
@@ -487,7 +532,7 @@ static int bash_group_member(gid_t gid) {
 	if (gid == getgid() || gid == getegid())
 		return (1);
 
-	ngroups     = getgroups(0, NULL);
+	ngroups = getgroups(0, NULL);
 	group_array = stalloc(ngroups * sizeof(gid_t));
 	if ((getgroups(ngroups, group_array)) != ngroups)
 		return (0);
@@ -499,4 +544,4 @@ static int bash_group_member(gid_t gid) {
 
 	return (0);
 }
-#endif /* HAVE_FACCESSAT */
+#endif	/* HAVE_FACCESSAT */

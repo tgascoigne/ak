@@ -45,8 +45,6 @@
 #error Arithmetic tokens are out of order.
 #endif
 
-#define intmax_t uint32_t
-
 static const char *arith_startbuf;
 
 const char *arith_buf;
@@ -57,31 +55,45 @@ static int last_token;
 #define ARITH_PRECEDENCE(op, prec) [op - ARITH_BINOP_MIN] = prec
 
 static const char prec[ARITH_BINOP_MAX - ARITH_BINOP_MIN] = {
-    ARITH_PRECEDENCE(ARITH_MUL, 0),    ARITH_PRECEDENCE(ARITH_DIV, 0),  ARITH_PRECEDENCE(ARITH_REM, 0),
-    ARITH_PRECEDENCE(ARITH_ADD, 1),    ARITH_PRECEDENCE(ARITH_SUB, 1),  ARITH_PRECEDENCE(ARITH_LSHIFT, 2),
-    ARITH_PRECEDENCE(ARITH_RSHIFT, 2), ARITH_PRECEDENCE(ARITH_LT, 3),   ARITH_PRECEDENCE(ARITH_LE, 3),
-    ARITH_PRECEDENCE(ARITH_GT, 3),     ARITH_PRECEDENCE(ARITH_GE, 3),   ARITH_PRECEDENCE(ARITH_EQ, 4),
-    ARITH_PRECEDENCE(ARITH_NE, 4),     ARITH_PRECEDENCE(ARITH_BAND, 5), ARITH_PRECEDENCE(ARITH_BXOR, 6),
-    ARITH_PRECEDENCE(ARITH_BOR, 7),
+	ARITH_PRECEDENCE(ARITH_MUL, 0),
+	ARITH_PRECEDENCE(ARITH_DIV, 0),
+	ARITH_PRECEDENCE(ARITH_REM, 0),
+	ARITH_PRECEDENCE(ARITH_ADD, 1),
+	ARITH_PRECEDENCE(ARITH_SUB, 1),
+	ARITH_PRECEDENCE(ARITH_LSHIFT, 2),
+	ARITH_PRECEDENCE(ARITH_RSHIFT, 2),
+	ARITH_PRECEDENCE(ARITH_LT, 3),
+	ARITH_PRECEDENCE(ARITH_LE, 3),
+	ARITH_PRECEDENCE(ARITH_GT, 3),
+	ARITH_PRECEDENCE(ARITH_GE, 3),
+	ARITH_PRECEDENCE(ARITH_EQ, 4),
+	ARITH_PRECEDENCE(ARITH_NE, 4),
+	ARITH_PRECEDENCE(ARITH_BAND, 5),
+	ARITH_PRECEDENCE(ARITH_BXOR, 6),
+	ARITH_PRECEDENCE(ARITH_BOR, 7),
 };
 
 #define ARITH_MAX_PREC 8
 
-static void yyerror(const char *s) __attribute__((noreturn));
-static void yyerror(const char *s) {
+static void yyerror(const char *s) __attribute__ ((noreturn));
+static void yyerror(const char *s)
+{
 	sh_error("arithmetic expression: %s: \"%s\"", s, arith_startbuf);
 	/* NOTREACHED */
 }
 
-static inline int arith_prec(int op) {
+static inline int arith_prec(int op)
+{
 	return prec[op - ARITH_BINOP_MIN];
 }
 
-static inline int higher_prec(int op1, int op2) {
+static inline int higher_prec(int op1, int op2)
+{
 	return arith_prec(op1) < arith_prec(op2);
 }
 
-static intmax_t do_binop(int op, intmax_t a, intmax_t b) {
+static intmax_t do_binop(int op, intmax_t a, intmax_t b)
+{
 	switch (op) {
 	default:
 	case ARITH_REM:
@@ -122,7 +134,8 @@ static intmax_t do_binop(int op, intmax_t a, intmax_t b) {
 
 static intmax_t assignment(int var, int noeval);
 
-static intmax_t primary(int token, union yystype *val, int op, int noeval) {
+static intmax_t primary(int token, union yystype *val, int op, int noeval)
+{
 	intmax_t result;
 
 again:
@@ -141,8 +154,8 @@ again:
 		return noeval ? val->val : lookupvarint(val->name);
 	case ARITH_ADD:
 		token = op;
-		*val  = yylval;
-		op    = yylex();
+		*val = yylval;
+		op = yylex();
 		goto again;
 	case ARITH_SUB:
 		*val = yylval;
@@ -158,7 +171,8 @@ again:
 	}
 }
 
-static intmax_t binop2(intmax_t a, int op, int prec, int noeval) {
+static intmax_t binop2(intmax_t a, int op, int prec, int noeval)
+{
 	for (;;) {
 		union yystype val;
 		intmax_t b;
@@ -166,26 +180,29 @@ static intmax_t binop2(intmax_t a, int op, int prec, int noeval) {
 		int token;
 
 		token = yylex();
-		val   = yylval;
+		val = yylval;
 
 		b = primary(token, &val, yylex(), noeval);
 
 		op2 = last_token;
-		if (op2 >= ARITH_BINOP_MIN && op2 < ARITH_BINOP_MAX && higher_prec(op2, op)) {
-			b   = binop2(b, op2, arith_prec(op), noeval);
+		if (op2 >= ARITH_BINOP_MIN && op2 < ARITH_BINOP_MAX &&
+		    higher_prec(op2, op)) {
+			b = binop2(b, op2, arith_prec(op), noeval);
 			op2 = last_token;
 		}
 
 		a = noeval ? b : do_binop(op, a, b);
 
-		if (op2 < ARITH_BINOP_MIN || op2 >= ARITH_BINOP_MAX || arith_prec(op2) >= prec)
+		if (op2 < ARITH_BINOP_MIN || op2 >= ARITH_BINOP_MAX ||
+		    arith_prec(op2) >= prec)
 			return a;
 
 		op = op2;
 	}
 }
 
-static intmax_t binop(int token, union yystype *val, int op, int noeval) {
+static intmax_t binop(int token, union yystype *val, int op, int noeval)
+{
 	intmax_t a = primary(token, val, op, noeval);
 
 	op = last_token;
@@ -195,7 +212,8 @@ static intmax_t binop(int token, union yystype *val, int op, int noeval) {
 	return binop2(a, op, ARITH_MAX_PREC, noeval);
 }
 
-static intmax_t and (int token, union yystype *val, int op, int noeval) {
+static intmax_t and(int token, union yystype *val, int op, int noeval)
+{
 	intmax_t a = binop(token, val, op, noeval);
 	intmax_t b;
 
@@ -204,14 +222,15 @@ static intmax_t and (int token, union yystype *val, int op, int noeval) {
 		return a;
 
 	token = yylex();
-	*val  = yylval;
+	*val = yylval;
 
 	b = and(token, val, yylex(), noeval | !a);
 
 	return a && b;
 }
 
-static intmax_t or (int token, union yystype *val, int op, int noeval) {
+static intmax_t or(int token, union yystype *val, int op, int noeval)
+{
 	intmax_t a = and(token, val, op, noeval);
 	intmax_t b;
 
@@ -220,15 +239,16 @@ static intmax_t or (int token, union yystype *val, int op, int noeval) {
 		return a;
 
 	token = yylex();
-	*val  = yylval;
+	*val = yylval;
 
-	b = or (token, val, yylex(), noeval | !!a);
+	b = or(token, val, yylex(), noeval | !!a);
 
 	return a || b;
 }
 
-static intmax_t cond(int token, union yystype *val, int op, int noeval) {
-	intmax_t a = or (token, val, op, noeval);
+static intmax_t cond(int token, union yystype *val, int op, int noeval)
+{
+	intmax_t a = or(token, val, op, noeval);
 	intmax_t b;
 	intmax_t c;
 
@@ -241,16 +261,17 @@ static intmax_t cond(int token, union yystype *val, int op, int noeval) {
 		yyerror("expecting ':'");
 
 	token = yylex();
-	*val  = yylval;
+	*val = yylval;
 
 	c = cond(token, val, yylex(), noeval | !!a);
 
 	return a ? b : c;
 }
 
-static intmax_t assignment(int var, int noeval) {
+static intmax_t assignment(int var, int noeval)
+{
 	union yystype val = yylval;
-	int op            = yylex();
+	int op = yylex();
 	intmax_t result;
 
 	if (var != ARITH_VAR)
@@ -263,10 +284,13 @@ static intmax_t assignment(int var, int noeval) {
 	if (noeval)
 		return result;
 
-	return setvarint(val.name, op == ARITH_ASS ? result : do_binop(op - 11, lookupvarint(val.name), result), 0);
+	return setvarint(val.name,
+			 op == ARITH_ASS ? result :
+			 do_binop(op - 11, lookupvarint(val.name), result), 0);
 }
 
-intmax_t arith(const char *s) {
+intmax_t arith(const char *s)
+{
 	intmax_t result;
 
 	arith_buf = arith_startbuf = s;

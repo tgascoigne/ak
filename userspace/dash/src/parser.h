@@ -37,37 +37,38 @@
 #include "token.h"
 
 /* control characters in argument strings */
-#define CTL_FIRST -127 /* first 'special' character */
-#define CTLESC -127    /* escape next character */
-#define CTLVAR -126    /* variable defn */
+#define CTL_FIRST -127		/* first 'special' character */
+#define CTLESC -127		/* escape next character */
+#define CTLVAR -126		/* variable defn */
 #define CTLENDVAR -125
 #define CTLBACKQ -124
-#define CTLARI -122 /* arithmetic expression */
-#define CTLENDARI -121
-#define CTLQUOTEMARK -120
-#define CTL_LAST -120 /* last 'special' character */
+#define	CTLARI -122		/* arithmetic expression */
+#define	CTLENDARI -121
+#define	CTLQUOTEMARK -120
+#define	CTL_LAST -120		/* last 'special' character */
 
 /* variable substitution byte (follows CTLVAR) */
-#define VSTYPE 0x0f /* type of variable substitution */
-#define VSNUL 0x10  /* colon--treat the empty string as unset */
+#define VSTYPE	0x0f		/* type of variable substitution */
+#define VSNUL	0x10		/* colon--treat the empty string as unset */
 
 /* values of VSTYPE field */
-#define VSNORMAL 0x1       /* normal variable:  $var or ${var} */
-#define VSMINUS 0x2        /* ${var-text} */
-#define VSPLUS 0x3         /* ${var+text} */
-#define VSQUESTION 0x4     /* ${var?message} */
-#define VSASSIGN 0x5       /* ${var=text} */
-#define VSTRIMRIGHT 0x6    /* ${var%pattern} */
-#define VSTRIMRIGHTMAX 0x7 /* ${var%%pattern} */
-#define VSTRIMLEFT 0x8     /* ${var#pattern} */
-#define VSTRIMLEFTMAX 0x9  /* ${var##pattern} */
-#define VSLENGTH 0xa       /* ${#var} */
+#define VSNORMAL	0x1		/* normal variable:  $var or ${var} */
+#define VSMINUS		0x2		/* ${var-text} */
+#define VSPLUS		0x3		/* ${var+text} */
+#define VSQUESTION	0x4		/* ${var?message} */
+#define VSASSIGN	0x5		/* ${var=text} */
+#define VSTRIMRIGHT	0x6		/* ${var%pattern} */
+#define VSTRIMRIGHTMAX 	0x7		/* ${var%%pattern} */
+#define VSTRIMLEFT	0x8		/* ${var#pattern} */
+#define VSTRIMLEFTMAX	0x9		/* ${var##pattern} */
+#define VSLENGTH	0xa		/* ${#var} */
 
 /* values of checkkwd variable */
-#define CHKALIAS 0x1
-#define CHKKWD 0x2
-#define CHKNL 0x4
-#define CHKEOFMARK 0x8
+#define CHKALIAS	0x1
+#define CHKKWD		0x2
+#define CHKNL		0x4
+#define CHKEOFMARK	0x8
+
 
 /*
  * NEOF is returned by parsecmd when it encounters an end of file.  It
@@ -77,8 +78,9 @@
 extern int lasttoken;
 extern int tokpushback;
 #define NEOF ((union node *)&tokpushback)
-extern int whichprompt; /* 1 == PS1, 2 == PS2 */
+extern int whichprompt;		/* 1 == PS1, 2 == PS2 */
 extern int checkkwd;
+
 
 union node *parsecmd(int);
 void fixredir(union node *, const char *, int);
@@ -87,10 +89,13 @@ const char *const *findkwd(const char *);
 char *endofname(const char *);
 const char *expandstr(const char *);
 
-static inline int goodname(const char *p) {
+static inline int
+goodname(const char *p)
+{
 	return !*endofname(p);
 }
 
-static inline int parser_eof(void) {
+static inline int parser_eof(void)
+{
 	return tokpushback && lasttoken == TEOF;
 }

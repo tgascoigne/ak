@@ -55,11 +55,11 @@
 #include "eval.h"
 #include "memalloc.h"
 
-#define MAXHISTLOOPS 4 /* max recursions through fc */
-#define DEFEDITOR "ed" /* default editor *should* be $EDITOR */
+#define MAXHISTLOOPS	4	/* max recursions through fc */
+#define DEFEDITOR	"ed"	/* default editor *should* be $EDITOR */
 
-History *hist; /* history cookie */
-EditLine *el;  /* editline cookie */
+History *hist;	/* history cookie */
+EditLine *el;	/* editline cookie */
 int displayhist;
 static FILE *el_in, *el_out;
 
@@ -73,7 +73,9 @@ extern FILE *tracefile;
  * Set history and editing status.  Called whenever the status may
  * have changed (figures out what to do).
  */
-void histedit(void) {
+void
+histedit(void)
+{
 	FILE *el_err;
 
 #define editing (Eflag || Vflag)
@@ -93,9 +95,9 @@ void histedit(void) {
 				out2str("sh: can't initialize history\n");
 		}
 		if (editing && !el && isatty(0)) { /* && isatty(2) ??? */
-			                               /*
-			                                * turn editing on
-			                                */
+			/*
+			 * turn editing on
+			 */
 			INTOFF;
 			if (el_in == NULL)
 				el_in = fdopen(0, "r");
@@ -114,7 +116,7 @@ void histedit(void) {
 					el_set(el, EL_HIST, history, hist);
 				el_set(el, EL_PROMPT, getprompt);
 			} else {
-			bad:
+bad:
 				out2str("sh: can't initialize editing\n");
 			}
 			INTON;
@@ -133,7 +135,7 @@ void histedit(void) {
 		}
 	} else {
 		INTOFF;
-		if (el) { /* no editing if not interactive */
+		if (el) {	/* no editing if not interactive */
 			el_end(el);
 			el = NULL;
 		}
@@ -145,18 +147,24 @@ void histedit(void) {
 	}
 }
 
-void sethistsize(const char *hs) {
+
+void
+sethistsize(const char *hs)
+{
 	int histsize;
 	HistEvent he;
 
 	if (hist != NULL) {
-		if (hs == NULL || *hs == '\0' || (histsize = atoi(hs)) < 0)
+		if (hs == NULL || *hs == '\0' ||
+		   (histsize = atoi(hs)) < 0)
 			histsize = 100;
 		history(hist, &he, H_SETSIZE, histsize);
 	}
 }
 
-void setterm(const char *term) {
+void
+setterm(const char *term)
+{
 	if (el != NULL && term != NULL)
 		if (el_set(el, EL_TERMINAL, term) != 0) {
 			outfmt(out2, "sh: Can't set terminal type %s\n", term);
@@ -168,7 +176,9 @@ void setterm(const char *term) {
  *  This command is provided since POSIX decided to standardize
  *  the Korn shell fc command.  Oh well...
  */
-int histcmd(int argc, char **argv) {
+int
+histcmd(int argc, char **argv)
+{
 	int ch;
 	const char *editor = NULL;
 	HistEvent he;
@@ -176,7 +186,7 @@ int histcmd(int argc, char **argv) {
 	int i, retval;
 	const char *firststr, *laststr;
 	int first, last, direction;
-	char *pat         = NULL, *repl; /* ksh "fc old=new" crap */
+	char *pat = NULL, *repl;	/* ksh "fc old=new" crap */
 	static int active = 0;
 	struct jmploc jmploc;
 	struct jmploc *volatile savehandler;
@@ -184,18 +194,18 @@ int histcmd(int argc, char **argv) {
 	FILE *efp;
 #ifdef __GNUC__
 	/* Avoid longjmp clobbering */
-	(void)&editor;
-	(void)&lflg;
-	(void)&nflg;
-	(void)&rflg;
-	(void)&sflg;
-	(void)&firststr;
-	(void)&laststr;
-	(void)&pat;
-	(void)&repl;
-	(void)&efp;
-	(void)&argc;
-	(void)&argv;
+	(void) &editor;
+	(void) &lflg;
+	(void) &nflg;
+	(void) &rflg;
+	(void) &sflg;
+	(void) &firststr;
+	(void) &laststr;
+	(void) &pat;
+	(void) &repl;
+	(void) &efp;
+	(void) &argc;
+	(void) &argv;
 #endif
 
 	if (hist == NULL)
@@ -207,10 +217,10 @@ int histcmd(int argc, char **argv) {
 #ifdef __GLIBC__
 	optind = 0;
 #else
-	optreset = 1;
-	optind   = 1; /* initialize getopt */
+	optreset = 1; optind = 1; /* initialize getopt */
 #endif
-	while (not_fcnumber(argv[optind]) && (ch = getopt(argc, argv, ":e:lnrs")) != -1)
+	while (not_fcnumber(argv[optind]) &&
+	      (ch = getopt(argc, argv, ":e:lnrs")) != -1)
 		switch ((char)ch) {
 		case 'e':
 			editor = optionarg;
@@ -229,7 +239,7 @@ int histcmd(int argc, char **argv) {
 			break;
 		case ':':
 			sh_error("option -%c expects argument", optopt);
-		/* NOTREACHED */
+			/* NOTREACHED */
 		case '?':
 		default:
 			sh_error("unknown option: -%c", optopt);
@@ -241,7 +251,7 @@ int histcmd(int argc, char **argv) {
 	 * If executing...
 	 */
 	if (lflg == 0 || editor || sflg) {
-		lflg        = 0; /* ignore */
+		lflg = 0;	/* ignore */
 		editfile[0] = '\0';
 		/*
 		 * Catch interrupts to reset active counter and
@@ -257,7 +267,7 @@ int histcmd(int argc, char **argv) {
 		savehandler = handler;
 		handler = &jmploc;
 		if (++active > MAXHISTLOOPS) {
-			active      = 0;
+			active = 0;
 			displayhist = 0;
 			sh_error("called recursively too many times");
 		}
@@ -265,10 +275,12 @@ int histcmd(int argc, char **argv) {
 		 * Set editor.
 		 */
 		if (sflg == 0) {
-			if (editor == NULL && (editor = bltinlookup("FCEDIT")) == NULL && (editor = bltinlookup("EDITOR")) == NULL)
+			if (editor == NULL &&
+			    (editor = bltinlookup("FCEDIT")) == NULL &&
+			    (editor = bltinlookup("EDITOR")) == NULL)
 				editor = DEFEDITOR;
 			if (editor[0] == '-' && editor[1] == '\0') {
-				sflg   = 1; /* no edit */
+				sflg = 1;	/* no edit */
 				editor = NULL;
 			}
 		}
@@ -277,8 +289,9 @@ int histcmd(int argc, char **argv) {
 	/*
 	 * If executing, parse [old=new] now
 	 */
-	if (lflg == 0 && argc > 0 && ((repl = strchr(argv[0], '=')) != NULL)) {
-		pat     = argv[0];
+	if (lflg == 0 && argc > 0 &&
+	     ((repl = strchr(argv[0], '=')) != NULL)) {
+		pat = argv[0];
 		*repl++ = '\0';
 		argc--, argv++;
 	}
@@ -288,15 +301,15 @@ int histcmd(int argc, char **argv) {
 	switch (argc) {
 	case 0:
 		firststr = lflg ? "-16" : "-1";
-		laststr  = "-1";
+		laststr = "-1";
 		break;
 	case 1:
 		firststr = argv[0];
-		laststr  = lflg ? "-1" : argv[0];
+		laststr = lflg ? "-1" : argv[0];
 		break;
 	case 2:
 		firststr = argv[0];
-		laststr  = argv[1];
+		laststr = argv[1];
 		break;
 	default:
 		sh_error("too many args");
@@ -306,11 +319,11 @@ int histcmd(int argc, char **argv) {
 	 * Turn into event numbers.
 	 */
 	first = str_to_event(firststr, 0);
-	last  = str_to_event(laststr, 1);
+	last = str_to_event(laststr, 1);
 
 	if (rflg) {
-		i     = last;
-		last  = first;
+		i = last;
+		last = first;
 		first = i;
 	}
 	/*
@@ -325,7 +338,7 @@ int histcmd(int argc, char **argv) {
 	 */
 	if (editor) {
 		int fd;
-		INTOFF; /* easier */
+		INTOFF;		/* easier */
 		sprintf(editfile, "%s_shXXXXXX", _PATH_TMP);
 		if ((fd = mkstemp(editfile)) < 0)
 			sh_error("can't create temporary file %s", editfile);
@@ -345,20 +358,22 @@ int histcmd(int argc, char **argv) {
 	 */
 	history(hist, &he, H_FIRST);
 	retval = history(hist, &he, H_NEXT_EVENT, first);
-	for (; retval != -1; retval = history(hist, &he, direction)) {
+	for (;retval != -1; retval = history(hist, &he, direction)) {
 		if (lflg) {
 			if (!nflg)
 				out1fmt("%5d ", he.num);
 			out1str(he.str);
 		} else {
-			const char *s = pat ? fc_replace(he.str, pat, repl) : he.str;
+			const char *s = pat ?
+			   fc_replace(he.str, pat, repl) : he.str;
 
 			if (sflg) {
 				if (displayhist) {
 					out2str(s);
 				}
 
-				evalstring(strcpy(stalloc(strlen(s) + 1), s), 0);
+				evalstring(strcpy(stalloc(strlen(s) + 1), s),
+					   0);
 				if (displayhist && hist) {
 					/*
 					 *  XXX what about recursive and
@@ -385,7 +400,7 @@ int histcmd(int argc, char **argv) {
 		/* XXX - should use no JC command */
 		evalstring(editcmd, 0);
 		INTON;
-		readcmdfile(editfile); /* XXX - should read back - quick tst */
+		readcmdfile(editfile);	/* XXX - should read back - quick tst */
 		unlink(editfile);
 	}
 
@@ -396,7 +411,9 @@ int histcmd(int argc, char **argv) {
 	return 0;
 }
 
-STATIC const char *fc_replace(const char *s, char *p, char *r) {
+STATIC const char *
+fc_replace(const char *s, char *p, char *r)
+{
 	char *dest;
 	int plen = strlen(p);
 
@@ -406,7 +423,7 @@ STATIC const char *fc_replace(const char *s, char *p, char *r) {
 			while (*r)
 				STPUTC(*r++, dest);
 			s += plen;
-			*p = '\0'; /* so no more matches */
+			*p = '\0';	/* so no more matches */
 		} else
 			STPUTC(*s++, dest);
 	}
@@ -416,25 +433,29 @@ STATIC const char *fc_replace(const char *s, char *p, char *r) {
 	return (dest);
 }
 
-int not_fcnumber(char *s) {
+int
+not_fcnumber(char *s)
+{
 	if (s == NULL)
 		return 0;
-	if (*s == '-')
-		s++;
+        if (*s == '-')
+                s++;
 	return (!is_number(s));
 }
 
-int str_to_event(const char *str, int last) {
+int
+str_to_event(const char *str, int last)
+{
 	HistEvent he;
 	const char *s = str;
-	int relative  = 0;
+	int relative = 0;
 	int i, retval;
 
 	retval = history(hist, &he, H_FIRST);
 	switch (*s) {
 	case '-':
 		relative = 1;
-	/*FALLTHROUGH*/
+		/*FALLTHROUGH*/
 	case '+':
 		s++;
 	}
@@ -453,11 +474,13 @@ int str_to_event(const char *str, int last) {
 				 * the notion of first and last is
 				 * backwards to that of the history package
 				 */
-				retval = history(hist, &he, last ? H_FIRST : H_LAST);
+				retval = history(hist, &he,
+						last ? H_FIRST : H_LAST);
 			}
 		}
 		if (retval == -1)
-			sh_error("history number %s not found (internal error)", str);
+			sh_error("history number %s not found (internal error)",
+				 str);
 	} else {
 		/*
 		 * pattern
