@@ -59,7 +59,7 @@ void kmain(void) {
 		}
 	}
 
-	char *argv[] = {"/initrd/dash", NULL};
+	char *argv[] = {"/initrd/dash", "-c", "echo hello", NULL};
 	char *envp[] = {"foo=bar", NULL};
 	execve("/initrd/dash", argv, envp);
 }
