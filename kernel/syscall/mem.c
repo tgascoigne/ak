@@ -22,8 +22,7 @@ void *sys_brk(vaddr_t brk) {
 
 void *sys_mmap_pgoff(void *addr, size_t length, int prot, int flags, int fd, off_t offset) {
 	if ((flags & MAP_ANONYMOUS) != 0) {
-		void *new_brk = sys_brk((vaddr_t)sys_brk(0) + (vaddr_t)length);
-		return (void *)((size_t)new_brk - length);
+		return sbrk((intptr_t)length);
 	}
 	PANIC("sys_mmap: not implemented\n");
 	return (void *)-1;

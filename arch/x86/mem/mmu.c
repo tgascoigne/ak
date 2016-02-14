@@ -55,8 +55,7 @@ void pg_init(void) {
 
 void pg_unmap_low_kernel(void) {
 	// unmap the kernel from 0x0
-	KernelPageDir[ADDR_PDE(0)] = NilPgEnt;
-	tlb_flush();
+	pg_unmap_ext((vaddr_t)0);
 }
 
 bool mmu_is_ready(void) {
@@ -98,7 +97,7 @@ void pg_unmap(vaddr_t vaddr) {
 		return;
 	}
 
-	paddr_t tblframe = PDE_ADDR(*dirent);
+	paddr_t tblframe = PTE_ADDR(*dirent);
 	pgentry_t *table = pg_tmp_map((pgaddr_t)tblframe);
 
 	pgentry_t *entry = &table[ADDR_PTE(vaddr)];
