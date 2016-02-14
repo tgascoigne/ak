@@ -35,6 +35,20 @@ fdescr_t *fd_lookup(fd_t fd) {
 	return CurrentTask->fdtbl[fd];
 }
 
+int fd_dupfd(fd_t from, fd_t to) {
+	if (CurrentTask->fdtbl[from] == NULL) {
+		errno = EBADF;
+		return -1;
+	}
+
+	while (CurrentTask->fdtbl[to] != NULL) {
+		to++;
+	}
+
+	CurrentTask->fdtbl[to] = CurrentTask->fdtbl[from];
+	return 0;
+}
+
 int fd_close(fd_t fd) {
 	if (CurrentTask->fdtbl[fd] == NULL) {
 		errno = EBADF;

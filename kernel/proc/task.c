@@ -16,6 +16,9 @@ task_t KernelTask = {
         {
             .next = NULL, .prev = NULL,
         },
+    .cwd  = "/",
+    .sid  = 1,
+    .pgid = 1,
 };
 
 task_t *CurrentTask = &KernelTask;
@@ -30,6 +33,17 @@ void task_insert(task_t *task) {
 	list_insert_after(&CurrentTask->list, &task->list);
 }
 
+task_t *task_get(pid_t pid) {
+	task_t *next_task = CurrentTask;
+	do {
+		next_task = list_elem(next_task->list.next, task_t, list);
+		if (next_task->pid == pid) {
+			return next_task;
+		}
+	} while (next_task->pid != CurrentTask->pid);
+	return (task_t *)NULL;
+}
+
 void task_exit(task_t *task, int status) {
 	list_remove(&task->list);
 	task->state    = TaskQuit;
@@ -41,6 +55,10 @@ task_t *task_clone(task_t *task) {
 	task_t *clone = (task_t *)malloc(sizeof(task_t));
 	clone->pid    = task_next_pid();
 	clone->brk    = CurrentTask->brk;
+	clone->sid    = CurrentTask->sid;
+	clone->pgid = CurrentTask->pgid;
+	strncpy(clone->cwd, CurrentTask->cwd, PATH_MAX);
+
 	clone->fdcap  = CurrentTask->fdcap;
 	clone->fdnext = CurrentTask->fdnext;
 	clone->fdtbl = (fdescr_t **)malloc(clone->fdcap * sizeof(fdescr_t *));

@@ -16,5 +16,6 @@ typedef struct {
 
 fd_t fd_open(iodev_t *dev);
 fdescr_t *fd_lookup(fd_t fd);
+int fd_dupfd(fd_t from, fd_t to);
 int fd_close(fd_t fd);
 bool fdio_tbl_init(void);

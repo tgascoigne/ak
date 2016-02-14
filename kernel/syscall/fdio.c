@@ -1,5 +1,6 @@
 #include "fdio.h"
 
+#include <asm/ioctls.h>
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -10,6 +11,7 @@
 #include <kernel/io/fdio.h>
 #include <kernel/io/stat.h>
 #include <kernel/fs/node.h>
+#include <kernel/proc/task.h>
 
 int sys_open(const char *pathname, int flags, mode_t mode) {
 	fsnode_t *fsn = fs_locate(FSRootNode, pathname);
@@ -75,7 +77,21 @@ int sys_close(fd_t fd) {
 }
 
 int sys_ioctl(fd_t fd, unsigned int cmd, unsigned long arg) {
-	//	printf("ioctl fd:%i cmd:0x%x arg:0x%lx (not implemented)\n", fd, cmd, arg);
+	int *iptr = (int *)arg;
+	switch (cmd) {
+	case TIOCGPGRP:
+		*iptr = CurrentTask->pgid;
+		return 0;
+		break;
+	}
+	return 0;
+}
+
+int sys_fcntl(fd_t fd, unsigned int cmd, unsigned long arg) {
+	switch (cmd) {
+	case F_DUPFD:
+		return fd_dupfd(fd, (fd_t)arg);
+	}
 	return 0;
 }
 
@@ -90,10 +106,16 @@ int sys_newstat(const char *path, struct kernel_stat *stat) {
 	return fsn->stat(fsn, stat);
 }
 
+char *sys_getcwd(char *buf, size_t size) {
+	return strncpy(buf, CurrentTask->cwd, size);
+}
+
 void fdio_init(void) {
 	syscall_register(SYS_OPEN, (syscall_fn_t)sys_open, 3);
 	syscall_register(SYS_CLOSE, (syscall_fn_t)sys_close, 1);
 	syscall_register(SYS_IOCTL, (syscall_fn_t)sys_ioctl, 3);
+	syscall_register(SYS_FCNTL, (syscall_fn_t)sys_fcntl, 3);
+	syscall_register(SYS_GETCWD, (syscall_fn_t)sys_getcwd, 2);
 	syscall_register(SYS_READ, (syscall_fn_t)sys_read, 3);
 	syscall_register(SYS_WRITE, (syscall_fn_t)sys_write, 3);
 	syscall_register(SYS_NEWSTAT, (syscall_fn_t)sys_newstat, 2);

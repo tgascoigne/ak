@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 #include <setjmp.h>
+#include <linux/limits.h>
 
 #include <proc/task.h>
 #include <mem/types.h>
@@ -25,10 +26,13 @@ typedef struct {
 	fd_t fdcap;
 	fdescr_t **fdtbl;
 	int exitcode;
+	pid_t sid;
+	pid_t pgid;
 	union {
 		arch_task_t;
 		arch_task_t arch;
 	};
+	char cwd[PATH_MAX];
 } task_t;
 
 extern task_t *CurrentTask;
@@ -36,6 +40,7 @@ extern task_t KernelTask;
 
 pid_t task_next_pid(void);
 void task_enter(task_t *task);
+task_t *task_get(pid_t pid);
 task_t *task_fork(void);
 void task_insert(task_t *task);
 void task_exit(task_t *task, int status);
