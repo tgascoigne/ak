@@ -4,10 +4,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <kernel/proc/task.h>
 #include <proc/exec.h>
 #include <mem/mmu.h>
 
 void elf_load(elf_t *elf) {
+	vaddr_t brk = 0;
 	for (int i = 0; i < elf->num_segments; i++) {
 		Elf32_Phdr *segment = &elf->phdr[i];
 
@@ -26,8 +28,13 @@ void elf_load(elf_t *elf) {
 		pg_alloc_range((vaddr_t)base_addr, (vaddr_t)lim_addr, rw);
 		char *seg_data = elf->elf_data + segment->p_offset;
 		memcpy((char *)base_addr, (char *)seg_data, segment->p_filesz);
-		printf("elf: loaded segment %i into %x-%x\n", i, base_addr, lim_addr);
+		printf("elf: loaded segment %i into 0x%x-0x%x\n", i, base_addr, lim_addr);
+		if (lim_addr > brk) {
+			brk = lim_addr;
+		}
 	}
+	CurrentTask->brk = brk;
+	printf("elf: process brk is 0x%x\n", brk);
 }
 
 void elf_start(elf_t *elf, char *const argv[], char *const envp[]) {

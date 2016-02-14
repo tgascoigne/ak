@@ -54,7 +54,12 @@ void kmain(void) {
 	fclose(fd);
 	fwrite(buf, 1, len, stdout);
 
-	char *argv[] = {"initrd/dash", NULL};
+	if (fork()) {
+		while (1) {
+		}
+	}
+
+	char *argv[] = {"/initrd/dash", NULL};
 	char *envp[] = {"foo=bar", NULL};
 	execve("/initrd/dash", argv, envp);
 }

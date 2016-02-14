@@ -130,7 +130,7 @@ void pg_reserve(vaddr_t vaddr) {
 	uint32_t flags = base_flags();
 	flags |= PAGE_RESERVED;
 	flags &= (uint32_t)~PAGE_PRESENT; /* reserved pages are not present (allocated on page fault) */
-	pg_map_ext(MEMMAX, vaddr, flags);
+	pg_map_ext(0, vaddr, flags);
 }
 
 void pg_reserve_range(vaddr_t start, vaddr_t end, bool rw) {
@@ -274,7 +274,7 @@ bool pg_is_reserved(vaddr_t addr) {
 		return false;
 	}
 
-	pgentry_t *pt = pg_tmp_map(PDE_ADDR(pgd));
+	pgentry_t *pt = pg_tmp_map(PTE_ADDR(pgd));
 	pgentry_t pte = pt[ADDR_PTE(addr)];
 	pg_tmp_unmap(pt);
 

@@ -8,7 +8,7 @@ OBJDUMP := $(CROSS_COMPILE)objdump
 OBJCOPY := $(CROSS_COMPILE)objcopy
 PREPROC := $(CC) -E -x c -P
 
-WARNFLAGS   := -Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow -Wno-unused-parameter -Wno-microsoft
+WARNFLAGS   := -Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow -Wno-unused-parameter -Wno-microsoft -Wno-unused-function
 
 CFLAGS		:= -iwithprefix include $(WARNFLAGS) -fms-extensions -g
 LDFLAGS     := -static
