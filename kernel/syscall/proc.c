@@ -85,7 +85,7 @@ int sys_setpgid(pid_t pid, pid_t pgid) {
 }
 
 pid_t sys_wait4(pid_t pid, int *status, int options, void *rusage) {
-	return CurrentTask->pid;
+	return 0;
 }
 
 void proc_init(void) {

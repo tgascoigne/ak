@@ -106,8 +106,9 @@ int sys_newstat(const char *path, struct kernel_stat *stat) {
 	return fsn->stat(fsn, stat);
 }
 
-char *sys_getcwd(char *buf, size_t size) {
-	return strncpy(buf, CurrentTask->cwd, size);
+int sys_getcwd(char *buf, size_t size) {
+	strncpy(buf, CurrentTask->cwd, size);
+	return (int)strlen(buf);
 }
 
 void fdio_init(void) {
