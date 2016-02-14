@@ -66,7 +66,9 @@ void multiboot_mmap(vaddr_t mb_info) {
 			pg_map_sequence(InitrdStart, (vaddr_t)PHYSTOKBSS(InitrdStart),
 			                (size_t)(InitrdEnd - InitrdStart + PAGE_SIZE));
 			task_brk(CurrentTask, PHYSTOKBSS(InitrdEnd));
-			Initrd = (cpiohdr_t *)PHYSTOKBSS(InitrdStart);
+			extern void *__curbrk;
+			__curbrk = (void *)CurrentTask->brk;
+			Initrd   = (cpiohdr_t *)PHYSTOKBSS(InitrdStart);
 		}
 
 		tag = (struct multiboot_tag *)((vaddr_t)tag + ((tag->size + 7) & (uint32_t)~7));
