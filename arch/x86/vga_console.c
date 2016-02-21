@@ -38,14 +38,7 @@ void vga_console_init(void) {
 	vga_console_clear();
 }
 
-void vga_console_puts(const char *str) {
-	while (*str != '\0') {
-		vga_console_putc(*str);
-		str++;
-	}
-}
-
-#define BUF_PUTC(state, c) state.buffer[(state.y * state.cols) + state.x] = (uint16_t)((state.attrib << 8) | c)
+#define BUF_PUTC(state, c) state.buffer[VGA_TEXT_ADDR(state.x, state.y)] = (uint16_t)((state.attrib << 8) | c)
 
 void vga_console_putc(char c) {
 	/* handle special characters */
@@ -85,10 +78,14 @@ void vga_console_putc(char c) {
 	if (state.y >= state.rows) {
 		vga_console_scroll();
 	}
+
+	vga_console_set_cursor(state.x, state.y);
 }
 
 void vga_console_clear(void) {
-	memset(state.buffer, 0, (size_t)(state.rows * state.cols) * 2);
+	for (int i = 0; i < (state.rows * state.cols) * 2; i++) {
+		state.buffer[i] = ((uint16_t)(state.attrib << 8) | ' ');
+	}
 }
 
 /* This only scrolls the buffer, not the cursor */
