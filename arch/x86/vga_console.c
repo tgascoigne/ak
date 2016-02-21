@@ -45,6 +45,8 @@ void vga_console_puts(const char *str) {
 	}
 }
 
+#define BUF_PUTC(state, c) state.buffer[(state.y * state.cols) + state.x] = (uint16_t)((state.attrib << 8) | c)
+
 void vga_console_putc(char c) {
 	/* handle special characters */
 	bool special = false;
@@ -54,14 +56,18 @@ void vga_console_putc(char c) {
 		state.y++;
 		special = true;
 		break;
+	case 0x8: /* backspace */
+		state.x--;
+		BUF_PUTC(state, ' ');
+		special = true;
+		break;
 	case '\r':
 		return; /* ignore \r */
 	}
 
 	if (!special) {
 		/* print the character */
-		int buffer_pos           = (state.y * state.cols) + state.x;
-		state.buffer[buffer_pos] = (uint16_t)((state.attrib << 8) | c);
+		BUF_PUTC(state, c);
 		state.x++;
 	}
 
@@ -70,6 +76,12 @@ void vga_console_putc(char c) {
 		state.x = 0;
 		state.y++;
 	}
+
+	if (state.x < 0) {
+		state.y--;
+		state.x = state.cols - 1;
+	}
+
 	if (state.y >= state.rows) {
 		vga_console_scroll();
 	}
