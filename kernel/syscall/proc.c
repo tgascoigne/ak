@@ -45,6 +45,10 @@ int sys_sched_yield(void) {
 	return 0;
 }
 
+pid_t sys_getppid(void) {
+	return CurrentTask->ppid;
+}
+
 pid_t sys_getpid(void) {
 	return CurrentTask->pid;
 }
@@ -91,6 +95,7 @@ pid_t sys_wait4(pid_t pid, int *status, int options, void *rusage) {
 void proc_init(void) {
 	syscall_register(SYS_EXIT, (syscall_fn_t)sys_exit, 1);
 	syscall_register(SYS_EXECVE, (syscall_fn_t)sys_execve, 3);
+	syscall_register(SYS_GETPPID, (syscall_fn_t)sys_getppid, 0);
 	syscall_register(SYS_GETPID, (syscall_fn_t)sys_getpid, 0);
 	syscall_register(SYS_FORK, (syscall_fn_t)sys_fork, 0);
 	syscall_register(SYS_WAIT4, (syscall_fn_t)sys_wait4, 4);

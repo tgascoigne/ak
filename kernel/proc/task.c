@@ -10,6 +10,7 @@ extern void *_kern_end;
 
 task_t KernelTask = {
     .pid          = KERNEL_PID,
+    .ppid         = KERNEL_PID,
     .brk          = (vaddr_t)&_kern_end,
     .state = TaskReady,
     .list =
@@ -56,6 +57,7 @@ void task_exit(task_t *task, int status) {
 task_t *task_clone(task_t *task) {
 	task_t *clone  = (task_t *)malloc(sizeof(task_t));
 	clone->pid     = task_next_pid();
+	clone->ppid    = CurrentTask->pid;
 	clone->brk     = CurrentTask->brk;
 	clone->mmapbrk = CurrentTask->mmapbrk;
 	clone->sid     = CurrentTask->sid;

@@ -247,7 +247,7 @@ bool pg_is_allocated(vaddr_t addr) {
 		return true;
 	}
 
-	pgentry_t *pt = pg_tmp_map(PDE_ADDR(pgd));
+	pgentry_t *pt = pg_tmp_map(PTE_ADDR(pgd));
 	pgentry_t pte = pt[ADDR_PTE(addr)];
 	pg_tmp_unmap(pt);
 

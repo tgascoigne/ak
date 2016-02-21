@@ -28,6 +28,7 @@ void elf_load(elf_t *elf) {
 		pg_alloc_range((vaddr_t)base_addr, (vaddr_t)lim_addr, rw);
 		char *seg_data = elf->elf_data + segment->p_offset;
 		memcpy((char *)base_addr, (char *)seg_data, segment->p_filesz);
+		memset((char *)base_addr + segment->p_filesz, 0, segment->p_memsz - segment->p_filesz);
 		printf("elf: loaded segment %i into 0x%x-0x%x\n", i, base_addr, lim_addr);
 		if (lim_addr > brk) {
 			brk = lim_addr;

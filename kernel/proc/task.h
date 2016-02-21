@@ -19,6 +19,7 @@ typedef enum {
 
 typedef struct {
 	pid_t pid;
+	pid_t ppid;
 	vaddr_t brk;
 	tstate_t state;
 	list_head_t list;
