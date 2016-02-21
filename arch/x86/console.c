@@ -2,9 +2,11 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <arch/x86/vga_console.h>
+#include <arch/x86/kbd.h>
 #include <kernel/module.h>
 #include <kernel/io/dev.h>
 #include <kernel/io/fdio.h>
@@ -12,10 +14,6 @@
 #include <kernel/fs/devfs.h>
 
 static int console_open(iodev_t *dev, int flags) {
-	return 0;
-}
-
-static ssize_t console_read(iodev_t *dev, void *buf, size_t count) {
 	return 0;
 }
 
@@ -28,6 +26,15 @@ static ssize_t console_write(iodev_t *dev, const void *buf, size_t count) {
 	return (ssize_t)i;
 }
 
+static ssize_t console_read(iodev_t *dev, void *buf, size_t count) {
+	ssize_t c;
+	// block until we get at least 1 char
+	while ((c = kbd_gets(buf, count)) == 0)
+		;
+	console_write(dev, buf, (size_t)c);
+	return c;
+}
+
 static int console_close(iodev_t *dev) {
 	return 0;
 }
@@ -38,6 +45,7 @@ static iodev_t ConsoleDev = {
 
 static bool console_register(void) {
 	vga_console_init();
+	kbd_init();
 
 	fdescr_t *consfd = (fdescr_t *)malloc(sizeof(fdescr_t));
 	consfd->dev = &ConsoleDev;

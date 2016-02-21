@@ -22,6 +22,7 @@
 
 #define INT_PIC1_BASE 32
 #define INT_PIT (INT_PIC1_BASE + 0)
+#define INT_KBD (INT_PIC1_BASE + 1)
 #define INT_PIC2_BASE (INT_PIC1_BASE + 8)
 #define INT_PIC_END (INT_PIC2_BASE + 8)
 #define INT_SYSCALL 128
