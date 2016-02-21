@@ -55,7 +55,7 @@ clean-libc:
 	(cd uClibc; make clean)
 
 format:
-	find . -iname "*.[ch]" -not -path "./uClibc/*" -not -path "./userspace/dash/*" -exec clang-format -i {} \;
+	find . -iname "*.[ch]" -not -path "./uClibc/*" -not -path "./userspace/*" -exec clang-format -i {} \;
 
 $(OUT): format libc $(OBJECTS) $(LD_SCRIPT_PROC)
 	$(LD) -T $(LD_SCRIPT_PROC) -o $(OUT) $(LDFLAGS) $(OBJECTS) $(LIBS)
