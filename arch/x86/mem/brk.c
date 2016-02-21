@@ -12,7 +12,7 @@ vaddr_t task_brk(task_t *task, vaddr_t brk) {
 
 		for (; cur < brk; cur += PAGE_SIZE) {
 			if (mmu_is_ready() && !pg_is_allocated(cur)) {
-				pg_reserve(cur);
+				pg_alloc(cur);
 			}
 		}
 

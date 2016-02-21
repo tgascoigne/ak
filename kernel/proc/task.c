@@ -16,12 +16,14 @@ task_t KernelTask = {
         {
             .next = NULL, .prev = NULL,
         },
-    .cwd  = "/",
-    .sid  = 1,
-    .pgid = 1,
+    .cwd     = "/",
+    .sid     = 1,
+    .pgid    = 1,
+    .mmapbrk = 0,
 };
 
 task_t *CurrentTask = &KernelTask;
+task_t *UserTask    = NULL;
 
 static pid_t next_pid = KERNEL_PID + 1;
 
@@ -52,10 +54,11 @@ void task_exit(task_t *task, int status) {
 }
 
 task_t *task_clone(task_t *task) {
-	task_t *clone = (task_t *)malloc(sizeof(task_t));
-	clone->pid    = task_next_pid();
-	clone->brk    = CurrentTask->brk;
-	clone->sid    = CurrentTask->sid;
+	task_t *clone  = (task_t *)malloc(sizeof(task_t));
+	clone->pid     = task_next_pid();
+	clone->brk     = CurrentTask->brk;
+	clone->mmapbrk = CurrentTask->mmapbrk;
+	clone->sid     = CurrentTask->sid;
 	clone->pgid = CurrentTask->pgid;
 	strncpy(clone->cwd, CurrentTask->cwd, PATH_MAX);
 

@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 
 #include <kernel/assert.h>
 
@@ -20,7 +21,7 @@ int elf_read(const char *elf_file, elf_t *elf) {
 	kassert(ret == 0, ELF_NO_FILE);
 
 	/* allocate space for it */
-	elf->elf_data   = (char *)malloc((size_t)fstat.st_size);
+	elf->elf_data   = (char *)mmap(0, (size_t)fstat.st_size, 0, MAP_ANONYMOUS, 0, 0);
 	elf->elf_length = (size_t)fstat.st_size;
 
 	/* read it from disk */

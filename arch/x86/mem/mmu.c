@@ -22,6 +22,8 @@ pgentry_t KernelStackTbl[1024] PAGE_ALIGN = {0};
 static bool MMUReady                      = false;
 
 void pg_fault_handler(isrargs_t *regs);
+void pg_write_entry(pgaddr_t pgd_addr, vaddr_t vaddr, pgentry_t entry);
+pgentry_t pg_read_entry(pgaddr_t pgd_addr, vaddr_t vaddr);
 
 void pg_init(void) {
 	idt_set_handler(INT_PAGE_FAULT, pg_fault_handler);
@@ -82,30 +84,7 @@ void pg_map(pgaddr_t paddr, vaddr_t vaddr) {
 }
 
 void pg_unmap(vaddr_t vaddr) {
-	pgentry_t *dir    = pg_tmp_map(CurrentTask->pgd);
-	pgentry_t *dirent = &dir[ADDR_PDE(vaddr)];
-	if (*dirent == NilPgEnt) {
-		// nothing to do
-		pg_tmp_unmap(dir);
-		return;
-	}
-
-	if ((*dirent & PAGE_EXTENDED) != 0) {
-		// We can't unmap a single page within a 4m range
-		// To unmap the entire range, call pg_unmap_ext instead
-		pg_tmp_unmap(dir);
-		return;
-	}
-
-	paddr_t tblframe = PTE_ADDR(*dirent);
-	pgentry_t *table = pg_tmp_map((pgaddr_t)tblframe);
-
-	pgentry_t *entry = &table[ADDR_PTE(vaddr)];
-	*entry           = NilPgEnt;
-
-	pg_tmp_unmap(table);
-	pg_tmp_unmap(dir);
-	tlb_invlpg(vaddr);
+	pg_write_entry(CurrentTask->pgd, PGADDR(vaddr), NilPgEnt);
 }
 
 void pg_alloc(vaddr_t vaddr) {
@@ -154,8 +133,32 @@ pgaddr_t pg_dir_new(void) {
 	return dirframe;
 }
 
-void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
-	pgentry_t *dir    = pg_tmp_map(CurrentTask->pgd);
+void pg_write_entry(pgaddr_t pgd_addr, vaddr_t vaddr, pgentry_t entry) {
+	pgentry_t *dir    = pg_tmp_map(pgd_addr);
+	int idx           = ADDR_PDE(vaddr);
+	pgentry_t *dirent = &dir[idx];
+	if (*dirent == NilPgEnt) {
+		uint32_t ptflags = base_flags();
+
+		/* table isn't mapped - allocate a new one */
+		paddr_t tblframe = pg_dir_new();
+		*dirent          = PAGE_ENTRY(tblframe, ptflags);
+	}
+
+	paddr_t tblframe = PTE_ADDR(*dirent);
+	pgentry_t *table = pg_tmp_map((pgaddr_t)tblframe);
+
+	idx                   = ADDR_PTE(vaddr);
+	pgentry_t *entry_addr = &table[idx];
+	*entry_addr           = entry;
+
+	pg_tmp_unmap(table);
+	pg_tmp_unmap(dir);
+	tlb_invlpg(vaddr);
+}
+
+pgentry_t pg_read_entry(pgaddr_t pgd_addr, vaddr_t vaddr) {
+	pgentry_t *dir    = pg_tmp_map(pgd_addr);
 	pgentry_t *dirent = &dir[ADDR_PDE(vaddr)];
 	if (*dirent == NilPgEnt) {
 		uint32_t ptflags = base_flags();
@@ -168,12 +171,17 @@ void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
 	paddr_t tblframe = PTE_ADDR(*dirent);
 	pgentry_t *table = pg_tmp_map((pgaddr_t)tblframe);
 
-	pgentry_t *entry = &table[ADDR_PTE(vaddr)];
-	*entry           = PAGE_ENTRY(paddr, flags);
+	pgentry_t entry = table[ADDR_PTE(vaddr)];
 
 	pg_tmp_unmap(table);
 	pg_tmp_unmap(dir);
-	tlb_invlpg(vaddr);
+
+	return entry;
+}
+
+void pg_map_ext(pgaddr_t paddr, vaddr_t vaddr, uint32_t flags) {
+	pgentry_t entry = PAGE_ENTRY(paddr, flags);
+	pg_write_entry(CurrentTask->pgd, PGADDR(vaddr), entry);
 }
 
 void pg_unmap_ext(vaddr_t vaddr) {
@@ -313,8 +321,27 @@ void memcpy_phys(void *dest, paddr_t src, size_t len) {
 	}
 }
 
+bool pg_is_kernel(vaddr_t addr) {
+	return addr >= KZERO && addr < KTMPMEM;
+}
+
+void pg_copy_mapping(pgaddr_t pgd_addr, vaddr_t addr) {
+	pgentry_t entry = pg_read_entry(pgd_addr, PGADDR(addr));
+
+	if (entry == NilPgEnt) {
+		PANIC("Tried to copy nil page entry\n");
+	}
+
+	pg_write_entry(CurrentTask->pgd, PGADDR(addr), entry);
+}
+
 void pg_fault_handler(isrargs_t *regs) {
 	vaddr_t fault_addr = mmu_read_cr2();
+
+	if (UserTask != NULL && pg_is_kernel(fault_addr)) {
+		pg_copy_mapping(KernelTask.pgd, fault_addr);
+		return;
+	}
 
 	if (pg_is_reserved(fault_addr)) {
 		paddr_t frame = frame_alloc();

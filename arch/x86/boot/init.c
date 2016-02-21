@@ -12,10 +12,10 @@
 void arch_init(vaddr_t mb_info) {
 	gdt_init();
 	idt_init();
-	/* the first 4m is used for various devices and the kernel */
-	frame_set_range(0, 0x400000);
 	pg_init();
 	pit_init();
 	multiboot_mmap(mb_info);
+	/* the first 4m is used for various devices and the kernel */
+	frame_set_range(0, 0x400000);
 	pg_unmap_low_kernel();
 }

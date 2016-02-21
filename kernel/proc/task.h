@@ -33,10 +33,12 @@ typedef struct {
 		arch_task_t arch;
 	};
 	char cwd[PATH_MAX];
+	vaddr_t mmapbrk;
 } task_t;
 
 extern task_t *CurrentTask;
 extern task_t KernelTask;
+extern task_t *UserTask;
 
 pid_t task_next_pid(void);
 void task_enter(task_t *task);

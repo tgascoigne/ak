@@ -22,7 +22,11 @@ void *sys_brk(vaddr_t brk) {
 
 void *sys_mmap_pgoff(void *addr, size_t length, int prot, int flags, int fd, off_t offset) {
 	if ((flags & MAP_ANONYMOUS) != 0) {
-		return sbrk((intptr_t)length);
+#pragma message("mmap allocations aren't done properly")
+		void *mem = (void *)CurrentTask->mmapbrk;
+		pg_alloc_range((vaddr_t)mem, (vaddr_t)mem + length + PAGE_SIZE, true);
+		CurrentTask->mmapbrk = (vaddr_t)mem + length + PAGE_SIZE;
+		return mem;
 	}
 	PANIC("sys_mmap: not implemented\n");
 	return (void *)-1;
