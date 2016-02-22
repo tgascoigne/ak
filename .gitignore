@@ -3,6 +3,7 @@
 *.sym
 *.bin
 TAGS
+out/
 
 ### C ###
 # Object files
