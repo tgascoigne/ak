@@ -18,6 +18,9 @@ void task_enter(task_t *task) {
 		CurrentTask = task;
 		task_load_context(&CurrentTask->arch);
 	}
+
+	/* exec any pending signals */
+	task_signal_exec(CurrentTask);
 }
 
 task_t *task_fork(void) {

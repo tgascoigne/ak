@@ -20,6 +20,7 @@ extern syscall_fn_t syscall_funcs[NUM_SYSCALLS];
 #define SYS_EXECVE 0x0b
 #define SYS_GETPID 0x14
 #define SYS_BRK 0x2d
+#define SYS_SIGNAL 0x30
 #define SYS_IOCTL 0x36
 #define SYS_FCNTL 0x37
 #define SYS_GETPPID 0x40
@@ -28,6 +29,7 @@ extern syscall_fn_t syscall_funcs[NUM_SYSCALLS];
 #define SYS_WAIT4 0x72
 #define SYS_UNAME 0x7a
 #define SYS_SCHED_YIELD 0x9e
+#define SYS_RT_SIGSUSPEND 0xb3
 #define SYS_GETCWD 0xb7
 #define SYS_MMAP_PGOFF 0xc0
 #define SYS_GETUID 0xc7

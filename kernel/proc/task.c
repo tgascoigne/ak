@@ -1,5 +1,6 @@
 #include "task.h"
 
+#include <sched.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -48,9 +49,18 @@ task_t *task_get(pid_t pid) {
 }
 
 void task_exit(task_t *task, int status) {
-	list_remove(&task->list);
 	task->state    = TaskQuit;
 	task->exitcode = status;
+	task_signal_raise(task, SIGTERM);
+
+	task_t *parent = task_get(task->ppid);
+	if (!parent) {
+		printf("failed to signal SIGCHLD to parent: no such pid %i\n", task->ppid);
+	} else {
+		task_signal_raise(parent, SIGCHLD);
+	}
+
+	list_remove(&task->list);
 	printf("task %i exited with code %i\n", task->pid, status);
 }
 
@@ -61,7 +71,10 @@ task_t *task_clone(task_t *task) {
 	clone->brk     = CurrentTask->brk;
 	clone->mmapbrk = CurrentTask->mmapbrk;
 	clone->sid     = CurrentTask->sid;
-	clone->pgid = CurrentTask->pgid;
+	clone->pgid    = CurrentTask->pgid;
+	clone->sigset  = CurrentTask->sigset;
+	clone->state = TaskReady;
+	memcpy(clone->sighandlers, CurrentTask->sighandlers, NSIG * sizeof(__sighandler_t));
 	strncpy(clone->cwd, CurrentTask->cwd, PATH_MAX);
 
 	clone->fdcap  = CurrentTask->fdcap;
@@ -75,4 +88,40 @@ task_t *task_clone(task_t *task) {
 	}
 
 	return clone;
+}
+
+void task_signal_raise(task_t *task, int signum) {
+	if (task->state == TaskSigWait) {
+		/* task was waiting on a signal; wake it up */
+		task->state = TaskReady;
+	}
+	task->sigpend = signum;
+}
+
+void task_signal_exec(task_t *task) {
+	if (task->sigpend) {
+		int signum = task->sigpend;
+
+		if (task->sigwait == task->sigpend) {
+			task->sigwait = 0;
+		}
+
+		task->sigpend = 0;
+
+		__sighandler_t hndl = task->sighandlers[signum];
+		if (hndl && hndl != SIG_IGN) {
+			hndl(signum);
+		}
+	}
+}
+
+__sighandler_t task_signal(task_t *task, int signum, __sighandler_t handler) {
+	__sighandler_t old        = task->sighandlers[signum];
+	task->sighandlers[signum] = handler;
+	return old;
+}
+
+void task_sigwait(task_t *task) {
+	task->state = TaskSigWait;
+	sched_yield();
 }

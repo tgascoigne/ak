@@ -88,17 +88,12 @@ int sys_setpgid(pid_t pid, pid_t pgid) {
 	return 0;
 }
 
-pid_t sys_wait4(pid_t pid, int *status, int options, void *rusage) {
-	return 0;
-}
-
 void proc_init(void) {
 	syscall_register(SYS_EXIT, (syscall_fn_t)sys_exit, 1);
 	syscall_register(SYS_EXECVE, (syscall_fn_t)sys_execve, 3);
 	syscall_register(SYS_GETPPID, (syscall_fn_t)sys_getppid, 0);
 	syscall_register(SYS_GETPID, (syscall_fn_t)sys_getpid, 0);
 	syscall_register(SYS_FORK, (syscall_fn_t)sys_fork, 0);
-	syscall_register(SYS_WAIT4, (syscall_fn_t)sys_wait4, 4);
 	syscall_register(SYS_SCHED_YIELD, (syscall_fn_t)sys_sched_yield, 0);
 	syscall_register(SYS_GETPGID, (syscall_fn_t)sys_getpgid, 1);
 	syscall_register(SYS_GETPGRP, (syscall_fn_t)sys_getpgrp, 0);

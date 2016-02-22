@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 #include <setjmp.h>
+#include <signal.h>
 #include <linux/limits.h>
 
 #include <proc/task.h>
@@ -14,6 +15,7 @@
 typedef enum {
 	TaskInit,
 	TaskReady,
+	TaskSigWait,
 	TaskQuit,
 } tstate_t;
 
@@ -35,6 +37,10 @@ typedef struct {
 	};
 	char cwd[PATH_MAX];
 	vaddr_t mmapbrk;
+	sigset_t sigset;
+	__sighandler_t sighandlers[NSIG];
+	int sigpend;
+	int sigwait;
 } task_t;
 
 extern task_t *CurrentTask;
@@ -51,3 +57,7 @@ void task_enable_preempt(void);
 void task_mask_preempt(void);
 void task_unmask_preempt(void);
 task_t *task_clone(task_t *task);
+__sighandler_t task_signal(task_t *task, int signum, __sighandler_t handler);
+void task_signal_exec(task_t *task);
+void task_signal_raise(task_t *task, int signum);
+void task_sigwait(task_t *task);

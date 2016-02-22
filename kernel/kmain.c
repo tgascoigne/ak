@@ -17,6 +17,7 @@
 #include <kernel/syscall/mem.h>
 #include <kernel/syscall/proc.h>
 #include <kernel/syscall/syscall.h>
+#include <kernel/syscall/signal.h>
 #include <kernel/syscall/uname.h>
 #include <kernel/syscall/user.h>
 #include <kernel/fs/node.h>
@@ -29,6 +30,7 @@ void kmain(void) {
 	syscall_arch_init();
 	mem_syscall_init();
 	proc_init();
+	signal_init();
 	fdio_init();
 	sched_init();
 	fs_create_rootfs();
