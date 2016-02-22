@@ -27,6 +27,7 @@ int elf_read(const char *elf_file, elf_t *elf) {
 	/* read it from disk */
 	FILE *elf_fd = fopen(elf_file, "r");
 	kassert(elf_fd != 0, ELF_NO_FILE);
+	fseek(elf_fd, 0, SEEK_SET);
 	ret = (int)fread(elf->elf_data, 1, elf->elf_length, elf_fd);
 	kassert(ret == (int)elf->elf_length, ELF_NO_FILE);
 	fclose(elf_fd);

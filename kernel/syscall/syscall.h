@@ -18,6 +18,7 @@ extern syscall_fn_t syscall_funcs[NUM_SYSCALLS];
 #define SYS_OPEN 0x05
 #define SYS_CLOSE 0x06
 #define SYS_EXECVE 0x0b
+#define SYS_LSEEK 0x13
 #define SYS_GETPID 0x14
 #define SYS_BRK 0x2d
 #define SYS_SIGNAL 0x30

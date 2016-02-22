@@ -58,6 +58,17 @@ ssize_t sys_read(fd_t fd, void *buf, size_t nbyte) {
 	return dev->read(dev, buf, nbyte);
 }
 
+off_t sys_lseek(fd_t fd, off_t offset, int whence) {
+	fdescr_t *descr = fd_lookup(fd);
+	if (descr == NULL) {
+		errno = EBADF;
+		return -1;
+	}
+
+	iodev_t *dev = descr->dev;
+	return dev->seek(dev, offset, whence);
+}
+
 int sys_close(fd_t fd) {
 	fdescr_t *descr = fd_lookup(fd);
 	if (descr == NULL) {
@@ -114,6 +125,7 @@ int sys_getcwd(char *buf, size_t size) {
 void fdio_init(void) {
 	syscall_register(SYS_OPEN, (syscall_fn_t)sys_open, 3);
 	syscall_register(SYS_CLOSE, (syscall_fn_t)sys_close, 1);
+	syscall_register(SYS_LSEEK, (syscall_fn_t)sys_lseek, 3);
 	syscall_register(SYS_IOCTL, (syscall_fn_t)sys_ioctl, 3);
 	syscall_register(SYS_FCNTL, (syscall_fn_t)sys_fcntl, 3);
 	syscall_register(SYS_GETCWD, (syscall_fn_t)sys_getcwd, 2);
