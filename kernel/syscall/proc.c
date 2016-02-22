@@ -35,6 +35,7 @@ int sys_exit(int status) {
 	/* this system call should never return.
 	   at this point, the task is removed from the queue, so we're
 	   just waiting out it's last cycle on the scheduler */
+	intr_enable();
 	while (1) {
 	}
 	return 0;

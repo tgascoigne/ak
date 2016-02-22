@@ -1,6 +1,5 @@
 #include "task.h"
 
-#include <sched.h>
 #include <stdlib.h>
 
 #include <arch/x86/intr/idt.h>

@@ -12,6 +12,7 @@ extern void *_kern_end;
 task_t KernelTask = {
     .pid          = KERNEL_PID,
     .ppid         = KERNEL_PID,
+    .childcount   = 0,
     .brk          = (vaddr_t)&_kern_end,
     .state = TaskReady,
     .list =
@@ -57,25 +58,30 @@ void task_exit(task_t *task, int status) {
 	if (!parent) {
 		printf("failed to signal SIGCHLD to parent: no such pid %i\n", task->ppid);
 	} else {
+		parent->sigchldpid  = task->pid;
+		parent->sigchldexit = task->exitcode;
 		task_signal_raise(parent, SIGCHLD);
+		parent->childcount--;
 	}
 
-	list_remove(&task->list);
 	printf("task %i exited with code %i\n", task->pid, status);
 }
 
 task_t *task_clone(task_t *task) {
 	task_t *clone  = (task_t *)malloc(sizeof(task_t));
 	clone->pid     = task_next_pid();
-	clone->ppid    = CurrentTask->pid;
 	clone->brk     = CurrentTask->brk;
 	clone->mmapbrk = CurrentTask->mmapbrk;
 	clone->sid     = CurrentTask->sid;
 	clone->pgid    = CurrentTask->pgid;
 	clone->sigset  = CurrentTask->sigset;
 	clone->state = TaskReady;
-	memcpy(clone->sighandlers, CurrentTask->sighandlers, NSIG * sizeof(__sighandler_t));
+	memcpy(clone->sigact, CurrentTask->sigact, NSIG * sizeof(struct sigaction));
 	strncpy(clone->cwd, CurrentTask->cwd, PATH_MAX);
+
+	clone->childcount = 0;
+	clone->ppid       = CurrentTask->pid;
+	CurrentTask->childcount++;
 
 	clone->fdcap  = CurrentTask->fdcap;
 	clone->fdnext = CurrentTask->fdnext;
@@ -91,10 +97,6 @@ task_t *task_clone(task_t *task) {
 }
 
 void task_signal_raise(task_t *task, int signum) {
-	if (task->state == TaskSigWait) {
-		/* task was waiting on a signal; wake it up */
-		task->state = TaskReady;
-	}
 	task->sigpend = signum;
 }
 
@@ -108,7 +110,7 @@ void task_signal_exec(task_t *task) {
 
 		task->sigpend = 0;
 
-		__sighandler_t hndl = task->sighandlers[signum];
+		__sighandler_t hndl = task->sigact[signum].sa_handler;
 		if (hndl && hndl != SIG_IGN) {
 			hndl(signum);
 		}
@@ -116,8 +118,9 @@ void task_signal_exec(task_t *task) {
 }
 
 __sighandler_t task_signal(task_t *task, int signum, __sighandler_t handler) {
-	__sighandler_t old        = task->sighandlers[signum];
-	task->sighandlers[signum] = handler;
+	__sighandler_t old = task->sigact[signum].sa_handler;
+
+	task->sigact[signum].sa_handler = handler;
 	return old;
 }
 
