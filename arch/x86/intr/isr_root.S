@@ -1,6 +1,6 @@
               .macro callback int
               .global idt_cb_\int
-idt_cb_\int:  cli
+idt_cb_\int:
               push  $0              # dummy error code
               push  $\int
               jmp   idt_cb_common
@@ -8,7 +8,7 @@ idt_cb_\int:  cli
 
               .macro callback_err int
               .global idt_cb_\int
-idt_cb_\int:  cli
+idt_cb_\int:
               push  $\int
               jmp   idt_cb_common
               .endm
@@ -38,7 +38,6 @@ idt_cb_common: pushal               # push all general registers
 
               popal                 # pop all general registers
               add   $8, %esp        # drop the errno and interrupt number
-              sti
               iret
 
               callback 0

@@ -29,6 +29,7 @@ extern syscall_fn_t syscall_funcs[NUM_SYSCALLS];
 #define SYS_WAIT4 0x72
 #define SYS_UNAME 0x7a
 #define SYS_SCHED_YIELD 0x9e
+#define SYS_RT_SIGACTION 0xae
 #define SYS_RT_SIGSUSPEND 0xb3
 #define SYS_GETCWD 0xb7
 #define SYS_MMAP_PGOFF 0xc0

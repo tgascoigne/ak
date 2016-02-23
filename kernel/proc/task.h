@@ -22,6 +22,7 @@ typedef enum {
 typedef struct {
 	pid_t pid;
 	pid_t ppid;
+	int childcount;
 	vaddr_t brk;
 	tstate_t state;
 	list_head_t list;
@@ -38,9 +39,11 @@ typedef struct {
 	char cwd[PATH_MAX];
 	vaddr_t mmapbrk;
 	sigset_t sigset;
-	__sighandler_t sighandlers[NSIG];
+	struct sigaction sigact[NSIG];
 	int sigpend;
 	int sigwait;
+	int sigchldpid;
+	int sigchldexit;
 } task_t;
 
 extern task_t *CurrentTask;
