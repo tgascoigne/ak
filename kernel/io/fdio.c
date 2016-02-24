@@ -68,6 +68,6 @@ bool fdio_tbl_init(void) {
 	CurrentTask->fdnext = 0;
 	CurrentTask->fdcap  = 16;
 	CurrentTask->fdtbl = (fdescr_t **)malloc(CurrentTask->fdcap * sizeof(fdescr_t *));
-	memset(CurrentTask->fdtbl, 0, FD_MAX * sizeof(fdescr_t *));
+	memset(CurrentTask->fdtbl, 0, CurrentTask->fdcap * sizeof(fdescr_t *));
 	return true;
 }

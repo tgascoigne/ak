@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include <arch/x86/mem/mmu.h>
+#include <arch/x86/mem/map.h>
 #include <kernel/panic.h>
 
 #define BITS_PER_ENTRY (8 * 4) // 8 bits * 4 characters (uint32_t)
@@ -11,17 +12,34 @@
 #define BIT_OFFSET(x) (x % BITS_PER_ENTRY)
 #define ADDR_PAGE(x) (x / PAGE_SIZE)
 
-static uint32_t *FrameBitmap;
-static uint32_t FrameCount;
+static bool FrameAllocInitialized = false;
+static uint32_t *FrameBitmap      = (uint32_t *)NULL;
+static uint32_t FrameCount        = 0;
+
+/* We preallocate 8 frames so that frame_alloc can give us memory
+   during initialization (before frame_alloc_init has been called) */
+enum {
+	PreallocMaxCount = 8,
+};
+static uint32_t PreallocFrames[PreallocMaxCount][1024] PAGE_ALIGN;
+static int PreallocCount = 0;
 
 void frame_alloc_init(paddr_t mem_max) {
 	FrameCount   = ADDR_PAGE(mem_max);
 	size_t count = BIT_IDX(FrameCount);
-	FrameBitmap = malloc(count * sizeof(uint32_t));
-	memset(FrameBitmap, 0, count * sizeof(uint32_t));
+	FrameBitmap  = malloc(count * sizeof(uint32_t));
+	/* initialize the bitmap such that all memory is allocated to begin
+	   multiboot_mmap will free up the available memory using the grub mmap */
+	memset(FrameBitmap, 0xFF, count * sizeof(uint32_t));
+	FrameAllocInitialized = true;
 }
 
 void frame_clear(paddr_t ptr) {
+	if (FrameAllocInitialized == false) {
+		/* chances are this is frame_set on a prealloced frame - safe to ignore */
+		return;
+	}
+
 	uint32_t entry = ADDR_PAGE(ptr);
 	uint32_t idx   = BIT_IDX(entry);
 	uint32_t off = BIT_OFFSET(entry);
@@ -29,6 +47,11 @@ void frame_clear(paddr_t ptr) {
 }
 
 void frame_set(paddr_t ptr) {
+	if (FrameAllocInitialized == false) {
+		/* chances are this is frame_set on a prealloced frame - safe to ignore */
+		return;
+	}
+
 	uint32_t entry = ADDR_PAGE(ptr);
 	uint32_t idx   = BIT_IDX(entry);
 	uint32_t off = BIT_OFFSET(entry);
@@ -55,6 +78,13 @@ bool frame_test(paddr_t ptr) {
 }
 
 paddr_t frame_alloc(void) {
+	if (FrameAllocInitialized == false) {
+		if (PreallocCount == PreallocMaxCount) {
+			PANIC("Out of preallocated frames\n");
+		}
+
+		return (paddr_t)KBSSTOPHYS(&PreallocFrames[PreallocCount++]);
+	}
 	return frame_alloc_after((paddr_t)0);
 }
 
@@ -74,7 +104,7 @@ paddr_t frame_alloc_4m(void) {
 
 paddr_t frame_alloc_after(paddr_t addr) {
 	for (paddr_t i = ADDR_PAGE(addr); i < FrameCount; i++) {
-		if (FrameBitmap[i] == (uint32_t)-1) {
+		if (FrameBitmap[i] == 0xFFFFFFFF) {
 			// -1 = all bits set, nothing free here
 			continue;
 		}

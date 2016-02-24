@@ -53,6 +53,9 @@ void *early_malloc(size_t size) {
 	vaddr_t brk = task_brk(CurrentTask, 0);
 	brk         = task_brk(CurrentTask, brk + size);
 
+	extern void *__curbrk;
+	__curbrk = (void *)CurrentTask->brk;
+
 	AllocStack[++AllocSP] = (vaddr_t)brk;
 	return (void *)(brk - size);
 }
@@ -60,5 +63,8 @@ void *early_malloc(size_t size) {
 void early_free(void *addr) {
 	if (AllocStack[AllocSP] == (vaddr_t)addr) {
 		task_brk(CurrentTask, AllocStack[AllocSP--]);
+
+		extern void *__curbrk;
+		__curbrk = (void *)CurrentTask->brk;
 	}
 }

@@ -15,7 +15,7 @@ void arch_init(vaddr_t mb_info) {
 	pg_init();
 	pit_init();
 	multiboot_mmap(mb_info);
-	/* the first 4m is used for various devices and the kernel */
-	frame_set_range(0, 0x400000);
+	/* multiboot_mmap will have identity mapped up to brk without claiming the frames */
+	frame_set_range(0, KBSSTOPHYS(CurrentTask->brk));
 	pg_unmap_low_kernel();
 }

@@ -19,10 +19,14 @@ task_t KernelTask = {
         {
             .next = NULL, .prev = NULL,
         },
-    .cwd     = "/",
-    .sid     = 1,
-    .pgid    = 1,
-    .mmapbrk = 0,
+    .cwd         = "/",
+    .sid         = 1,
+    .pgid        = 1,
+    .mmapbrk     = 0,
+    .sigpend     = 0,
+    .sigwait     = 0,
+    .sigchldpid  = 0,
+    .sigchldexit = 0,
 };
 
 task_t *CurrentTask = &KernelTask;
@@ -68,13 +72,16 @@ void task_exit(task_t *task, int status) {
 }
 
 task_t *task_clone(task_t *task) {
-	task_t *clone  = (task_t *)malloc(sizeof(task_t));
-	clone->pid     = task_next_pid();
-	clone->brk     = CurrentTask->brk;
-	clone->mmapbrk = CurrentTask->mmapbrk;
-	clone->sid     = CurrentTask->sid;
-	clone->pgid    = CurrentTask->pgid;
-	clone->sigset  = CurrentTask->sigset;
+	task_t *clone = (task_t *)calloc(1, sizeof(task_t));
+#define clone_field(field) clone->field = CurrentTask->field
+	clone->pid = task_next_pid();
+	clone_field(brk);
+	clone_field(mmapbrk);
+	clone_field(sid);
+	clone_field(pgid);
+	clone_field(sigset);
+	clone_field(sigpend);
+	clone_field(sigwait);
 	clone->state = TaskReady;
 	memcpy(clone->sigact, CurrentTask->sigact, NSIG * sizeof(struct sigaction));
 	strncpy(clone->cwd, CurrentTask->cwd, PATH_MAX);
@@ -83,8 +90,8 @@ task_t *task_clone(task_t *task) {
 	clone->ppid       = CurrentTask->pid;
 	CurrentTask->childcount++;
 
-	clone->fdcap  = CurrentTask->fdcap;
-	clone->fdnext = CurrentTask->fdnext;
+	clone_field(fdcap);
+	clone_field(fdnext);
 	clone->fdtbl = (fdescr_t **)malloc(clone->fdcap * sizeof(fdescr_t *));
 	memcpy(clone->fdtbl, CurrentTask->fdtbl, clone->fdcap * sizeof(fdescr_t *));
 	for (int i = 0; i < clone->fdnext; i++) {

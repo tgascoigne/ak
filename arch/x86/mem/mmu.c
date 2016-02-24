@@ -325,21 +325,21 @@ bool pg_is_kernel(vaddr_t addr) {
 	return addr >= KZERO && addr < KTMPMEM;
 }
 
-void pg_copy_mapping(pgaddr_t pgd_addr, vaddr_t addr) {
-	pgentry_t entry = pg_read_entry(pgd_addr, PGADDR(addr));
+void pg_copy_mapping(pgaddr_t dest_pgd, pgaddr_t src_pgd, vaddr_t addr) {
+	pgentry_t entry = pg_read_entry(src_pgd, PGADDR(addr));
 
 	if (entry == NilPgEnt) {
 		PANIC("Tried to copy nil page entry\n");
 	}
 
-	pg_write_entry(CurrentTask->pgd, PGADDR(addr), entry);
+	pg_write_entry(dest_pgd, PGADDR(addr), entry);
 }
 
 void pg_fault_handler(isrargs_t *regs) {
 	vaddr_t fault_addr = mmu_read_cr2();
 
 	if (UserTask != NULL && pg_is_kernel(fault_addr)) {
-		pg_copy_mapping(KernelTask.pgd, fault_addr);
+		pg_copy_mapping(UserTask->pgd, KernelTask.pgd, fault_addr);
 		return;
 	}
 

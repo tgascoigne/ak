@@ -11,7 +11,7 @@
 #include <kernel/panic.h>
 #include <kernel/initrd.h>
 
-bool multiboot_validate(uint32_t magic, vaddr_t mb_info) {
+bool multiboot_validate(uint32_t magic, paddr_t mb_info) {
 	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
 		PANIC("bad multiboot magic %i\n", magic);
 	}
@@ -19,7 +19,21 @@ bool multiboot_validate(uint32_t magic, vaddr_t mb_info) {
 	return true;
 }
 
-void multiboot_mmap(vaddr_t mb_info) {
+static void vmmap(vaddr_t start, vaddr_t end) {
+	pg_map_sequence(KBSSTOPHYS(start), (vaddr_t)start, (size_t)(end - start + PAGE_SIZE));
+	task_brk(CurrentTask, end);
+	extern void *__curbrk;
+	__curbrk = (void *)CurrentTask->brk;
+}
+
+void multiboot_mmap(paddr_t mb_info_phys) {
+	vaddr_t mb_info = PHYSTOKBSS(mb_info_phys);
+	vmmap(KTEXT, mb_info + 4);
+
+	size_t mb_size = *((size_t *)mb_info);
+
+	vmmap(KTEXT, mb_info + mb_size);
+
 	// the first 8 bytes are size + reserved
 	struct multiboot_tag *tag = (struct multiboot_tag *)(mb_info + 8);
 
@@ -46,8 +60,8 @@ void multiboot_mmap(vaddr_t mb_info) {
 			struct multiboot_tag_mmap *mmap    = (struct multiboot_tag_mmap *)tag;
 			struct multiboot_mmap_entry *entry = (struct multiboot_mmap_entry *)&mmap->entries;
 			for (int i = 0; i < (int)tag->size; i += mmap->entry_size) {
-				if (entry->type == MULTIBOOT_MEMORY_RESERVED) {
-					frame_set_range((paddr_t)entry->addr, (paddr_t)entry->addr + (paddr_t)entry->len);
+				if (entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
+					frame_clear_range((paddr_t)entry->addr, (paddr_t)entry->addr + (paddr_t)entry->len);
 				}
 
 				entry = (struct multiboot_mmap_entry *)((vaddr_t)entry + (vaddr_t)mmap->entry_size);
@@ -63,12 +77,7 @@ void multiboot_mmap(vaddr_t mb_info) {
 			/* In order to load the initrd, we map it into kernel space,
 			   then extend the kernel brk to ensure malloc can't access it */
 			frame_set_range(InitrdStart, InitrdEnd);
-			pg_map_sequence(InitrdStart, (vaddr_t)PHYSTOKBSS(InitrdStart),
-			                (size_t)(InitrdEnd - InitrdStart + PAGE_SIZE));
-			task_brk(CurrentTask, PHYSTOKBSS(InitrdEnd));
-			extern void *__curbrk;
-			__curbrk = (void *)CurrentTask->brk;
-			Initrd   = (cpiohdr_t *)PHYSTOKBSS(InitrdStart);
+			Initrd = (cpiohdr_t *)PHYSTOKBSS(InitrdStart);
 		}
 
 		tag = (struct multiboot_tag *)((vaddr_t)tag + ((tag->size + 7) & (uint32_t)~7));
