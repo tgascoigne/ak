@@ -3,8 +3,9 @@ $(INITRD_DIR)/busybox:
 	mkdir -p out; \
 	make O=./out ak_defconfig; \
 	cd out; \
-	LDFLAGS="-Xlinker -melf_i386" \
-	CFLAGS="-g -DHAVE_KILLPG -DHAVE_STRTOD -march=i686 -m32 -nostdlib -I /usr/i386-linux-uclibc/usr/include/ -L $$HOME/ak/uClibc/lib/" LIBS="$$HOME/ak/uClibc/lib/crt1.o -lm -lc -lgcc" \
+	echo "CONFIG_EXTRA_CFLAGS=\"$(CFLAGS) -I /usr/include\"" >> .config; \
+	echo "CONFIG_EXTRA_LDFLAGS=\"-Xlinker -melf_i386\"" >> .config; \
+	echo "CONFIG_EXTRA_LDLIBS=\"-lc -lgcc\"" >> .config; \
 	make)
 	cp userspace/busybox/out/busybox $@
 

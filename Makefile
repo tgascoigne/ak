@@ -42,6 +42,7 @@ LIBC_HEADERS := $(LIBC_OUT)/usr/include/
 LIBC_LIBDIR  := $(LIBC_OUT)/usr/lib/
 HEADER_INC   += -isystem $(LIBC_HEADERS)
 LIB_INC      += -L$(LIBC_LIBDIR)
+LIB_INC      += -L/usr/lib/gcc/x86_64-redhat-linux/5.3.1/32/
 DYN_LIB_INC  += $(LIBC_OUT)/usr/lib/:$(LIBC_OUT)/lib/
 
 OBJECTS   += $(addsuffix .o, $(basename $(SOURCES)))
