@@ -38,9 +38,9 @@ debug: $(OUT_ISO) $(OUT_SYMS)
 	sleep 2
 	gdb --command=$(tmpsh)
 
-$(OUT_IMG): $(ARCH_PATH)/boot.sfdisk $(OUT) $(INITRD_OUT)
-	sudo $(ARCH_PATH)/bin/mkbootimg.sh $@ $(OUT) $(INITRD_OUT)
+$(OUT_IMG): $(ARCH_PATH)/boot.sfdisk $(OUT) $(INITRD_IMG)
+	sudo $(ARCH_PATH)/bin/mkbootimg.sh $@ $(OUT) $(INITRD_IMG)
 	sudo chown `whoami` $(OUT_IMG)
 
-$(OUT_ISO): $(OUT) $(INITRD_OUT)
-	$(ARCH_PATH)/bin/mkbootiso.sh $@ $(OUT) $(INITRD_OUT)
+$(OUT_ISO): $(OUT) $(INITRD_IMG)
+	$(ARCH_PATH)/bin/mkbootiso.sh $@ $(OUT) $(INITRD_IMG)

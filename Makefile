@@ -12,7 +12,7 @@ LIBS		:=
 LD_SCRIPT   := arch/$(ARCH)/kernel.ld
 OUT			:= kernel.elf
 OUT_SYMS    := $(addsuffix .sym, $(basename $(OUT)))
-INITRD_OUT  := initrd.img
+INITRD_IMG  := initrd.img
 INITRD_DIR  := initrd
 
 SOURCES   :=
@@ -26,7 +26,6 @@ all: $(OUT) $(DISASM) $(BINFILE)
 
 include arch/makefile.mk
 include kernel/makefile.mk
-include userspace/makefile.mk
 
 CC		:= $(CROSS_COMPILE)gcc
 LD		:= $(CROSS_COMPILE)ld
@@ -67,9 +66,6 @@ $(BINFILE): $(OUT)
 
 $(DISASM): $(OUT)
 	$(OBJDUMP) -D $(OUT) > $(DISASM)
-
-$(INITRD_OUT): $(USER_BINARIES) $(shell find $(INITRD_DIR) -type f)
-	(cd $(INITRD_DIR) && ls | cpio -ov) > $(INITRD_OUT)
 
 %.processed.ld: %.ld
 	$(PREPROC) $(HEADER_INC) $^ -o $@
