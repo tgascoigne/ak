@@ -25,6 +25,12 @@ void pg_fault_handler(isrargs_t *regs);
 void pg_write_entry(pgaddr_t pgd_addr, vaddr_t vaddr, pgentry_t entry);
 pgentry_t pg_read_entry(pgaddr_t pgd_addr, vaddr_t vaddr);
 
+static void rewrite_stack_addrs(void *bottom, void *top);
+
+#define rebase_sp(x) (KSTACK + (x - KBSSTOPHYS(&_stack_bottom)))
+extern void *_stack_bottom;
+extern void *_stack_top;
+
 void pg_init(void) {
 	idt_set_handler(INT_PAGE_FAULT, pg_fault_handler);
 
@@ -32,11 +38,6 @@ void pg_init(void) {
 	KernelPageDir[ADDR_PDE(KTMPMEM)] = PAGE_ENTRY(KBSSTOPHYS(&TmpPageTbl), KERNEL_FLAGS | PAGE_LINK);
 
 	KernelTask.pgd = (pgaddr_t)KBSSTOPHYS(&KernelPageDir);
-
-#define rebase_sp(x) (KSTACK + (x - KBSSTOPHYS(&_stack_bottom)))
-
-	extern void *_stack_bottom;
-	extern void *_stack_top;
 
 #pragma message("extend stack on PAGE_STACK_END fault")
 	KernelStackTbl[1022] = PAGE_ENTRY(0, PAGE_STACK_END);
@@ -52,7 +53,18 @@ void pg_init(void) {
 	__asm__ volatile("mov %0, %%ebp" : : "b"(bp));
 
 	tlb_flush();
+	rewrite_stack_addrs(KBSSTOPHYS(&_stack_bottom), KBSSTOPHYS(&_stack_top));
 	MMUReady = true;
+}
+
+static void rewrite_stack_addrs(void *bottom, void *top) {
+	vaddr_t *newbottom = (vaddr_t *)KSTACK;
+	vaddr_t *newtop = (vaddr_t *)(KSTACK - PAGE_SIZE);
+	for (vaddr_t *saddr = newtop; saddr < newbottom; saddr++) {
+		if (top < *saddr && *saddr < bottom) {
+			*saddr = rebase_sp(*saddr);
+		}
+	}
 }
 
 void pg_unmap_low_kernel(void) {
