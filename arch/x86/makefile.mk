@@ -1,13 +1,13 @@
 ARCH_PATH := arch/$(ARCH)/
 
-CFLAGS  += -march=i686 -m32
-LDFLAGS += -melf_i386
+ARCH_CFLAGS   := -m32
+ARCH_LDFLAGS  :=
+BUILDROOT     := /opt/i386-buildroot-akos
+CROSS_COMPILE := $(BUILDROOT)/usr/bin/i586-buildroot-linux-uclibc-
 
 OUT_IMG     := boot.img
 OUT_ISO     := boot.iso
 CLEANOBJS   += $(OUT_IMG) $(OUT_ISO)
-
-LIBC_TARGET = i386-linux-uclibc
 
 SOURCES += $(addprefix $(ARCH_PATH), \
                 vga_console.c        \

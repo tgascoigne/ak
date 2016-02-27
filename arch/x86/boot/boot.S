@@ -14,24 +14,24 @@
 
 _start_vaddr: movl  $KernelPageDir, %ecx
               sub   $KZERO, %ecx
-              mov   %ecx, %cr3
+              movl  %ecx, %cr3
 
-              mov   %cr4, %ecx
+              movl  %cr4, %ecx
               orl   $CR4_PSE, %ecx
               orl   $CR4_PGE, %ecx
-              mov   %ecx, %cr4
+              movl  %ecx, %cr4
 
-              mov   %cr0, %ecx
+              movl  %cr0, %ecx
               orl   $CR0_PGENABLE, %ecx
-              mov   %ecx, %cr0
+              movl  %ecx, %cr0
 
-              # Shift the stack pointers up to the virtual mapping
+# Shift the stack pointers up to the virtual mapping
               add   $KZERO, %esp
               add   $KZERO, %ebp
               add   $KZERO, %edi
               add   $KZERO, %esi
 
-              push $_start_pgenable
+              pushl $_start_pgenable
               ret
 
 _start_pgenable:
@@ -39,14 +39,14 @@ _start_pgenable:
               sub   $KZERO, %ecx
               movl  %ecx, %esp
 
-              push  %ebx            # multiboot_info_t*
-              push  %eax            # multiboot magic
+              pushl %ebx            # multiboot_info_t*
+              pushl %eax            # multiboot magic
 
               call  multiboot_validate
               add   $4, %esp
 
               cmp   $0, %eax
-              je   error
+              je    error
 
               call  arch_init
 

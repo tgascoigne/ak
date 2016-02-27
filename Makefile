@@ -1,28 +1,19 @@
 ARCH  ?= x86
 BOARD ?= generic
+CROSS_COMPILE :=
 
-CC		:= $(CROSS_COMPILE)clang
-LD		:= $(CROSS_COMPILE)ld
-AS		:= $(CROSS_COMPILE)as
-OBJDUMP := $(CROSS_COMPILE)objdump
-OBJCOPY := $(CROSS_COMPILE)objcopy
-PREPROC := $(CC) -E -x c -P
+WARNFLAGS   :=
 
-WARNFLAGS   := -Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow -Wno-unused-parameter -Wno-microsoft -Wno-unused-function
-
-CFLAGS		:= -iwithprefix include -fms-extensions -g
+CFLAGS		:= -iwithprefix include -fms-extensions -fno-builtin -nostartfiles -static -g
 LDFLAGS     := -static
 LIB_INC     :=
 HEADER_INC  := -I.
-LIBS		:= -lc -lgcc
+LIBS		:=
 LD_SCRIPT   := arch/$(ARCH)/kernel.ld
 OUT			:= kernel.elf
 OUT_SYMS    := $(addsuffix .sym, $(basename $(OUT)))
 INITRD_OUT  := initrd.img
 INITRD_DIR  := initrd
-
-LIBC_PREFIX := $(shell pwd)/out
-LIBC_TARGET :=
 
 SOURCES   :=
 OBJECTS   :=
@@ -37,20 +28,19 @@ include arch/makefile.mk
 include kernel/makefile.mk
 include userspace/makefile.mk
 
-LIBC_OUT     := $(LIBC_PREFIX)/usr/$(LIBC_TARGET)/
-LIBC_HEADERS := $(LIBC_OUT)/usr/include/
-LIBC_LIBDIR  := $(LIBC_OUT)/usr/lib/
-HEADER_INC   += -isystem $(LIBC_HEADERS)
-LIB_INC      += -L$(LIBC_LIBDIR)
-LIB_INC      += -L/usr/lib/gcc/x86_64-redhat-linux/5.3.1/32/
-DYN_LIB_INC  += $(LIBC_OUT)/usr/lib/:$(LIBC_OUT)/lib/
+CC		:= $(CROSS_COMPILE)gcc
+LD		:= $(CROSS_COMPILE)ld
+AS		:= $(CROSS_COMPILE)as
+OBJDUMP := $(CROSS_COMPILE)objdump
+OBJCOPY := $(CROSS_COMPILE)objcopy
+PREPROC := $(CC) -E -x c -P
 
 OBJECTS   += $(addsuffix .o, $(basename $(SOURCES)))
 DISASM    += $(addsuffix .dis, $(basename $(OUT)))
 BINFILE   += $(addsuffix .bin, $(basename $(OUT)))
 CLEANOBJS += $(OUT) $(OUT_SYMS) $(INITRD_OUT) $(OBJECTS) $(BINFILE) $(DISASM) .depend
-CFLAGS    += $(HEADER_INC)
-LDFLAGS   += $(LIB_INC)
+CFLAGS    += $(HEADER_INC) $(ARCH_CFLAGS)
+LDFLAGS   += $(LIB_INC) $(ARCH_LDFLAGS)
 ASFLAGS   += $(CFLAGS)
 
 LD_SCRIPT_PROC = $(addsuffix .processed.ld, $(basename $(LD_SCRIPT)))
@@ -62,16 +52,12 @@ clean: clean-ak
 clean-ak:
 	-rm -f $(CLEANOBJS)
 
-clean-libc:
-	make -C uClibc clean
-	rm -rf $(LIBC_PREFIX)
-
 format:
 	find . -iname "*.[ch]" -not -path "./uClibc/*" -not -path "./userspace/*" -exec clang-format -i {} \;
 
 %.o: CFLAGS += $(WARNFLAGS)
-$(OUT): format libc $(OBJECTS) $(LD_SCRIPT_PROC)
-	$(LD) -T $(LD_SCRIPT_PROC) -o $(OUT) $(LDFLAGS) $(OBJECTS) $(LIBS)
+$(OUT): format $(OBJECTS) $(LD_SCRIPT_PROC)
+	$(CC) -T $(LD_SCRIPT_PROC) -o $(OUT) $(CFLAGS) $(addprefix -Xlinker ,$(LDFLAGS)) $(OBJECTS) $(LIBS)
 
 $(OUT_SYMS): $(OUT)
 	$(OBJCOPY) --only-keep-debug $(OUT) $(OUT_SYMS)
@@ -88,11 +74,6 @@ $(INITRD_OUT): $(USER_BINARIES) $(shell find $(INITRD_DIR) -type f)
 %.processed.ld: %.ld
 	$(PREPROC) $(HEADER_INC) $^ -o $@
 
-libc: $(LIBC_OUT)
-
-$(LIBC_OUT):
-	PREFIX=$(LIBC_PREFIX) make -C uClibc install
-
 depend: .depend
 
 .depend: $(SOURCES)
@@ -101,4 +82,4 @@ depend: .depend
 
 include .depend
 
-.PHONY: all libc clean clean-ak clean-libc format
+.PHONY: all clean clean-ak format
