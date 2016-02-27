@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <errno.h>
 
-#include <arch/x86/intr/intr.h>
+#include <arch/i386/intr/intr.h>
 #include <kernel/syscall/syscall.h>
 #include <kernel/proc/task.h>
 #include <kernel/proc/sched.h>

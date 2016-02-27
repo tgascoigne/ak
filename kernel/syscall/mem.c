@@ -2,8 +2,8 @@
 
 #include <sys/mman.h>
 
-#include <arch/x86/mem/brk.h>
-#include <arch/x86/mem/early_malloc.h>
+#include <arch/i386/mem/brk.h>
+#include <arch/i386/mem/early_malloc.h>
 #include <kernel/panic.h>
 #include <kernel/syscall/syscall.h>
 

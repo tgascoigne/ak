@@ -1,4 +1,4 @@
-ARCH  ?= x86
+ARCH  ?= i386
 BOARD ?= generic
 CROSS_COMPILE :=
 
