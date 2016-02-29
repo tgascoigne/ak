@@ -54,10 +54,10 @@ void pic_mask(uint8_t irq) {
 		port = PIC1_DATA;
 	} else {
 		port = PIC2_DATA;
-		irq -= 8;
+		irq  = (uint8_t)((int)irq - 8);
 	}
 
-	val = (uint8_t)io_get8(port) | (uint8_t)(1 << irq);
+	val = (uint8_t)(io_get8(port) | (1 << irq));
 	io_put8(port, val);
 }
 
@@ -69,9 +69,9 @@ void pic_unmask(uint8_t irq) {
 		port = PIC1_DATA;
 	} else {
 		port = PIC2_DATA;
-		irq -= 8;
+		irq  = (uint8_t)((int)irq - 8);
 	}
 
-	val = io_get8(port) & ~(1 << irq);
+	val = (uint8_t)(io_get8(port) & ~(1 << irq));
 	io_put8(port, val);
 }

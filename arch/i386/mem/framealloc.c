@@ -43,7 +43,7 @@ void frame_clear(paddr_t ptr) {
 	uint32_t entry = ADDR_PAGE(ptr);
 	uint32_t idx   = BIT_IDX(entry);
 	uint32_t off = BIT_OFFSET(entry);
-	FrameBitmap[idx] &= ~(1 << off);
+	FrameBitmap[idx] &= (uint32_t)(~(1 << off));
 }
 
 void frame_set(paddr_t ptr) {
@@ -55,7 +55,7 @@ void frame_set(paddr_t ptr) {
 	uint32_t entry = ADDR_PAGE(ptr);
 	uint32_t idx   = BIT_IDX(entry);
 	uint32_t off = BIT_OFFSET(entry);
-	FrameBitmap[idx] |= (1 << off);
+	FrameBitmap[idx] |= (uint32_t)(1 << off);
 }
 
 void frame_clear_range(paddr_t begin, paddr_t end) {
@@ -74,7 +74,7 @@ bool frame_test(paddr_t ptr) {
 	uint32_t entry = (uint32_t)ADDR_PAGE(ptr);
 	uint32_t idx   = (uint32_t)BIT_IDX(entry);
 	uint32_t off = (uint32_t)BIT_OFFSET(entry);
-	return (FrameBitmap[idx] & (1 << off)) != 0;
+	return (FrameBitmap[idx] & (uint32_t)(1 << off)) != 0;
 }
 
 paddr_t frame_alloc(void) {
@@ -110,7 +110,7 @@ paddr_t frame_alloc_after(paddr_t addr) {
 		}
 #pragma message("associate mapped pages with the task structure")
 		for (paddr_t j = 0; j < BITS_PER_ENTRY; j++) {
-			if ((FrameBitmap[i] & (1 << j)) == 0) {
+			if ((FrameBitmap[i] & (uint32_t)(1 << j)) == 0) {
 				return (i * BITS_PER_ENTRY + j) * PAGE_SIZE;
 			}
 		}

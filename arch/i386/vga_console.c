@@ -97,7 +97,7 @@ static void vga_console_scroll(void) {
 static void vga_console_set_cursor(int x, int y) {
 	int pos = VGA_TEXT_ADDR(x, y);
 	io_put8(0x3D4, 0x0F);
-	io_put8(0x3D5, (pos & 0xFF));
+	io_put8(0x3D5, (uint8_t)(pos & 0xFF));
 	io_put8(0x3D4, 0x0E);
-	io_put8(0x3D5, ((pos >> 8) & 0xFF));
+	io_put8(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
 }

@@ -14,9 +14,11 @@ static fd_t fd_alloc(void) {
 
 	if (CurrentTask->fdnext >= CurrentTask->fdcap) {
 		fd_t oldcap = CurrentTask->fdcap;
-		CurrentTask->fdcap *= 2;
-		CurrentTask->fdtbl = (fdescr_t **)realloc(CurrentTask->fdtbl, CurrentTask->fdcap * sizeof(fdescr_t *));
-		memset(&CurrentTask->fdtbl[oldcap], 0, (CurrentTask->fdcap - oldcap) * sizeof(fdescr_t *));
+
+		CurrentTask->fdcap = (fd_t)(CurrentTask->fdcap * 2);
+		CurrentTask->fdtbl =
+		    (fdescr_t **)realloc(CurrentTask->fdtbl, (size_t)(CurrentTask->fdcap * sizeof(fdescr_t *)));
+		memset(&CurrentTask->fdtbl[oldcap], 0, ((size_t)(CurrentTask->fdcap - oldcap) * (size_t)sizeof(fdescr_t *)));
 	}
 
 	return CurrentTask->fdnext;

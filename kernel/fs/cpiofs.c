@@ -106,7 +106,7 @@ ssize_t cpiofs_read_file(cpiofiledev_t *file, void *buf, size_t nbyte) {
 		nbyte = (size_t)file->length - (size_t)file->pos;
 	}
 	memcpy(buf, file->data + file->pos, nbyte);
-	file->pos += nbyte;
+	file->pos += (off_t)nbyte;
 	return (ssize_t)nbyte;
 }
 

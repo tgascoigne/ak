@@ -16,6 +16,8 @@ void arch_init(vaddr_t mb_info) {
 	pit_init();
 	multiboot_mmap(mb_info);
 	/* multiboot_mmap will have identity mapped up to brk without claiming the frames */
-	frame_set_range(0, KBSSTOPHYS(CurrentTask->brk));
+	frame_set_range(0, 0x1000 * 0x1000);
 	pg_unmap_low_kernel();
+	/* alloc the first page for TLS */
+	pg_alloc(0x0);
 }

@@ -59,7 +59,7 @@ ssize_t tmpfs_write_file(tmpfiledev_t *file, const void *buf, size_t nbyte) {
 		file->length = (ssize_t)file->pos + (ssize_t)nbyte;
 	}
 	memcpy(file->data + (size_t)file->pos, buf, nbyte);
-	file->pos += nbyte;
+	file->pos += (off_t)nbyte;
 	return (ssize_t)nbyte;
 }
 
@@ -68,7 +68,7 @@ ssize_t tmpfs_read_file(tmpfiledev_t *file, void *buf, size_t nbyte) {
 		nbyte = (size_t)file->length - (size_t)file->pos;
 	}
 	memcpy(buf, file->data + file->pos, nbyte);
-	file->pos += nbyte;
+	file->pos += (off_t)nbyte;
 	return (ssize_t)nbyte;
 }
 

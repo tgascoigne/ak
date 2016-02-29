@@ -49,13 +49,14 @@ void kmain(void) {
 
 	task_unmask_preempt();
 	intr_enable();
-
-	FILE *fd = fopen("/initrd/hello_world.txt", "r");
-	char buf[256];
-	size_t len = fread(buf, 1, 256, fd);
-	fclose(fd);
-	fwrite(buf, 1, len, stdout);
-
+	/*
+	    FILE *fd = fopen("/initrd/hello_world.txt", "r");
+	    char buf[256];
+	    size_t len = fread(buf, 1, 256, fd);
+	    fclose(fd);
+	    fwrite(buf, 1, len, stdout);
+	*/
+	printf("Booting...\n");
 	if (fork()) {
 		while (1) {
 		}

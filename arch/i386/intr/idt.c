@@ -50,10 +50,10 @@ void idt_set_handler(uint8_t interrupt, isrfunc_t func) {
 }
 
 void idt_encode_addrs(idtdescr_t *descr, vaddr_t offset, uint16_t selector) {
-	descr->offset_low  = offset & 0xFFFF;
-	descr->offset_high = (offset >> 16) & 0xFFFF;
-	descr->selector    = selector & 0xFFFF;
-	descr->present     = 1;
+	descr->offset_low  = (uint16_t)(offset & 0xFFFF);
+	descr->offset_high = (uint16_t)((offset >> 16) & 0xFFFF);
+	descr->selector    = (uint16_t)(selector & 0xFFFF);
+	descr->present     = (uint8_t)1;
 	descr->zero0       = 0;
 }
 

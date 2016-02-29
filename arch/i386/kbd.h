@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
+#include <unistd.h>
 
 typedef void (*consbufputc_t)(char c);
 

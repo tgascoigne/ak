@@ -2,7 +2,7 @@ ARCH  ?= i386
 BOARD ?= generic
 CROSS_COMPILE :=
 
-WARNFLAGS   :=
+WARNFLAGS   := -Wall -Wextra -Wconversion -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-unknown-pragmas
 
 CFLAGS		:= -iwithprefix include -fms-extensions -fno-builtin -nostartfiles -static -g
 LDFLAGS     := -static
@@ -55,7 +55,7 @@ format:
 	find . -iname "*.[ch]" -not -path "./uClibc/*" -not -path "./userspace/*" -exec clang-format -i {} \;
 
 %.o: CFLAGS += $(WARNFLAGS)
-$(OUT): format $(OBJECTS) $(LD_SCRIPT_PROC)
+$(OUT): $(OBJECTS) $(LD_SCRIPT_PROC)
 	$(CC) -T $(LD_SCRIPT_PROC) -o $(OUT) $(CFLAGS) $(addprefix -Xlinker ,$(LDFLAGS)) $(OBJECTS) $(LIBS)
 
 $(OUT_SYMS): $(OUT)

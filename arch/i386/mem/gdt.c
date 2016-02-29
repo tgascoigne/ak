@@ -72,12 +72,12 @@ void gdt_init() {
 
 static void gdt_encode_entry(gdtentry_t *entry, vaddr_t base, vaddr_t limit, uint8_t access, uint8_t granularity) {
 	entry->base_low  = (uint16_t)(base & 0xFFFF);
-	entry->base_mid  = (uint8_t)(base >> 16) & 0xFF;
-	entry->base_high = (uint8_t)(base >> 24) & 0xFF;
+	entry->base_mid  = (uint8_t)((base >> 16) & 0xFF);
+	entry->base_high = (uint8_t)((base >> 24) & 0xFF);
 
 	entry->limit_low   = (uint16_t)(limit & 0xFFFF);
-	entry->granularity = (uint8_t)(limit >> 16) & 0x0F;
+	entry->granularity = (uint8_t)((limit >> 16) & 0x0F);
 
-	entry->granularity |= (granularity << 4);
+	entry->granularity |= (uint8_t)(granularity << 4);
 	entry->access = access;
 }

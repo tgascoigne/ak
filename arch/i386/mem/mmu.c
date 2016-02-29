@@ -25,7 +25,7 @@ void pg_fault_handler(isrargs_t *regs);
 void pg_write_entry(pgaddr_t pgd_addr, vaddr_t vaddr, pgentry_t entry);
 pgentry_t pg_read_entry(pgaddr_t pgd_addr, vaddr_t vaddr);
 
-static void rewrite_stack_addrs(void *bottom, void *top);
+static void rewrite_stack_addrs(paddr_t bottom, paddr_t top);
 
 #define rebase_sp(x) (KSTACK + (x - KBSSTOPHYS(&_stack_bottom)))
 extern void *_stack_bottom;
@@ -57,11 +57,11 @@ void pg_init(void) {
 	MMUReady = true;
 }
 
-static void rewrite_stack_addrs(void *bottom, void *top) {
+static void rewrite_stack_addrs(paddr_t bottom, paddr_t top) {
 	vaddr_t *newbottom = (vaddr_t *)KSTACK;
 	vaddr_t *newtop = (vaddr_t *)(KSTACK - PAGE_SIZE);
 	for (vaddr_t *saddr = newtop; saddr < newbottom; saddr++) {
-		if (top < *saddr && *saddr < bottom) {
+		if ((vaddr_t)top < *saddr && *saddr < (vaddr_t)bottom) {
 			*saddr = rebase_sp(*saddr);
 		}
 	}
@@ -147,7 +147,7 @@ pgaddr_t pg_dir_new(void) {
 
 void pg_write_entry(pgaddr_t pgd_addr, vaddr_t vaddr, pgentry_t entry) {
 	pgentry_t *dir    = pg_tmp_map(pgd_addr);
-	int idx           = ADDR_PDE(vaddr);
+	int idx           = (int)ADDR_PDE(vaddr);
 	pgentry_t *dirent = &dir[idx];
 	if (*dirent == NilPgEnt) {
 		uint32_t ptflags = base_flags();

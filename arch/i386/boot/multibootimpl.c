@@ -59,7 +59,7 @@ void multiboot_mmap(paddr_t mb_info_phys) {
 		if (tag->type == MULTIBOOT_TAG_TYPE_MMAP) {
 			struct multiboot_tag_mmap *mmap    = (struct multiboot_tag_mmap *)tag;
 			struct multiboot_mmap_entry *entry = (struct multiboot_mmap_entry *)&mmap->entries;
-			for (int i = 0; i < (int)tag->size; i += mmap->entry_size) {
+			for (uint32_t i = 0; i < tag->size; i += mmap->entry_size) {
 				if (entry->type == MULTIBOOT_MEMORY_AVAILABLE) {
 					frame_clear_range((paddr_t)entry->addr, (paddr_t)entry->addr + (paddr_t)entry->len);
 				}

@@ -36,11 +36,11 @@ typedef struct idt_handler_args {
 
 typedef struct __attribute__((packed)) {
 	vaddr_t offset_low : 16;
-	int selector : 16;
-	int zero0 : 8;
-	int type : 5;
-	int dpl : 2;
-	int present : 1;
+	uint16_t selector : 16;
+	uint8_t zero0 : 8;
+	uint8_t type : 5;
+	uint8_t dpl : 2;
+	uint8_t present : 1;
 	vaddr_t offset_high : 16;
 } idtdescr_t;
 

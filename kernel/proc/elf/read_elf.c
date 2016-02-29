@@ -179,7 +179,7 @@ static int elf_read_symtab(elf_t *elf) {
 	ret = elf_get_section_by_name(elf, ".symtab", &symtab_sec);
 	kassert(ret == 0, ret);
 	elf->symtab      = (Elf32_Sym *)(elf->elf_data + elf->shdr[symtab_sec].sh_offset);
-	elf->num_symbols = elf->shdr[symtab_sec].sh_size / sizeof(Elf32_Sym);
+	elf->num_symbols = (int)elf->shdr[symtab_sec].sh_size / (int)sizeof(Elf32_Sym);
 	return 0;
 }
 

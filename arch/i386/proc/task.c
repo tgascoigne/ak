@@ -26,10 +26,12 @@ task_t *task_fork(void) {
 	task_t *clone = task_clone(CurrentTask);
 	task_insert(clone);
 
-	int ret;
+	int ret __attribute__((unused));
 	ret = task_fork_context(&clone->arch);
 
 	if (CurrentTask == clone) {
+		/* alloc the first page for TLS */
+		pg_alloc(0x0);
 		return 0;
 	}
 	return clone;
