@@ -37,6 +37,7 @@ void *__wrap_malloc(size_t size) {
 void __wrap_free(void *addr) {
 	if (EarlyMallocEnabled) {
 		early_free(addr);
+		return;
 	}
 	enter_kernel();
 	__real_free(addr);

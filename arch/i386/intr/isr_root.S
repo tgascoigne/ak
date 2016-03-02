@@ -1,3 +1,7 @@
+#define	ASM_FILE 1
+#include <arch/i386/mem/gdt.h>
+#undef ASM_FILE
+
               .macro callback int
               .global idt_cb_\int
 idt_cb_\int:
@@ -16,24 +20,16 @@ idt_cb_\int:
               .extern idt_handler
 idt_cb_common: pushal               # push all general registers
 
-              mov   %ds, %ax
-              push  %eax            # push data segment register
-              mov   %esp, %edx      # store esp (idt_handler_args_t*)
+              mov   %gs, %ax
+              push  %eax
 
-              mov   $0x10, %ax      # load the kernel data segment
-              mov   %ax, %ds
-              mov   %ax, %es
-              mov   %ax, %fs
-              mov   %ax, %gs
+              mov   %esp, %edx      # store esp (idt_handler_args_t*)
 
               push  %edx
               call  idt_handler
               add   $4, %esp
 
-              pop   %eax            # reload the callee's data segment
-              mov   %ds, %ax
-              mov   %es, %ax
-              mov   %fs, %ax
+              pop   %eax
               mov   %gs, %ax
 
               popal                 # pop all general registers

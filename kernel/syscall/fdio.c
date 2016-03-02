@@ -106,15 +106,30 @@ int sys_fcntl(fd_t fd, unsigned int cmd, unsigned long arg) {
 	return 0;
 }
 
-int sys_newstat(const char *path, struct kernel_stat *stat) {
+int sys_stat64(const char *path, struct kernel_stat64 *stat) {
 	fsnode_t *fsn = fs_locate(FSRootNode, path);
 	if (fsn == NULL) {
 		errno = ENOENT;
 		return -1;
 	}
-	memset(stat, 0, sizeof(struct kernel_stat));
+	memset(stat, 0, sizeof(struct kernel_stat64));
 
 	return fsn->stat(fsn, stat);
+}
+
+int sys_newstat(const char *path, struct kernel_stat *stat) {
+	struct kernel_stat64 stat64;
+
+	memset(stat, 0, sizeof(struct kernel_stat));
+	memset(&stat64, 0, sizeof(struct kernel_stat64));
+
+	int ret = sys_stat64(path, &stat64);
+	if (ret != 0) {
+		return ret;
+	}
+
+	stat->st_size = (uint32_t)stat64.st_size;
+	return ret;
 }
 
 int sys_getcwd(char *buf, size_t size) {
@@ -132,5 +147,6 @@ void fdio_init(void) {
 	syscall_register(SYS_READ, (syscall_fn_t)sys_read, 3);
 	syscall_register(SYS_WRITE, (syscall_fn_t)sys_write, 3);
 	syscall_register(SYS_NEWSTAT, (syscall_fn_t)sys_newstat, 2);
+	syscall_register(SYS_STAT64, (syscall_fn_t)sys_stat64, 2);
 	fdio_tbl_init();
 }

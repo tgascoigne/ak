@@ -1,5 +1,6 @@
 #include "proc.h"
 
+#include <sched.h>
 #include <stdbool.h>
 #include <errno.h>
 
@@ -15,6 +16,11 @@ pid_t sys_fork(void) {
 		return clone->pid;
 	}
 	return 0;
+}
+
+pid_t sys_clone(unsigned long flags, void *child_stack, void *ptid, void *ctid, void *regs) {
+#pragma message("clone() isn't implemented properly")
+	return sys_fork();
 }
 
 int sys_execve(const char *filename, char *const argv[], char *const envp[]) {
@@ -95,6 +101,7 @@ void proc_init(void) {
 	syscall_register(SYS_GETPPID, (syscall_fn_t)sys_getppid, 0);
 	syscall_register(SYS_GETPID, (syscall_fn_t)sys_getpid, 0);
 	syscall_register(SYS_FORK, (syscall_fn_t)sys_fork, 0);
+	syscall_register(SYS_CLONE, (syscall_fn_t)sys_clone, 0);
 	syscall_register(SYS_SCHED_YIELD, (syscall_fn_t)sys_sched_yield, 0);
 	syscall_register(SYS_GETPGID, (syscall_fn_t)sys_getpgid, 1);
 	syscall_register(SYS_GETPGRP, (syscall_fn_t)sys_getpgrp, 0);

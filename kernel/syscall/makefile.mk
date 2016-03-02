@@ -5,4 +5,5 @@ SOURCES += $(addprefix kernel/syscall/, \
                 mem.c                   \
                 uname.c                 \
                 signal.c                \
-                user.c)
+                user.c                  \
+                thread.c)
