@@ -4,13 +4,22 @@
 #include <kernel/io/dev.h>
 
 #define FS_PATH_DELIM "/"
+#define FS_PATH_DELIM_CHR '/'
 #define FS_NAME_MAX 128
+
+typedef enum {
+	FsModeFile    = 0100000,
+	FsModeSymLink = 0120000,
+	FsModeDir     = 040000,
+} FsMode;
+
+#define FsModeMask(mode, mask) ((mode & mask) == mask)
 
 typedef struct fsnode fsnode_t;
 
 typedef struct fsnode *(*fscreatefunc_t)(struct fsnode *, const char *name);
 typedef iodev_t *(*fsopenfunc_t)(struct fsnode *, int flags);
-typedef int (*fsstatfunc_t)(struct fsnode *, struct kernel_stat *stat);
+typedef int (*fsstatfunc_t)(struct fsnode *, struct kernel_stat64 *stat);
 
 typedef enum { VfsTypeDir, VfsTypeFile, VfsTypeDev } VfsType;
 
@@ -23,6 +32,7 @@ typedef struct fsnode_ops {
 typedef struct fsnode {
 	char name[FS_NAME_MAX];
 	VfsType type;
+	FsMode mode;
 	fsnode_ops_t;
 
 	struct fsnode *parent;
