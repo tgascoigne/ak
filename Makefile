@@ -54,9 +54,14 @@ clean-ak:
 format:
 	find . -iname "*.[ch]" -not -path "./uClibc/*" -not -path "./userspace/*" -exec clang-format -i {} \;
 
+CRTI_OBJ=$(shell $(CC) $(CFLAGS) -print-file-name=crti.o)
+CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) -print-file-name=crtbegin.o)
+CRTEND_OBJ:=$(shell $(CC) $(CFLAGS) -print-file-name=crtend.o)
+CRTN_OBJ=$(shell $(CC) $(CFLAGS) -print-file-name=crtn.o)
+
 %.o: CFLAGS += $(WARNFLAGS)
 $(OUT): $(OBJECTS) $(LD_SCRIPT_PROC)
-	$(CC) -T $(LD_SCRIPT_PROC) -o $(OUT) $(CFLAGS) $(addprefix -Xlinker ,$(LDFLAGS)) $(OBJECTS) $(LIBS)
+	$(CC) -T $(LD_SCRIPT_PROC) -o $(OUT) $(CFLAGS) $(addprefix -Xlinker ,$(LDFLAGS)) $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(OBJECTS) $(CRTEND_OBJ) $(CRTN_OBJ) $(LIBS)
 
 $(OUT_SYMS): $(OUT)
 	$(OBJCOPY) --only-keep-debug $(OUT) $(OUT_SYMS)

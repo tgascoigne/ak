@@ -55,6 +55,8 @@ _start_pgenable:
 loop:		  hlt
 			  jmp	loop
 
+
+
 error:		  pushl $error_str
 			  call printf
 			  jmp loop
