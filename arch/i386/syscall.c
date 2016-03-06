@@ -5,20 +5,38 @@
 #include <stdbool.h>
 
 #include <arch/i386/intr/idt.h>
+#include <arch/i386/kdebug.h>
 #include <kernel/syscall/syscall.h>
+
+typedef struct {
+    int nargs;
+    char *hname;
+} syscallmeta_t;
+
+static syscallmeta_t SyscallTbl[] = {
+#include <arch/i386/syscallent.h>
+};
 
 static void syscall_interrupt(isrargs_t *regs) {
 	int syscall     = (int)regs->eax;
 	syscall_fn_t fn = syscall_funcs[syscall];
-	int argc        = syscall_argc[syscall];
-
-	if (fn == NULL) {
-		printf("unhandled syscall: %02x\n", syscall);
-		return;
-	}
+	int argc        = SyscallTbl[syscall].nargs;
 
 	/* syscall arguments are passed in order in the following registers */
 	uint32_t all_regs[] = {regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi, regs->ebp};
+
+#ifdef _KSTRACE_
+    kdebugf("kstrace: <0x%02x> %s(", syscall, SyscallTbl[syscall].hname);
+    for (int i = 0; i < argc; i++) {
+        kdebugf("0x%02x, ", all_regs[i]);
+    }
+    kdebugf(")\n");
+#endif
+
+	if (fn == NULL) {
+		kdebugf("unhandled syscall: %02x\n", syscall);
+		return;
+	}
 
 	uint32_t ret;
 	switch (argc) {

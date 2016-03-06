@@ -43,7 +43,11 @@ extern syscall_fn_t syscall_funcs[NUM_SYSCALLS];
 #define SYS_GETGID 0xc8
 #define SYS_GETEUID 0xc9
 #define SYS_GETEGID 0xca
+#define SYS_SETUID 0xd5
+#define SYS_SETGID 0xd6
+#define SYS_FUTEX 0xf0
 #define SYS_SET_THREAD_AREA 0xf3
 #define SYS_GET_THREAD_AREA 0xf4
+#define SYS_EXIT_GROUP 0xfc
 
 void syscall_register(int syscall, syscall_fn_t fn, int argc);

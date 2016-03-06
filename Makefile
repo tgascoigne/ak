@@ -2,7 +2,7 @@ ARCH  ?= i386
 BOARD ?= generic
 CROSS_COMPILE :=
 
-WARNFLAGS   := -Wall -Wextra -Wconversion -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-unknown-pragmas
+WARNFLAGS   := -Wall -Wextra -Wconversion -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-unknown-pragmas -Wno-unused-function
 
 CFLAGS		:= -iwithprefix include -fms-extensions -fno-builtin -nostartfiles -static -g
 LDFLAGS     := -static

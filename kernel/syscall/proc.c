@@ -47,6 +47,10 @@ int sys_exit(int status) {
 	return 0;
 }
 
+int sys_exit_group(int status) {
+    return sys_exit(status);
+}
+
 int sys_sched_yield(void) {
 	kern_sched_yield();
 	return 0;
@@ -106,4 +110,5 @@ void proc_init(void) {
 	syscall_register(SYS_GETPGID, (syscall_fn_t)sys_getpgid, 1);
 	syscall_register(SYS_GETPGRP, (syscall_fn_t)sys_getpgrp, 0);
 	syscall_register(SYS_SETPGID, (syscall_fn_t)sys_setpgid, 2);
+	syscall_register(SYS_EXIT_GROUP, (syscall_fn_t)sys_exit_group, 1);
 }

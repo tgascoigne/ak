@@ -37,7 +37,7 @@ int elf_read(const char *elf_file, elf_t *elf) {
 	kassert(ret == 0, ret);
 	ret = elf_read_shdr(elf);
 	kassert(ret == 0, ret);
-	ret = elf_read_symtab(elf);
+//	ret = elf_read_symtab(elf);
 	kassert(ret == 0, ret);
 	ret = elf_read_phdr(elf);
 	kassert(ret == 0, ret);

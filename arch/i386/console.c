@@ -1,5 +1,3 @@
-#include "console.h"
-
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,7 +22,7 @@ static int console_open(iodev_t *dev, int flags) {
 	return 0;
 }
 
-static ssize_t console_write(iodev_t *dev, const void *buf, size_t count) {
+ssize_t console_write(iodev_t *dev, const void *buf, size_t count) {
 	const char *cbuf = (const char *)buf;
 	size_t i;
 	for (i = 0; i < count; i++) {
@@ -76,7 +74,7 @@ static int console_close(iodev_t *dev) {
 	return 0;
 }
 
-static iodev_t ConsoleDev = {
+iodev_t ConsoleDev = {
     .open = console_open, .read = console_read, .write = console_write, .close = console_close,
 };
 
